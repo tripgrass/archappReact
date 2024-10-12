@@ -4,8 +4,14 @@ export default function RootLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: false
-      }}
+        headerStyle: {
+          backgroundColor: 'blue',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}    
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />

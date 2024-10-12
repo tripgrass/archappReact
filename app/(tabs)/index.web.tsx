@@ -4,7 +4,7 @@ import { Link } from 'expo-router';
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Home screen</Text>
+      <Text style={styles.text}>Home for web screen</Text>
        <Link href="/login" style={styles.link}>Login</Link>      
     </View>
   );
@@ -22,5 +22,5 @@ const styles = StyleSheet.create({
   },
   link:{
     color: 'white'
-  },  
+  },
 });
