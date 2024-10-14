@@ -1,13 +1,15 @@
+import { router, Link } from 'expo-router';
 import { Text, View, StyleSheet } from "react-native";
 import LoginForm from '@/components/LoginForm';
-const s = require('../style');
 
+import { useSession } from '../ctx';
 
-export default function Page() {
+export default function SignIn() {
+  const { signIn } = useSession();
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Login</Text>
-      <LoginForm style={styles.form}/>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <LoginForm style={styles.form}/>    
+      
     </View>
   );
 }

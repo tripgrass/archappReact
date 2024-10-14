@@ -1,10 +1,11 @@
 import { Text, View, StyleSheet } from "react-native";
 import { Link } from 'expo-router';
+const s = require('../style');
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Home for web screen</Text>
+      <Text >Home for web screen</Text>
        <Link href="/login" style={styles.link}>Login</Link>      
     </View>
   );
