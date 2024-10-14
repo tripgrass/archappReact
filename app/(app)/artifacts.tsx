@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
 import { useSession } from '../../ctx';
+import MapView from '../map.web'; 
 
 const API_URL = 'https://zkd.b51.mytemp.website/api/artifacts';
 
@@ -34,18 +35,23 @@ const App = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Making API Requests</Text>
-      <FlatList
-        data={data}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text>{item.name}</Text>
-          </View>
-        )}
-      />
+    <>
+    <View style={{ flex: 1 }}>
+      <MapView style={StyleSheet.absoluteFill} />
     </View>
+      <View style={styles.container}>
+        <FlatList
+          data={data}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => (
+            <View style={styles.item}>
+              <Text>{item.name}</Text>
+            </View>
+          )}
+        />
+      </View>
+
+    </>
   );
 };
 
