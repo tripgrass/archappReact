@@ -4,9 +4,9 @@ import { useSession } from '../../ctx';
 
 export default function Index() {
   const { signOut } = useSession();
-  const { session } = useSession();
+  const { machineSession } = useSession();
 
-console.log('session', session);
+console.log('session', machineSession);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

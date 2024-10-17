@@ -5,6 +5,7 @@ export default function Root() {
   return (
     <SessionProvider>
       <Slot />
+      
     </SessionProvider>
   );
 }

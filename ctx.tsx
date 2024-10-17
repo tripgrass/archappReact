@@ -1,16 +1,20 @@
 import { useContext, createContext, type PropsWithChildren } from 'react';
 import { useStorageState } from './useStorageState';
 import { router } from 'expo-router';
+import {GetLaravelUserAuthentication} from '@/components/GetLaravelUserAuthentication';
+
 
 const AuthContext = createContext<{
   signIn: () => void;
   signOut: () => void;
-  session?: string | null;
+  machineSession?: string | null;
+  userSession?:string | null;
   isLoading: boolean;
 }>({
   signIn: () => null,
   signOut: () => null,
-  session: null,
+  machineSession: null,
+  userSession: null,
   isLoading: false,
 });
 
@@ -26,49 +30,10 @@ export function useSession() {
   return value;
 }
 
-export async function getResponse() {
-  try {
-    /*
-    const response = await fetch(
-      'https://zkd.b51.mytemp.website/api/login',
-      {
-        method: 'post',
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            email: "yoitsemailtime@gmail.com",
-            password: "12345678",
-        })      
-      }
-    )
-    */
-const formdata = new FormData();
-formdata.append("grant_type", "client_credentials");
-formdata.append("client_id", "3");
-formdata.append("client_secret", "JhDsrW9OBavvTZ8IpSsQ1dVQud30bBcAYRC59Hjj");
-formdata.append("scope", "*");
-
-const requestOptions = {
-  method: "POST",
-  body: formdata,
-  redirect: "follow"
-};
-
-const response = await fetch("https://zkd.b51.mytemp.website/oauth/token", requestOptions);
-  
-    const data = await response.json();
-    console.log('data',data);
-    return data;
-  } catch (error) {
-    console.error("Error:", error);
-  }    
-
-}
 
 export function SessionProvider({ children }: PropsWithChildren) {
-  const [[isLoading, session], setSession] = useStorageState('session');
+  const [[isLoading, machineSession], setMachineSession] = useStorageState('machineSession');
+  const [ [loadingUser, userSession], setUserSession] = useStorageState('userSession');
 
   return (
     <AuthContext.Provider
@@ -76,20 +41,28 @@ export function SessionProvider({ children }: PropsWithChildren) {
         signIn: () => {
 
           // Perform sign-in logic here
-getResponse().then(result => {
-    // do things with the result here, like call functions with them
-    console.log('result', result);
-    setSession(result.access_token);
-              router.replace('/');
+          
+          GetLaravelUserAuthentication().then(result => {
+            console.log('result in sign in', result);
+            if( result.data ){
+              setMachineSession("stuff");
+              setUserSession("stuff");
 
-});
+              router.replace('/');
+            }
+          });
 
         },
         signOut: () => {
-          setSession(null);
+          setMachineSession( null);
+          setUserSession(null);
+            console.log('sign out machineSession', machineSession);
+            console.log('sign out userSession', userSession);
         },
-        session,
+        machineSession,
+        userSession,
         isLoading,
+        loadingUser
       }}>
       {children}
     </AuthContext.Provider>

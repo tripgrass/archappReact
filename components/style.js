@@ -17,5 +17,19 @@ module.exports = StyleSheet.create({
         height: 100,
         width: 100,
     },
+    link:{
+        margin:20
+    },
+    button: {
+        marginTop:10,
+        color:'white',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 32,
+        borderRadius: 4,
+        elevation: 3,
+        backgroundColor: 'blue',
+    },    
 
 });

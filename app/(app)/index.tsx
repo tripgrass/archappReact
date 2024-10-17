@@ -14,7 +14,9 @@ export default function Index() {
         }}>
         Sign Out
       </Text>
-       <Link href="/artifacts" >Artifacts</Link>      
+       <Link href="/camera" style={{margin:20, size:20}}>Camera</Link>      
+       <Link href="/map" style={{margin:20, size:20}}>Map</Link>      
+       <Link href="/add" style={{margin:20, size:20}}>Add</Link>      
 
     </View>
   );

@@ -1,6 +1,6 @@
 import { Text, View, StyleSheet } from "react-native";
 import { Link } from 'expo-router';
-const s = require('../style');
+const s = require('@/components/style');
 
 export default function Index() {
   return (

@@ -108,7 +108,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding:20,
-    minWidth:'30%',
+    maxWidth:'400px',
+    width:'100%',
     justifyContent: 'center',
     paddingTop: Constants.statusBarHeight,
     backgroundColor: '#0e101c',

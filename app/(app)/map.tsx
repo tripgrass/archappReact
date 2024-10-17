@@ -6,14 +6,58 @@ import { useSession } from '../../ctx';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import { useNavigation } from 'expo-router';
 const API_URL = 'https://zkd.b51.mytemp.website/api/artifacts';
+import * as Location from "expo-location";
 
 const App = () => {
+
   const { machineSession, isLoading } = useSession();
 
   const [data, setData] = useState([]);
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  const [errorMsg, setErrorMsg] = useState(null);
+const mapRef = useRef<any>(null);    
+ const [currentLocation, setCurrentLocation] = useState(null);
+const [initialRegion, setInitialRegion] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+/*
+  useEffect(() => {
+    (async () => {
+      // permissions check
+let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        // do something when permission is denied
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync();
+      setUserLocation(location);
+    })()
+  }, [])
+*/
+  useEffect(() => {
+    const getLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.log("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setCurrentLocation(location.coords);
+
+      setInitialRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      });
+    };
+
+    getLocation();
   }, []);
 
   const fetchData = async () => {
@@ -34,7 +78,6 @@ const App = () => {
       console.error('Error fetching data:', error);
     }
   };
-const mapRef = useRef<any>(null);    
 const INITIAL_REGION = {
   latitude: 37.33,
   longitude: -122,
@@ -43,7 +86,6 @@ const INITIAL_REGION = {
 };
 
   const navigation = useNavigation();
-
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -98,16 +140,18 @@ const onMarkerSelected = (marker: any) => {
 ];
   return (
     <>
+
     <View style={{ flex: 1 }}>
       <MapView
         style={StyleSheet.absoluteFillObject}
-        initialRegion={INITIAL_REGION}
+        initialRegion={initialRegion}
         showsUserLocation
         showsMyLocationButton
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         onRegionChangeComplete={onRegionChange}
       >
+      {userLocation && <Marker coordinate={userLocation.coords} />}
 {markers.map((marker, index) => (
           <Marker
             key={index}
@@ -125,15 +169,8 @@ const onMarkerSelected = (marker: any) => {
       </MapView>
     </View>
       <View style={styles.container}>
-        <FlatList
-          data={data}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <View style={styles.item}>
-              <Text>{item.name}</Text>
-            </View>
-          )}
-        />
+
+        
       </View>
 
     </>

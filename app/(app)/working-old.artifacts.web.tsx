@@ -3,13 +3,13 @@ import { Alert, TouchableOpacity, View, Text, StyleSheet, FlatList } from 'react
 import axios from 'axios';
 import { useSession } from '../../ctx';
 //import MapView from '../../components/map'; 
-import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
+import MapView, { Callout, Marker, PROVIDER_DEFAULT, Region } from 'react-native-maps';
 import { useNavigation } from 'expo-router';
 const API_URL = 'https://zkd.b51.mytemp.website/api/artifacts';
-
+import { ClusterProps, MarkerClusterer } from '@teovilla/react-native-web-maps';
 const App = () => {
   const { machineSession, isLoading } = useSession();
-
+const [region, setRegion] = useState<Region | null>(null);
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -96,45 +96,63 @@ const onMarkerSelected = (marker: any) => {
     name: 'Golden Gate Bridge'
   }
 ];
+function MyClusterComponent(props: ClusterProps<{ onPress(): void }>) {
+  return (
+    <Marker
+      onPress={props.onPress}
+      coordinate={props.coordinate}
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.cluster}>
+        <Text style={styles.clusterText}>{props.pointCountAbbreviated}</Text>
+      </View>
+    </Marker>
+  );
+}
   return (
     <>
-    <View style={{ flex: 1 }}>
-      <MapView
-        style={StyleSheet.absoluteFillObject}
-        initialRegion={INITIAL_REGION}
-        showsUserLocation
-        showsMyLocationButton
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
+    <View style={styles.mapContainer}>
+      <MapView style={styles.map} 
+        initialRegion={{
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  }}
+        provider="google"
+        googleMapsApiKey="AIzaSyBSm8FeujWMFA5t3Exz_YXYSMJ6N5E-jYA"
         onRegionChangeComplete={onRegionChange}
       >
-{markers.map((marker, index) => (
+        <MarkerClusterer
+          region={region}
+          renderCluster={(cluster) => (
+            <MyClusterComponent
+              {...cluster}
+              onPress={() =>
+                mapRef.current?.animateCamera({
+                  center: cluster.coordinate,
+                  zoom: cluster.expansionZoom + 3,
+                })
+              }
+            />
+          )}
+        >
           <Marker
-            key={index}
-            title={marker.name}
-            coordinate={marker}
-            onPress={() => onMarkerSelected(marker)}
-          >
-            <Callout onPress={calloutPressed}>
-              <View style={{ padding: 10 }}>
-                <Text style={{ fontSize: 24 }}>Hello</Text>
-              </View>
-            </Callout>
-          </Marker>
-        ))}        
+            coordinate={{
+              latitude: 59.33956246905637,
+              longitude: 18.050015441134114,
+            }}
+          />
+          <Marker
+            coordinate={{
+              latitude: 59.3442016958775,
+              longitude: 18.038256636812825,
+            }}
+          />
+        </MarkerClusterer> 
       </MapView>
     </View>
-      <View style={styles.container}>
-        <FlatList
-          data={data}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <View style={styles.item}>
-              <Text>{item.name}</Text>
-            </View>
-          )}
-        />
-      </View>
+
 
     </>
   );
@@ -160,6 +178,12 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     borderRadius: 8,
   },
+  mapContainer:{
+    height:'80%'
+  },
+  map:{
+    height:'100%'
+  }
 });
 
 export default App;
