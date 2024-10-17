@@ -120,7 +120,7 @@ function MyClusterComponent(props: ClusterProps<{ onPress(): void }>) {
     longitudeDelta: 0.0421,
   }}
         provider="google"
-        googleMapsApiKey="AIzaSyBSm8FeujWMFA5t3Exz_YXYSMJ6N5E-jYA"
+        googleMapsApiKey=""
         onRegionChangeComplete={onRegionChange}
       >
         <MarkerClusterer

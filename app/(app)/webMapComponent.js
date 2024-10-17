@@ -1,13 +1,14 @@
 // Function to load Google Maps API
 function loadGoogleMapsAPI(callback) {
+    const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY;
+
     if (window.google && window.google.maps) {
       // Google Maps API is already loaded, call the callback function
       callback();
     } else {
-      const apiKey = "AIzaSyA_4ZnnpViUCht6wNxvOPnmCbvp-O_rOiM"
       // Google Maps API is not loaded, dynamically load it
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}`;
       script.async = true;
       script.defer = true;
       script.onload = callback;

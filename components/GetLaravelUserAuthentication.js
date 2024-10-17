@@ -36,7 +36,7 @@ console.log('config',config);
         params:{
           grant_type:"client_credentials",
           client_id: "3",
-          client_secret: "JhDsrW9OBavvTZ8IpSsQ1dVQud30bBcAYRC59Hjj",
+          client_secret: "",
           scope: "*"
         },
         headers: { 
