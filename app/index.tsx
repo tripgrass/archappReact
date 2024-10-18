@@ -21,7 +21,17 @@ export default function Page() {
       ) }
       {userSession ? (
         <>
-          <Link href="/(app)/add" asChild >
+          <Link href="/(tabs)/index" asChild >
+            <Pressable >
+              <Text style={s.link}>home</Text>
+            </Pressable>
+          </Link>
+          <Link href="/(tabs)/map" asChild >
+            <Pressable >
+              <Text style={s.link}>Map</Text>
+            </Pressable>
+          </Link>
+          <Link href="/(tabs)/add" asChild >
             <Pressable >
               <Text style={s.link}>Add Artifact</Text>
             </Pressable>

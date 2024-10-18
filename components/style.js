@@ -18,7 +18,8 @@ module.exports = StyleSheet.create({
         width: 100,
     },
     link:{
-        margin:20
+        margin:20,
+        fontSize:24
     },
     button: {
         marginTop:10,

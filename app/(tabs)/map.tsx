@@ -39,6 +39,9 @@ let { status } = await Location.requestForegroundPermissionsAsync();
   }, [])
 */
   useEffect(() => {
+    console.log('effect');
+    fetchData();
+
     const getLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
@@ -61,7 +64,50 @@ let { status } = await Location.requestForegroundPermissionsAsync();
   }, []);
 
   const fetchData = async () => {
+    /*
     try {
+      const response = await axios.get(API_URL);
+      console.log(response);
+      setData(response.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+    */
+    const API_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN;
+    try {
+      let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: 'https://zkd.b51.mytemp.website/api/artifactstest',
+        headers: { 
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${API_TOKEN}`         
+        }
+      };
+      axios.request(config)
+        .then( (result) => {
+          console.log('result',result.data);
+          if( 'undefined' != typeof result.data ){
+      setData(result.data.data);
+      setMarkers(result.data.data);
+            //setMachineSession("stuff");
+          }
+        })
+        .catch((error) => {
+          console.log('error', error);
+          if( '401' == error.status ){
+            setError('email', { type: 'custom', message: 'Password and Email do not match.' });
+              console.log('401');
+          }
+        })
+    } catch (error) {
+      console.error("Error:", error);
+    }           
+  };  
+/*
+  const fetchData = async () => {
+    try {
+      
 //      const response = await axios.get(API_URL);
       const response = await axios
           .get(API_URL, {
@@ -77,7 +123,9 @@ let { status } = await Location.requestForegroundPermissionsAsync();
     } catch (error) {
       console.error('Error fetching data:', error);
     }
+    
   };
+  */
 const INITIAL_REGION = {
   latitude: 37.33,
   longitude: -122,
@@ -112,7 +160,7 @@ const INITIAL_REGION = {
     // mapRef.current?.animateCamera({ center: GreenBayStadium, zoom: 10 }, { duration: 2000 });
   };
 const onMarkerSelected = (marker: any) => {
-    Alert.alert(marker.name);
+    //Alert.alert(marker.name);
   };
 
   const calloutPressed = (ev: any) => {
@@ -121,7 +169,7 @@ const onMarkerSelected = (marker: any) => {
   const onRegionChange = (region: Region) => {
     console.log(region);
   };
- const markers = [
+ const markersvoid = [
   // San Francisco
   {
     latitude: 37.7749,
@@ -138,6 +186,16 @@ const onMarkerSelected = (marker: any) => {
     name: 'Golden Gate Bridge'
   }
 ];
+ 
+ const [markers, setMarkers] = useState([
+    {
+      latitude: 32.208080,
+      longitude: -110.965510,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+      name: 'San Francisco City Center'
+    }
+  ]);
   return (
     <>
 
@@ -152,8 +210,9 @@ const onMarkerSelected = (marker: any) => {
         onRegionChangeComplete={onRegionChange}
       >
       {userLocation && <Marker coordinate={userLocation.coords} />}
-{markers.map((marker, index) => (
-          <Marker
+        {markers.map( (marker, index) => (
+          marker.latitude ?
+          (<Marker
             key={index}
             title={marker.name}
             coordinate={marker}
@@ -161,15 +220,24 @@ const onMarkerSelected = (marker: any) => {
           >
             <Callout onPress={calloutPressed}>
               <View style={{ padding: 10 }}>
-                <Text style={{ fontSize: 24 }}>Hello</Text>
+                <Text style={{ fontSize: 24 }}>{marker.name}</Text>
               </View>
             </Callout>
-          </Marker>
+          </Marker>)
+          : null
         ))}        
       </MapView>
     </View>
       <View style={styles.container}>
-
+      <FlatList
+        data={data}
+        keyExtractor={(item) => String(item.id)}
+        renderItem={({ item }) => (
+          <View style={styles.item}>
+            <Text>{item.name} {item.latitude} </Text>
+          </View>
+        )}
+      />
         
       </View>
 

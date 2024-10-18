@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
 
-const API_URL = 'https://zkd.b51.mytemp.website/api/artifacts';
 
 const App = () => {
   const [data, setData] = useState([]);
@@ -12,6 +11,7 @@ const App = () => {
   }, []);
 
   const fetchData = async () => {
+    /*
     try {
       const response = await axios.get(API_URL);
       console.log(response);
@@ -19,6 +19,38 @@ const App = () => {
     } catch (error) {
       console.error('Error fetching data:', error);
     }
+    */
+const API_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN;
+    try {
+      let config = {
+        method: 'get',
+        maxBodyLength: Infinity,
+        url: 'https://zkd.b51.mytemp.website/api/artifactstest',
+        headers: { 
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${API_TOKEN}`         
+        }
+      };
+      console.log('config',config);
+      axios.request(config)
+        .then( (result) => {
+          console.log('result',result);
+          if( 'undefined' != typeof result.data ){
+      setData(result.data.data);
+
+            //setMachineSession("stuff");
+          }
+        })
+        .catch((error) => {
+          console.log('error', error);
+          if( '401' == error.status ){
+            setError('email', { type: 'custom', message: 'Password and Email do not match.' });
+              console.log('401');
+          }
+        })
+    } catch (error) {
+      console.error("Error:", error);
+    }           
   };
 
   return (
@@ -29,7 +61,7 @@ const App = () => {
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <View style={styles.item}>
-            <Text>{item.title}</Text>
+            <Text>{item.name} {item.latitude} </Text>
           </View>
         )}
       />

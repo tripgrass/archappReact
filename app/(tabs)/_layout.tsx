@@ -1,10 +1,29 @@
-import { Tabs } from 'expo-router';
+import '@/components/gesture-handler';
+import { Text } from 'react-native';
+import { Redirect, Stack } from 'expo-router';
 
-export default function TabLayout() {
-  return (
-    <Tabs>
-      <Tabs.Screen name="index" options={{ title: 'Home-tabs' }} />
-      <Tabs.Screen name="login" options={{ title: 'Login-tabs' }} />
-    </Tabs>
-  );
+import { useSession } from '../../ctx';
+import { JsStack } from '@/layouts/js-stack';
+export default function AppLayout() {
+  const { userSession, loadingUser } = useSession();
+
+  if (loadingUser) {
+    return <Text>Loading...</Text>;
+  }
+
+  // Only require authentication within the (app) group's layout as users
+  // need to be able to access the (auth) group and sign in again.
+  if (!userSession) {
+    // On web, static rendering will stop here as the user is not authenticated
+    // in the headless Node process that the pages are rendered in.
+    return <Redirect href="/sign-in" />;
+  }
+
+//https://docs.expo.dev/router/advanced/stack/#relation-with-native-stack-navigator
+  return <JsStack >
+      <Stack.Screen name="about" options={{ title: 'About' }} />
+      <Stack.Screen name="add" options={{ 
+          title: 'Add an Artifact'
+        }} />
+  </JsStack>;
 }

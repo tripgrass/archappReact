@@ -2,9 +2,11 @@
 import {StatusBar} from 'expo-status-bar'
 import React, { useState } from 'react'
 import axios from 'axios';
+import { router, Link } from 'expo-router';
 import querystring from 'querystring';
+import { useForm, Controller } from 'react-hook-form';
 
-import {StyleSheet, Text, View, TouchableOpacity, Alert, ImageBackground, Image} from 'react-native'
+import {StyleSheet, Text, View, TouchableOpacity, Alert, ImageBackground, Image, Button, TextInput, Pressable} from 'react-native'
 import {CameraView, CameraType, useCameraPermissions} from 'expo-camera'
 //import MediaLibrary from '../../components/MediaLibrary'; 
 import * as MediaLibrary from 'expo-media-library';
@@ -13,6 +15,14 @@ import { useSession } from '../../ctx';
 let camera: CameraView
 
 export default function App() {
+
+    const { register, setError, setValue, handleSubmit, control, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      email: '',
+      password: ''
+    }
+  });
+
   const [startCamera, setStartCamera] = useState(false)
   const [previewVisible, setPreviewVisible] = useState(false)
   const [capturedImage, setCapturedImage] = useState<any>(null)
@@ -38,7 +48,42 @@ export default function App() {
         setStartCamera(true)
       }
   }
-
+ const onSubmit = data => {
+  console.log('data in submit', data);
+    const API_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN;
+    try {
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        data:{
+          name:data.name,
+          latitude:data.latitude,
+          longitude:data.longitude
+        },
+        url: 'https://zkd.b51.mytemp.website/api/artifacts/store',
+        headers: { 
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${API_TOKEN}`         
+        }
+      };
+      axios.request(config)
+        .then( (result) => {
+          if( 'undefined' != typeof result.data ){
+            //setMachineSession("stuff");
+            router.replace('/map');
+          }
+        })
+        .catch((error) => {
+          console.log('error', error);
+          if( '401' == error.status ){
+            setError('email', { type: 'custom', message: 'Password and Email do not match.' });
+              console.log('401');
+          }
+        })
+    } catch (error) {
+      console.error("Error:", error);
+    }       
+  };
   const postArt = async () => {
     const formdata = new FormData();
     formdata.append("name", "rando");
@@ -54,24 +99,24 @@ export default function App() {
       redirect: "follow"
     };
 
-let config = {
-  method: 'post',
-  maxBodyLength: Infinity,
-  url: 'https://zkd.b51.mytemp.website/api/artifacts?name=what',
-  headers: { 
-    'Accept': 'application/json', 
-    'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiMjJhZDRhNGIwODA0ZDkwMTM4MzY1NzljNGQxYWFlNWI1ODc2YjYzNWY3YjdiYTJkMzI3MTUwZGRhOTAxZWQ4YjdmMDM2NTc3MDJiNmI2M2QiLCJpYXQiOjE3MjkwNDczNjUuMDgwNzY4LCJuYmYiOjE3MjkwNDczNjUuMDgwNzcsImV4cCI6MTc2MDU4MzM2NS4wNzYyMiwic3ViIjoiIiwic2NvcGVzIjpbIioiXX0.q-FYTDDONhdz0NrGHBheUJqRmIxv6mlUtDOjfO2Wqi-reupe_fTaQujRkApYM_XvcyA8cN5x1qiucu-DzKbDN0PwzgLPuuQxt5L0qRQ2mWRx7rk_C0bT18nXQgwARljS2gIxihIjJGQAeoajwxm4Mhl7ziZ6tOjpVmokOEgWyGTPfqAd1mxIIfS2hhZuTU2F3T-J0ujqLjdUK1xX6bM_Vt_NYnfWkc-tCE5am1DmDiO33l63iQ6N8aUrfHhkQBLCiAtmMCw0h9EsD_d8L-37kPL7vDDoOUPPaE-NeZ4NpAQc_qpmfHIuOiAG7HX7KTWVqoapu9awue2SvaxZHQo9prkoCqN7uwxGXeSDBo2KXioIhP38Q_UKNaaih42Bw04WcJveSeIt8nAxHoA6Plyim9-BL2MY1Rq2ARS5PiLlEz1lSBrJeRzB-Tf8CaSBVuTCaA19mvGwLaOV4BC1YlCRwAaC_ASjrJrkU2xFwFi2tcu9-57GfJI9kVQhSS4Gja4_MkZ-LCVVaSYU0s08e-sFBoKJI6OtZKHAhruC8-nfu4UX3Q3-26KTMiKOlfw7ETwHYA2oCRyjYPre8DS-StH9chqdyb4Zml-V6SLBasrWlmWb-8fJOsFxWRHsRD4lD6TcAN98I_uWgTUZjOOZ5BjtCBYTIpA4CxEtyQCfP0g2By0', 
-    'Cookie': 'XSRF-TOKEN=eyJpdiI6IjdlbXRyTHFmVS9udFNpUTRaTENCUnc9PSIsInZhbHVlIjoiQndGNk1hYlBYZUk0Y1ZYOWxLZ3B5T2dqaG1heW9pS2txYzJybzBjelR2RXRRYjQyYmlMZlVEcnU1VDE2bVROb3BlVUd2b3J3SVpTZmNVb24xYktYZitnSUo3bGorQTFhdm1SSFJ2d1d3N1hGQmx6all4WVJJbTRUY29UVFlaS2IiLCJtYWMiOiI1ZjUwNzNlMmJmODU2MDNiNzE4MzU0ZjdkYjljZWFiNGJiOGNmNTgzODMwM2IzOGI0MGEyZDFmY2JiZmE0MWIyIiwidGFnIjoiIn0%3D; laravel_session=eyJpdiI6ImFmcG5Jc0JRT2NvTjZPRTIrci9yWlE9PSIsInZhbHVlIjoiZGRBTURBRVlsenB5d3RPb3d0Q1Bna1c3WHZKdG9ZbzMvTkZHb0dwTWQ2akFCOEZQWkZXejdFRUk1T2VNQjRFR2NjRFY0OWFxSTBlYitXck5UVThpcm5UNjBpMGN0UmJIMEtTOEZBNGw0R1UxMkVlbzl1cmlXMy9TNXFOLzdvNzIiLCJtYWMiOiI3ZjBlOWU2ZDU3ZTQwZmViMjQ1OGI5YjJmY2FlMDg5N2NmZTQ5MGEyNGMzNmRiZjkwNWMyOWJhYjU4MDE3M2RlIiwidGFnIjoiIn0%3D'
-  }
-};
+  let config = {
+    method: 'post',
+    maxBodyLength: Infinity,
+    url: 'https://zkd.b51.mytemp.website/api/artifacts?name=what',
+    headers: { 
+      'Accept': 'application/json', 
+      'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiMjJhZDRhNGIwODA0ZDkwMTM4MzY1NzljNGQxYWFlNWI1ODc2YjYzNWY3YjdiYTJkMzI3MTUwZGRhOTAxZWQ4YjdmMDM2NTc3MDJiNmI2M2QiLCJpYXQiOjE3MjkwNDczNjUuMDgwNzY4LCJuYmYiOjE3MjkwNDczNjUuMDgwNzcsImV4cCI6MTc2MDU4MzM2NS4wNzYyMiwic3ViIjoiIiwic2NvcGVzIjpbIioiXX0.q-FYTDDONhdz0NrGHBheUJqRmIxv6mlUtDOjfO2Wqi-reupe_fTaQujRkApYM_XvcyA8cN5x1qiucu-DzKbDN0PwzgLPuuQxt5L0qRQ2mWRx7rk_C0bT18nXQgwARljS2gIxihIjJGQAeoajwxm4Mhl7ziZ6tOjpVmokOEgWyGTPfqAd1mxIIfS2hhZuTU2F3T-J0ujqLjdUK1xX6bM_Vt_NYnfWkc-tCE5am1DmDiO33l63iQ6N8aUrfHhkQBLCiAtmMCw0h9EsD_d8L-37kPL7vDDoOUPPaE-NeZ4NpAQc_qpmfHIuOiAG7HX7KTWVqoapu9awue2SvaxZHQo9prkoCqN7uwxGXeSDBo2KXioIhP38Q_UKNaaih42Bw04WcJveSeIt8nAxHoA6Plyim9-BL2MY1Rq2ARS5PiLlEz1lSBrJeRzB-Tf8CaSBVuTCaA19mvGwLaOV4BC1YlCRwAaC_ASjrJrkU2xFwFi2tcu9-57GfJI9kVQhSS4Gja4_MkZ-LCVVaSYU0s08e-sFBoKJI6OtZKHAhruC8-nfu4UX3Q3-26KTMiKOlfw7ETwHYA2oCRyjYPre8DS-StH9chqdyb4Zml-V6SLBasrWlmWb-8fJOsFxWRHsRD4lD6TcAN98I_uWgTUZjOOZ5BjtCBYTIpA4CxEtyQCfP0g2By0', 
+      'Cookie': 'XSRF-TOKEN=eyJpdiI6IjdlbXRyTHFmVS9udFNpUTRaTENCUnc9PSIsInZhbHVlIjoiQndGNk1hYlBYZUk0Y1ZYOWxLZ3B5T2dqaG1heW9pS2txYzJybzBjelR2RXRRYjQyYmlMZlVEcnU1VDE2bVROb3BlVUd2b3J3SVpTZmNVb24xYktYZitnSUo3bGorQTFhdm1SSFJ2d1d3N1hGQmx6all4WVJJbTRUY29UVFlaS2IiLCJtYWMiOiI1ZjUwNzNlMmJmODU2MDNiNzE4MzU0ZjdkYjljZWFiNGJiOGNmNTgzODMwM2IzOGI0MGEyZDFmY2JiZmE0MWIyIiwidGFnIjoiIn0%3D; laravel_session=eyJpdiI6ImFmcG5Jc0JRT2NvTjZPRTIrci9yWlE9PSIsInZhbHVlIjoiZGRBTURBRVlsenB5d3RPb3d0Q1Bna1c3WHZKdG9ZbzMvTkZHb0dwTWQ2akFCOEZQWkZXejdFRUk1T2VNQjRFR2NjRFY0OWFxSTBlYitXck5UVThpcm5UNjBpMGN0UmJIMEtTOEZBNGw0R1UxMkVlbzl1cmlXMy9TNXFOLzdvNzIiLCJtYWMiOiI3ZjBlOWU2ZDU3ZTQwZmViMjQ1OGI5YjJmY2FlMDg5N2NmZTQ5MGEyNGMzNmRiZjkwNWMyOWJhYjU4MDE3M2RlIiwidGFnIjoiIn0%3D'
+    }
+  };
 
-axios.request(config)
-.then((response) => {
-  console.log(JSON.stringify(response.data));
-})
-.catch((error) => {
-  console.log(error);
-});
+  axios.request(config)
+  .then((response) => {
+    console.log(JSON.stringify(response.data));
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 
 //    const response = await fetch("https://zkd.b51.mytemp.website/artifacts", requestOptions);
     /*
@@ -136,6 +181,82 @@ console.log(capturedImage);
   }
   return (
     <View style={styles.container}>
+           <Link href="/(tabs)/about" asChild >
+            <Pressable >
+              <Text >about</Text>
+            </Pressable>
+          </Link>
+      <Text style={styles.label}>Name</Text>
+      <Controller
+        control={control}
+        render={({field: { onChange, onBlur, value }}) => (
+          <TextInput
+            style={styles.input}
+            onBlur={onBlur}
+            onChangeText={value => onChange(value)}
+            value={value}
+            errors={errors}
+          />
+        )}
+        name="name"
+        rules={{ required: true }}
+      />
+      <Text style={{color:'white', height:'30px'}}>
+        {errors.name && errors.name.message }
+      </Text>
+
+      <Text style={styles.label}>Lat</Text>
+      <Controller
+        control={control}
+        render={({field: { onChange, onBlur, value }}) => (
+          <TextInput
+            style={styles.input}
+            onBlur={onBlur}
+            onChangeText={value => onChange(value)}
+            value={value}
+          />
+        )}
+        name="latitude"
+        rules={{ required: true }}
+      />
+      <Text style={styles.label}>Long</Text>
+      <Controller
+        control={control}
+        render={({field: { onChange, onBlur, value }}) => (
+          <TextInput
+            style={styles.input}
+            onBlur={onBlur}
+            onChangeText={value => onChange(value)}
+            value={value}
+          />
+        )}
+        name="longitude"
+        rules={{ required: true }}
+      />
+
+      <View style={styles.button}>
+        <Button
+          style={styles.buttonInner}
+          color
+          title="Reset"
+          onPress={() => {
+            reset({
+              name: 'test',
+              latitude: '32.208080',
+              longitude: '-110.965510'
+            })
+          }}
+        />
+      </View>
+
+      <View style={styles.button}>
+        <Button
+          style={styles.buttonInner}
+          color
+          title="Sign In"
+          onPress={handleSubmit(onSubmit)}
+        />
+    </View>    
       {startCamera ? (
         <View
           style={{
@@ -303,13 +424,33 @@ console.log(capturedImage);
 }
 
 const styles = StyleSheet.create({
+  label: {
+    color: 'blue',
+    margin: 20,
+    marginLeft: 0,
+  },
+  button: {
+    marginTop: 40,
+    color: 'white',
+    height: 40,
+    backgroundColor: 'blue',
+    borderRadius: 4,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
-})
+    padding:20,
+    maxWidth:'400px',
+    width:'100%',
+    justifyContent: 'center',
+  },
+  input: {
+    backgroundColor: 'white',
+    borderColor: 'none',
+    height: 40,
+    padding: 10,
+    borderRadius: 4,
+  },
+});
 
 const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
   console.log('sdsfds', photo)
