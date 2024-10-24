@@ -38,8 +38,8 @@ export function SessionProvider({ children }: PropsWithChildren) {
           setUserSession(JSON.stringify(data));
         },
         signOut: () => {
+          router.replace('');
           setUserSession(null);
-            console.log('sign out userSession', userSession);
         },
         userSession,
         loadingUser

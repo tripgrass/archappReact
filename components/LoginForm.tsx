@@ -37,7 +37,7 @@ export default () => {
           if( 'undefined' != typeof result.data ){
             //setMachineSession("stuff");
             signIn(result.data);
-            router.replace('/');
+            router.replace('/(tabs)');
           }
         })
         .catch((error) => {
@@ -57,7 +57,73 @@ export default () => {
       value: arg.nativeEvent.text,
     };
   };
+ <View style={styles.container}>
 
+      <Text style={styles.label}>Email</Text>
+      <Controller
+        control={control}
+        render={({field: { onChange, onBlur, value }}) => (
+          <TextInput
+            {...register('email', 
+              { 
+                required: 'Email is required', 
+                pattern: { value: /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/, message: 'Invalid email address' } 
+              }
+            )}
+            style={styles.input}
+            onBlur={onBlur}
+            onChangeText={value => onChange(value)}
+            value={value}
+            errors={errors}
+          />
+        )}
+        name="email"
+        rules={{ required: true }}
+
+      />
+      <Text style={{color:'white', height:'30px'}}>
+        {errors.email && errors.email.message }
+      </Text>
+
+      <Text style={styles.label}>Password</Text>
+      <Controller
+        control={control}
+        render={({field: { onChange, onBlur, value }}) => (
+          <TextInput
+            secureTextEntry={true}        
+            style={styles.input}
+            onBlur={onBlur}
+            onChangeText={value => onChange(value)}
+            value={value}
+          />
+        )}
+        name="password"
+        rules={{ required: true }}
+      />
+
+      <View style={styles.button}>
+        <Button
+          style={styles.buttonInner}
+          color
+          title="Reset"
+          onPress={() => {
+            reset({
+              email: 'yoitsemailtime@gmail.com',
+              password: '12345678'
+            })
+          }}
+        />
+      </View>
+
+      <View style={styles.button}>
+        <Button
+          style={styles.buttonInner}
+          color
+          title="Sign In"
+          onPress={handleSubmit(onSubmit)}
+        />
+      </View>  
+    </View>
 
 
   return (

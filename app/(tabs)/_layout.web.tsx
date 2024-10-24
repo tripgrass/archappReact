@@ -20,7 +20,7 @@ export default function AppLayout() {
   }
 
 //https://docs.expo.dev/router/advanced/stack/#relation-with-native-stack-navigator
-  return <JsStack initialRouteName="index">
+  return <Stack>
       <Stack.Screen name="index" options={{ title: 'Home' }} />
       <Stack.Screen name="map" options={{ title: 'Map Title' }} />
       <Stack.Screen name="add" options={{ 
@@ -32,5 +32,5 @@ export default function AppLayout() {
           presentation: 'modal'
         }}
       />
-  </JsStack>;
+  </Stack>;
 }

@@ -13,7 +13,7 @@ export default function Page() {
 
    return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Landing Page</Text>
+      <Text>Landing Page for tabs</Text>
       {machineSession ? (
         <Text>hasmachineauth</Text>
       ) : (
@@ -24,11 +24,6 @@ export default function Page() {
           <Link href="/(tabs)/map" asChild >
             <Pressable >
               <Text style={s.link}>Map</Text>
-            </Pressable>
-          </Link>
-          <Link href="/(tabs)/home" asChild >
-            <Pressable >
-              <Text style={s.link}>homeweb</Text>
             </Pressable>
           </Link>
           <Link href="/(tabs)/add" asChild >

@@ -8,10 +8,10 @@ import {
   useMapsLibrary,
   useMap
 } from '@vis.gl/react-google-maps';
-const API_KEY = "AIzaSyBSm8FeujWMFA5t3Exz_YXYSMJ6N5E-jYA";
+    const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY;
+
 export default function Index() {
-console.log(Location);
-alert(1);  
+  console.log(Location);
 
   return (
   <APIProvider apiKey={API_KEY}>
