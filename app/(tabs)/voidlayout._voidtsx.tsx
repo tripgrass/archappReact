@@ -16,18 +16,15 @@ export default function AppLayout() {
   if (!userSession) {
     // On web, static rendering will stop here as the user is not authenticated
     // in the headless Node process that the pages are rendered in.
-    //return <Redirect href="/sign-in" />;
+    return <Redirect href="/sign-in" />;
   }
 
 //https://docs.expo.dev/router/advanced/stack/#relation-with-native-stack-navigator
-  return <Stack>
+  return <JsStack initialRouteName="index">
       <Stack.Screen name="index" options={{ title: 'Home' }} />
       <Stack.Screen name="map" options={{ title: 'Map Title' }} />
       <Stack.Screen name="add" options={{ 
           title: 'Add an Artifact'
-        }} />
-              <Stack.Screen name="edit" options={{ 
-          title: 'Edit an Artifact'
         }} />
        <Stack.Screen
         name="modal"
@@ -35,5 +32,5 @@ export default function AppLayout() {
           presentation: 'modal'
         }}
       />
-  </Stack>;
+  </JsStack>;
 }

@@ -1,5 +1,5 @@
 import { View, Pressable, Text } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, Redirect } from 'expo-router';
 import { useSession } from '../ctx';
 import { useStorageState } from '../useStorageState';
 import {GetLaravelUserAuthentication} from '@/components/GetLaravelUserAuthentication';
@@ -10,7 +10,8 @@ export default function Page() {
   const [[isLoading, machineSession], setMachineSession] = useStorageState('machineSession');
   const { userSession, signOut } = useSession();
 
-
+   return <Redirect href="/(tabs)" />;
+ 
    return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Landing Page</Text>
@@ -19,6 +20,11 @@ export default function Page() {
       ) : (
         <Text>checking for auth</Text>
       ) }
+          <Link href="/(tabs)/map" asChild >
+            <Pressable >
+              <Text style={s.link}>Map</Text>
+            </Pressable>
+          </Link>
       {userSession ? (
         <>
           <Link href="/(tabs)/index" asChild >

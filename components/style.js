@@ -24,16 +24,16 @@ module.exports = StyleSheet.create({
     formSection:{
         flex: 1,
         width:'100%',
+
     },
     formButtonSection:{
 //        display:'flex',
 //        backgroundColor:'red',
-        zIndex:999,
-        backgroundColor:'rgba(140, 140, 140, .8)',
-        position:'absolute',
-        bottom:0,
-        padding:10,
-        paddingBottom:20,
+        //zIndex:999,
+        //backgroundColor:'rgba(210, 210, 210, .6)',
+        //position:'sticky',
+        //bottom:0,
+        padding:20,
         width:'100%',
     },
     formSectionTitleWrapper:{
@@ -42,6 +42,7 @@ module.exports = StyleSheet.create({
         flexDirection:'row',
         marginTop:40,
         marginBottom:5
+        
     },
     formSectionTitle:{
         display:'flex-inline',
@@ -66,6 +67,7 @@ module.exports = StyleSheet.create({
     formWrapperTwo:{
         flex:1    ,
         padding:10,
+        width:'100%'
     },
     h1:{
         fontSize:30,
@@ -90,18 +92,6 @@ module.exports = StyleSheet.create({
     },
     link:{
         margin:20
-    },
-    formButton: {
-        marginTop:10,
-        elevation: 3,
-        borderRadius: 4,
-        backgroundColor:'gray'
-    }, 
-    formButtonAction:{
-        marginTop:10,
-        elevation: 3,
-        borderRadius: 4, 
-
     },
     fieldWrapper:{
     },
@@ -132,7 +122,6 @@ module.exports = StyleSheet.create({
 
     }, 
     pressableButton: {
-        marginTop:10,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 12,
@@ -141,6 +130,8 @@ module.exports = StyleSheet.create({
         elevation: 3,
         backgroundColor: 'white',
         elevation:3,
+        display:'inline-block',
+        marginTop:10,
         border: 'solid 1px #d8d8d8'
     },
     pressableButtonText: {

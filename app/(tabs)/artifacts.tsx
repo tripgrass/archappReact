@@ -1,165 +1,85 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Alert, TouchableOpacity, View, Text, StyleSheet, FlatList } from 'react-native';
+import { Pressable, View, Text, ScrollView, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
-import { useSession } from '../../ctx';
-//import MapView from '../../components/map'; 
-import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
-import { useNavigation } from 'expo-router';
-const API_URL = 'https://zkd.b51.mytemp.website/api/artifacts';
+import CustomButton from '@/components/Button';
 
-const App = () => {
-  const { machineSession, isLoading } = useSession();
+import { useNavigation, Link } from 'expo-router';
+import  {ArtifactsService}  from '@/utilities/ArtifactsService';
+const s = require('@/components/style');
+import { usePathname, useRouter, useSegments } from 'expo-router';
 
-  const [data, setData] = useState([]);
+const App = ({navigation}) => {
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+	const router = useRouter();
 
-  const fetchData = async () => {
-    try {
-//      const response = await axios.get(API_URL);
-      const response = await axios
-          .get(API_URL, {
-            headers: {
-              Authorization: `Bearer ${machineSession}`,
-            },
-          })
-          .then((response) => {
-            console.log('respose--->', response.data.data);
-            setData(response.data.data);
-          })
-          .catch((error) => console.log(error))
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
-const mapRef = useRef<any>(null);    
-const INITIAL_REGION = {
-  latitude: 37.33,
-  longitude: -122,
-  latitudeDelta: 2,
-  longitudeDelta: 2
-};
+    const pathname = usePathname();
+    console.log(pathname);
+	
+	const [artifacts, setArtifacts] = useState([]); 
+	useEffect(() => {
+		ArtifactsService.getAll()
+			.then(results => setArtifacts(results))
+			.catch(console.log('.error'))
+	}, []);
 
-  const navigation = useNavigation();
+	return (
+	
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity onPress={focusMap}>
-          <View style={{ padding: 10 }}>
-            <Text>Focus</Text>
-          </View>
-        </TouchableOpacity>
-      )
-    });
-  }, []);
+			<FlatList
+				style={styles.container,{padding:20, marginBottom:30}}
+				data={artifacts}
+				keyExtractor={(item) => String(item.id)}
+				renderItem={({ item, index }) => 
+					<View key={index} style={{ maxWidth:'1200px', margin:'0 auto', display:'flex', flexWrap:'wrap',flexDirection:'row',width:'100%', alignItems:'center', marginTop:8}}>
+						<Text style={{width:'30%',flexGrow: 1}}>{item.name}</Text>
 
-  const focusMap = () => {
-    const GreenBayStadium = {
-      latitude: 44.5013,
-      longitude: -88.0622,
-      latitudeDelta: 0.1,
-      longitudeDelta: 0.1
-    };
+						<CustomButton
+							title="Edit"
+							webbable={true}
+							url={'/edit/' + item.id }						
+							styles={{marginRight:10}}
+							onPress={() => { navigation.navigate('edit', {
+									      params: { artifactId: item.id }
+									   }) 
+									}}
+						/>
+						<CustomButton
+							webbable={true}
+							url={'/show/' + item.id }						
+							title="View"
+							onPress={() => { navigation.navigate('show', {
+									      params: { artifactId: item.id }
+									   }) 
+									}}
+						/>						
 
-    mapRef.current?.animateToRegion(GreenBayStadium);
+					</View>
+				}				
+			/>
 
-    // Or change the camera with a duration
-    // mapRef.current?.animateCamera({ center: GreenBayStadium, zoom: 10 }, { duration: 2000 });
-  };
-const onMarkerSelected = (marker: any) => {
-    Alert.alert(marker.name);
-  };
-
-  const calloutPressed = (ev: any) => {
-    console.log(ev);
-  };
-  const onRegionChange = (region: Region) => {
-    console.log(region);
-  };
- const markers = [
-  // San Francisco
-  {
-    latitude: 37.7749,
-    longitude: -122.4194,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-    name: 'San Francisco City Center'
-  },
-  {
-    latitude: 37.8077,
-    longitude: -122.475,
-    latitudeDelta: 0.01,
-    longitudeDelta: 0.01,
-    name: 'Golden Gate Bridge'
-  }
-];
-  return (
-    <>
-    <View style={{ flex: 1 }}>
-      <MapView
-        style={StyleSheet.absoluteFillObject}
-        initialRegion={INITIAL_REGION}
-        showsUserLocation
-        showsMyLocationButton
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
-        onRegionChangeComplete={onRegionChange}
-      >
-{markers.map((marker, index) => (
-          <Marker
-            key={index}
-            title={marker.name}
-            coordinate={marker}
-            onPress={() => onMarkerSelected(marker)}
-          >
-            <Callout onPress={calloutPressed}>
-              <View style={{ padding: 10 }}>
-                <Text style={{ fontSize: 24 }}>Hello</Text>
-              </View>
-            </Callout>
-          </Marker>
-        ))}        
-      </MapView>
-    </View>
-      <View style={styles.container}>
-        <FlatList
-          data={data}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <View style={styles.item}>
-              <Text>{item.name}</Text>
-            </View>
-          )}
-        />
-      </View>
-
-    </>
-  );
+	);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop:70,
-    flex: 1,
-    justifyContent:'center',
-    alignItems:'center',
-    padding: 16,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  item: {
-    backgroundColor: '#f5f5f5',
-    padding: 10,
-    marginVertical: 8,
-    borderRadius: 8,
-  },
+	container: {
+		paddingTop:70,
+		paddingBottom:100,
+		flex: 1,
+		justifyContent:'center',
+		alignItems:'center',
+		padding: 16
+	},
+	title: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		marginBottom: 16,
+	},
+	item: {
+		backgroundColor: '#f5f5f5',
+		padding: 10,
+		marginVertical: 8,
+		borderRadius: 8,
+	},
 });
 
 export default App;
