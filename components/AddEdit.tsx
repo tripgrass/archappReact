@@ -10,7 +10,7 @@ import SegmentedControl from '@react-native-segmented-control/segmented-control'
 import {Alert,  FlatList, Image, ImageBackground, Keyboard, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native'
 import {CameraView, CameraType, useCameraPermissions} from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
-import { useSession } from '@/ctx';
+import { useSession } from '@/utilities/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from "expo-location";
 import CustomButton from '@/components/Button';

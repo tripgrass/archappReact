@@ -1,5 +1,5 @@
 import { Slot, Stack } from 'expo-router';
-import { SessionProvider } from '../ctx';
+import { SessionProvider } from '@/utilities/AuthContext';
 
 export default function Root() {
   return (

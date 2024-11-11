@@ -11,15 +11,19 @@ import { usePathname, useRouter, useSegments } from 'expo-router';
 export default function ProfileScreen({navigation}) {
     const router = useRouter();
     const { userSession, signOut } = useSession();
+//  console.log('profile userSession', userSession);
 
     const pathname = usePathname();
     console.log(pathname);
    
    const [artifacts, setArtifacts] = useState([]); 
    useEffect(() => {
-      ArtifactsService.getAll()
-         .then(results => setArtifacts(results))
-         .catch(console.log('.error'))
+        { (userSession) ? (
+
+          ArtifactsService.getAll()
+             .then(results => setArtifacts(results))
+             .catch(console.log('.error'))
+            ) : null }
    }, []);
 
    return (

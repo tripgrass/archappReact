@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useSession } from '../ctx';
+import { useSession } from '@/utilities/AuthContext';
 import { useStorageState } from '../useStorageState';
 
 export async function GetLaravelMachineAuthentication() {

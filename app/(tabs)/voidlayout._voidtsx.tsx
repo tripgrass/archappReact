@@ -2,7 +2,7 @@ import '@/components/gesture-handler';
 import { Text } from 'react-native';
 import { Redirect, Stack } from 'expo-router';
 
-import { useSession } from '../../ctx';
+import { useSession } from '@/utilities/AuthContext';
 import { JsStack } from '@/layouts/js-stack';
 export default function AppLayout() {
   const { userSession, loadingUser } = useSession();

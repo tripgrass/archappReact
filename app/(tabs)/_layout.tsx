@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Platform, Pressable, View, Text,TouchableOpacity  } from 'react-native';
 import CustomButton from '@/components/Button';
 
-import { useSession } from '../../ctx';
+import { useSession } from '@/utilities/AuthContext';
 import { Redirect } from 'expo-router';
 import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,6 +15,7 @@ import home from '@/app/(tabs)/index';
 import profilePage from '@/app/(tabs)/profile';
 import artifacts from '@/app/(tabs)/artifacts';
 import SignIn from '@/app/sign-in';
+import Register from '@/app/register';
 import settings from '@/app/(tabs)/settings';
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -43,6 +44,7 @@ function EmptyScreen() {
 function Home({ navigation }) {
 
   const { userSession, signOut } = useSession();
+//  console.log('home userSession', userSession);
 	return (
 		<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
 			<Text>Home Screens </Text>
@@ -255,6 +257,7 @@ function App() {
           	/>
 				<Stack.Screen name="Home" options={{ title: 'Map Title' }} component={Home}/>
 				<Stack.Screen name="SignIn" options={{ title: 'SignIn' }} component={SignIn}/>
+				<Stack.Screen name="Register" options={{ title: 'Register' }} component={Register}/>
 				
 				<Stack.Screen name="map" options={{ title: 'Map Title' }} component={map}/>
 				<Stack.Screen name="add" options={{ title: 'ddd' }} component={edit} />

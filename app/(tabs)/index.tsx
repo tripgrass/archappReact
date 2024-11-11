@@ -1,6 +1,6 @@
 import { View, Button, Pressable, Text } from 'react-native';
 import { Link } from 'expo-router';
-import { useSession } from '../../ctx';
+import { useSession } from '@/utilities/AuthContext';
 import { useStorageState } from '../../useStorageState';
 import {GetLaravelUserAuthentication} from '@/components/GetLaravelUserAuthentication';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';

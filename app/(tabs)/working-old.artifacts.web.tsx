@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Alert, TouchableOpacity, View, Text, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
-import { useSession } from '../../ctx';
+import { useSession } from '@/utilities/AuthContext';
 //import MapView from '../../components/map'; 
 import MapView, { Callout, Marker, PROVIDER_DEFAULT, Region } from 'react-native-maps';
 import { useNavigation } from 'expo-router';

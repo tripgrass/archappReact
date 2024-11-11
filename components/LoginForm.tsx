@@ -5,7 +5,7 @@ import { useForm, Controller } from 'react-hook-form';
 import Constants from 'expo-constants';
 import axios from 'axios';
 
-import { useSession } from '../ctx';
+import { useSession } from '@/utilities/AuthContext';
 import { router } from 'expo-router';
 
 export default () => {
@@ -34,6 +34,7 @@ export default () => {
       };
       axios.request(config)
         .then( (result) => {
+          console.log('login result', result.data);
           if( 'undefined' != typeof result.data ){
             //setMachineSession("stuff");
             signIn(result.data);
