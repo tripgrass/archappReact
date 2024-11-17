@@ -18,8 +18,10 @@ function ShowArtifact({ route, navigation }) {
 	useEffect(() => {
 		 if(isFocused){
 			if( artifactId ){
-		        ArtifactsService.getById(artifactId)
-		            .then(result => setup(result))
+		        ArtifactsService({
+		        	method:'getById',
+		        	id:artifactId
+		        }).then(result => setup(result))
 		            .catch(console.log('.error'))
 				}
 			}

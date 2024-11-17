@@ -1,5 +1,6 @@
 'use strict';
 import { Platform, StyleSheet } from 'react-native';
+import Constants from 'expo-constants';
 
 module.exports = StyleSheet.create({
     mainContainer: {
@@ -42,7 +43,7 @@ module.exports = StyleSheet.create({
         flexDirection:'row',
         marginTop:40,
         marginBottom:5
-        
+
     },
     formSectionTitle:{
         display:'flex-inline',
@@ -69,6 +70,18 @@ module.exports = StyleSheet.create({
         padding:10,
         width:'100%'
     },
+    formWrapperCamera:{
+        flex:1    ,
+        width:'100%',
+        position:'absolute',
+        zIndex:9999,
+        top:Constants.statusBarHeight,
+        bottom:0,
+        elevation:3,
+    },        
+    iconWrapper:{
+        width:'100%'
+    },    
     h1:{
         fontSize:30,
         fontWeight:600
@@ -159,5 +172,13 @@ module.exports = StyleSheet.create({
         letterSpacing: 0.25,
         color: 'black',
     },        
-
+    pressPlus:{
+        fontSize:30,
+        color:'black',
+        position:'absolute',
+        top:-20,
+        right:-5,
+        display:'none',
+        fontWeight:'bold'
+    }
 });

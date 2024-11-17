@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef} from 'react';
 import { Pressable, View, Text, ScrollView, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
 import CustomButton from '@/components/Button';
@@ -10,9 +10,8 @@ import { usePathname, useRouter, useSegments } from 'expo-router';
 
 export default function ProfileScreen({navigation}) {
     const router = useRouter();
-    const { userSession, signOut } = useSession();
+    const { userSession, signOut, signIn } = useSession();
 //  console.log('profile userSession', userSession);
-
     const pathname = usePathname();
     console.log(pathname);
    
@@ -20,9 +19,11 @@ export default function ProfileScreen({navigation}) {
    useEffect(() => {
         { (userSession) ? (
 
-          ArtifactsService.getAll()
-             .then(results => setArtifacts(results))
-             .catch(console.log('.error'))
+            ArtifactsService({method:'getAll'})
+                .then( (results) => {
+                    setArtifacts(results)
+                })
+                .catch(console.log('.error'))
             ) : null }
    }, []);
 

@@ -1,27 +1,28 @@
-//https://www.freecodecamp.org/news/how-to-create-a-camera-app-with-expo-and-react-native/
-import {StatusBar} from 'expo-status-bar'
-import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios';
-import { router, Link,useFocusEffect, useNavigation } from 'expo-router';
-import querystring from 'querystring';
-import { useForm, Controller } from 'react-hook-form';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import SegmentedControl from '@react-native-segmented-control/segmented-control';
-import {Alert,  FlatList, Image, ImageBackground, Keyboard, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native'
+import {Alert, FlatList, Image, ImageBackground, Keyboard, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native'
+import {ArtifactsService}  from '@/utilities/ArtifactsService';
+import { Asset } from 'expo-asset';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {CameraView, CameraType, useCameraPermissions} from 'expo-camera';
-import * as MediaLibrary from 'expo-media-library';
-import { useSession } from '@/utilities/AuthContext';
-import * as ImagePicker from 'expo-image-picker';
-import * as Location from "expo-location";
+import Compressor from 'compressorjs';
 import CustomButton from '@/components/Button';
 import FilePicker from '@/components/FilePicker';
-//import base64ToFile from '@/utilities/ImageHandler';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import FormData from 'form-data';
-import Compressor from 'compressorjs';
-import { Asset } from 'expo-asset';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
+import React, { useState, useEffect, useRef } from 'react'
+import { router, Link,useFocusEffect, useNavigation } from 'expo-router';
+import SegmentedControl from '@react-native-segmented-control/segmented-control';
+import {StatusBar} from 'expo-status-bar'
+import { useForm, Controller } from 'react-hook-form';
 import { useNavigationState } from '@react-navigation/native';
+import { useSession } from '@/utilities/AuthContext';
+import * as MediaLibrary from 'expo-media-library';
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from "expo-location";
+import CameraV  from '@/app/(tabs)/camera';
+
+import Constants from 'expo-constants';
 
 const s = require('@/components/style');
 
@@ -52,6 +53,7 @@ export default function AddEdit( {navigation, artifact} ) {
 		console.log('galleryImage k', k);
 		console.log('galleryImage ::', galleryImages[k]);
 	});
+
 	var defaultValues = artifact ? artifact : {};
 	defaultValues.latitude = artifact?.latitude;
 	defaultValues.longitude = artifact?.longitude;
@@ -60,11 +62,10 @@ export default function AddEdit( {navigation, artifact} ) {
 	});
 	const [image, setImage] = useState<string | null>(null);
 	const [scale, setScale] = useState(artifact?.scale ? artifact?.scale : 1);
-	const [startCamera, setStartCamera] = useState(false)
 	const [previewVisible, setPreviewVisible] = useState(false)
 	const [capturedImage, setCapturedImage] = useState<any>(null)
-	const [cameraType, setCameraType] = useState()
-	const [flashMode, setFlashMode] = useState('off')
+	const [cameraType, setCameraType] = useState();
+	const [flashMode, setFlashMode] = useState('on');
 	const [pickedImagePath, setPickedImagePath] = useState('');
 	const [facing, setFacing] = useState<CameraType>('back');
 	const [permission, requestPermission] = useCameraPermissions();
@@ -73,7 +74,10 @@ export default function AddEdit( {navigation, artifact} ) {
 	const [fillLocationMode, setFillLocationMode] = useState('Manually Fill');
  	const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
  	const initialized = useRef(false);
-		
+	    const [startCamera, setStartCamera] = useState(false)
+const { userSession } = useSession();
+
+	console.log('userSession!: ', userSession);	
 	const getData = async () => {
 		fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
 		setFillLocationMode(fillLocationModeVal);
@@ -91,7 +95,7 @@ export default function AddEdit( {navigation, artifact} ) {
 			}
 		})	
 	}
-
+/*
 	useEffect(() => {
 		const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
 		const hideSubscription = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
@@ -108,7 +112,7 @@ export default function AddEdit( {navigation, artifact} ) {
 	const handleKeyboardHide = event => {
 		setIsKeyboardVisible(false);
 	};
-	
+*/	
 	function getAddressObject(address_components) {
 		var ShouldBeComponent = {
 			home: ["street_number"],
@@ -192,7 +196,7 @@ export default function AddEdit( {navigation, artifact} ) {
 			.catch((error) => {
 				console.log('error', error);
 				if( '401' == error.status ){
-					setError('email', { type: 'custom', message: 'Password and Email do not match.' });
+				setError('email', { type: 'custom', message: 'Password and Email do not match.' });
 						console.log('401');
 				}
 			})
@@ -215,15 +219,9 @@ export default function AddEdit( {navigation, artifact} ) {
 		}    
 	}
 	const onSubmit = data => {
-		console.log('onsubmit start', data);
-
-		const API_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN;
-
 		var form = new FormData();
-		console.log('onsubmit data', data);
 		var images = [];
 		var i = 0;
-console.log('upload galleryimages', galleryImages);
 		galleryImages.forEach(selectedImage => {
 			if( Platform.OS == "web" ){
 				form.append('source', 'web');
@@ -239,8 +237,6 @@ console.log('upload galleryimages', galleryImages);
 				const match = /\.(\w+)$/.exec(filename as string);
 				const ext = match?.[1];
 				const type = match ? `image/${match[1]}` : `image`;
-
-	console.log('uri in onsubmit', uri);
 				form.append('images[' + i + ']', {
 					uri,
 					name: `image.${ext}`,
@@ -260,40 +256,19 @@ console.log('upload galleryimages', galleryImages);
 		form.append('zipcode',data.zipcode);					
 		form.append('latitude',data.latitude);
 		form.append('longitude',data.longitude);
-		form.append('scale',scale);					
-
-		try {
-			let config = {
-				method: 'post',
-				maxBodyLength: Infinity,
-				data:form,
-				url: 'https://zkd.b51.mytemp.website/api/artifacts/store',
-				headers: { 
-					'Accept': 'application/json',
-					'Authorization': `Bearer ${API_TOKEN}`,
-					"Content-Type": "multipart/form-data"					      
-				}
-			};
-			console.log('config:', config);
-			axios.request(config)
-				.then( (result) => {
-					console.log('result of axios:', result);
-					if( 'undefined' != typeof result.data ){
-						//setMachineSession("stuff");
-						router.replace('/map');
-					}
-				})
-				.catch((error) => {
-					console.log('error', error);
-					if( '401' == error.status ){
-						setError('email', { type: 'custom', message: 'Password and Email do not match.' });
-							console.log('401');
-					}
-				})
-		} catch (error) {
-			console.error("Error:", error);
-		} 
-					
+		form.append('scale',scale);
+		if( userSession ){
+			var parsedUserSession = JSON.parse(userSession);
+			form.append('user_name', parsedUserSession?.user?.name );
+			form.append('user_email', parsedUserSession?.user?.email );
+		}
+            ArtifactsService({
+            	method:'create',
+            	url:'artifacts',
+            	data:form
+            }).then( (results) => {
+            	// route to edit?
+		}).catch(console.log('.error'))					
 	};
 
 	const handleToggle = ( event ) => { setSelectedIndex( event.nativeEvent.selectedSegmentIndex); };
@@ -355,13 +330,7 @@ console.log('upload galleryimages', galleryImages);
 			setlocationLookupState( lookupState );
 		}
 	}
-	const __takePicture = async () => {
-		const photo: any = await camera.takePictureAsync()
-		console.log(photo)
-		setPreviewVisible(true)
-
-		setCapturedImage(photo)
-	}
+	
  const handleFileChange = event => {
     const fileObj = event.target.files && event.target.files[0];
     if (!fileObj) {
@@ -370,17 +339,18 @@ console.log('upload galleryimages', galleryImages);
 
     console.log('fileObj is', fileObj);
 
-    // 👇️ Reset file input
     event.target.value = null;
+fileObj.uri = URL.createObjectURL(fileObj);
+    //console.log(event.target.files);
 
-    // 👇️ Is now empty
-    console.log(event.target.files);
+    //console.log(fileObj);
+    //console.log(fileObj.name);
+	const cloneDeep = _.cloneDeep(galleryImages);
+	cloneDeep.push(fileObj);
+	setGalleryImages( cloneDeep );
+	setPreviewVisible(true)
 
-    // 👇️ Can still access the file object here
-    console.log(fileObj);
-    console.log(fileObj.name);
-	galleryImages.push(fileObj);
-	setGalleryImages( galleryImages );
+    console.log('galleryImages',cloneDeep);
 
   };
 	const __pickImage = async () => {
@@ -414,10 +384,11 @@ console.log('upload galleryimages', galleryImages);
 			console.log(base64.assets[0]);
 //			galleryImages.push(result.assets[0]);
 //						galleryImages.push(uri);
+	const cloneDeep = _.cloneDeep(galleryImages);
 
-			galleryImages.push(base64.assets[0]);
-			setGalleryImages( galleryImages );
-			console.log('galleryImages', galleryImages);
+			cloneDeep.push(base64.assets[0]);
+			setGalleryImages( cloneDeep );
+			console.log('galleryImages', cloneDeep);
 			setPreviewVisible(true)
 		}    
 		else{
@@ -440,55 +411,22 @@ console.log('upload galleryimages', galleryImages);
 	}
 	const __removePhoto = () => {
 	}
-	const __savePhoto = async () => {
-
-//		var result = await MediaLibrary.saveToLibraryAsync(capturedImage.uri);
-//		console.log('after save to library:::::::', result);    
-
- 	const manipResult = await manipulateAsync(
-      capturedImage.uri,
-      [{ resize: { width: capturedImage.width * 0.3 } }],
-      { compress: .5 }
-    );	
-		console.log('after save to library:::::::', manipResult);    
-		galleryImages.push(manipResult);
-		setGalleryImages( galleryImages );
-console.log('galleryImages', galleryImages);
-		setCapturedImage(null)
-		setPreviewVisible(false)
-		setStartCamera(false)
-
-	}
-	const __retakePicture = () => {
-		setCapturedImage(null)
-		setPreviewVisible(false)
-		__startCamera()
-	}
-	const __handleFlashMode = () => {
-		if (flashMode === 'on') {
-			setFlashMode('off')
-		} else if (flashMode === 'off') {
-			setFlashMode('on')
-		} else {
-			setFlashMode('auto')
-		}
-	}
-	const __switchCamera = () => {
-		if (cameraType === 'back') {
-			setCameraType('front')
-		} else {
-			setCameraType('back')
-		}
-	}
+	
+	
+	
 	const hide = false;
 
 
 	return (
 		<>
+							
+
+			<CameraV galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraV>
+
+						
 			<View style={[s.formButtonSection,{
 					paddingTop:50,
 					backgroundColor:'rgba(255,255,255,1)',
-					zIndex:999,
 					elevation:2,
 					padding:0,
 					position:'absolute'
@@ -783,7 +721,12 @@ console.log('galleryImages', galleryImages);
 							<View style={s.formSectionTitleWrapper}>
 								<Text style={s.formSectionTitle}>Images</Text>
 								{ (Platform.OS == 'web') ? 
-								(<FilePicker onChange={handleFileChange}></FilePicker>) : null }
+								(<FilePicker 
+									onChange={handleFileChange}
+								></FilePicker>) : null }
+								{( Platform.OS !== "web" ) ? (
+									<>
+
 								<Pressable 
 									style={({pressed}) => [
 													{
@@ -832,136 +775,22 @@ console.log('galleryImages', galleryImages);
 												width:30,
 												borderRadius:16,								
 									}}/>
-									</Pressable>						
+									</Pressable>
+								</>) : null }						
 							</View>
 						</View>
-
-
-					</View>
-					<View style={s.formWrapperTwo}>  
-						{startCamera ? (
-							<View
-								style={{
-									flex: 1,
-									width: '100%',
-									height:200,
-									background:'yellow'
-								}}
-							>
-							<Text>startcamera</Text>
-								{previewVisible && capturedImage ? (
-									<View style={{height:300, width:300, background:'red'}}>
-										<CameraPreview photo={capturedImage} savePhoto={__savePhoto} retakePicture={__retakePicture} />
-									</View>
-								) : (
-									<CameraView
-										type={cameraType}
-										flashMode={flashMode}
-										style={{flex: 1, height:200}}
-										ref={(r) => {
-											camera = r
-										}}
-									>
-										<View
-											style={{
-												flex: 1,
-												height:200,
-												width: '100%',
-												backgroundColor: 'transparent',
-												flexDirection: 'row'
-											}}
-										>
-											<View
-												style={{
-													position: 'absolute',
-													left: '5%',
-													top: '10%',
-													flexDirection: 'column',
-													justifyContent: 'space-between'
-												}}
-											>
-												<TouchableOpacity
-													onPress={__handleFlashMode}
-													style={{
-														backgroundColor: flashMode === 'off' ? '#000' : '#fff',
-														//borderRadius: '50%',
-														height: 25,
-														width: 25
-													}}
-												>
-													<Text
-														style={{
-															fontSize: 20
-														}}
-													>
-														⚡️
-													</Text>
-												</TouchableOpacity>
-												<TouchableOpacity
-													onPress={__switchCamera}
-													style={{
-														marginTop: 20,
-													 // borderRadius: '50%',
-														height: 25,
-														width: 25
-													}}
-												>
-													<Text
-														style={{
-															fontSize: 20
-														}}
-													>
-														{cameraType === 'front' ? '🤳' : '📷'}
-													</Text>
-												</TouchableOpacity>
-											</View>
-											<View
-												style={{
-													position: 'absolute',
-													bottom: 0,
-													flexDirection: 'row',
-													flex: 1,
-													width: '100%',
-													padding: 20,
-													justifyContent: 'space-between'
-												}}
-											>
-												<View
-													style={{
-														alignSelf: 'center',
-														flex: 1,
-														alignItems: 'center'
-													}}
-												>
-													<TouchableOpacity
-														onPress={__takePicture}
-														style={{
-															width: 70,
-															height: 70,
-															bottom: 0,
-															//borderRadius: 50,
-															backgroundColor: '#fff'
-														}}
-													/>
-												</View>
-											</View>
-										</View>
-									</CameraView>
-								)}
-							</View>
-						) : (
-							<></>
-						)}
-						<View style={{flex:1, flexDirection:'row', marginTop:0}}>
+<View style={{flex:1, flexDirection:'row', marginTop:0, justifyContent: 'center',}}>
 							{galleryImages && galleryImages.length > 0 ? (
 								<FlatList
+									contentContainerStyle={[s.iconWrapper,{ marginLeft:'auto',marginRight:'auto',flex:1, flexDirection:'row',maxWidth:'1100px', alignItems: 'center'}]}
 									horizontal={true} 
 									showsHorizontalScrollIndicator={false} 
 									data={galleryImages}
+									extraData={galleryImages}
+									keyExtractor={(item, index) => {return  index.toString();}}
 									renderItem={ ({ item, index }) => (
 										<Image source={{uri:item.uri}} /* Use item to set the image source */
-											key={index} /* Important to set a key for list items,
-																but it's wrong to use indexes as keys, see below */
+											key={item.id}
 											serverId={item.id}
 											style={{
 												width:150,
@@ -974,12 +803,12 @@ console.log('galleryImages', galleryImages);
 									)}
 								/>
 							) : (
-								<>
+								<View style={[s.iconWrapper,{flex:1, flexDirection:'row',maxWidth:'1100px', alignItems: 'center'}]}>  
 									<Ionicons name="image-outline" size={70} color="#d8d8d8" style={{display:'flex'}}/>						
 									<Ionicons name="image-outline" size={70} color="#d8d8d8" style={{display:'flex'}}/>
 									<Ionicons name="image-outline" size={70} color="#d8d8d8" style={{display:'flex'}}/>
 									<Ionicons name="image-outline" size={70} color="#d8d8d8" style={{display:'flex'}}/>
-								</>
+								</View>
 							)}
 						</View>
 						{image && <Image source={{ uri: image }} style={styles.image} />}
@@ -991,9 +820,11 @@ console.log('galleryImages', galleryImages);
 								/>
 							}
 						</View>
+
 					</View>
+					
 				</View>
-				<StatusBar style="auto" />			
+				<StatusBar style={{display:'block'}} />			
 							
 			</ScrollView>
 		</>
@@ -1019,7 +850,7 @@ const GalleryImage = ({photo, removePhoto}: any) => {
 	return (
 		<View
 			style={{
-				backgroundColor: 'blue',
+				backgroundColor: 'yellow',
 				flex: 1,
 				width: '200px',
 				height: '200px'
@@ -1063,81 +894,6 @@ const GalleryImage = ({photo, removePhoto}: any) => {
 								}}
 							>
 								Delete
-							</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
-			</ImageBackground>
-		</View>
-	)
-}
-const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
-	console.log('sdsfds', photo)
-	return (
-		<View
-			style={{
-				backgroundColor: 'blue',
-				flex: 1,
-				width: '200px',
-				height: '200px'
-			}}
-		>
-			<ImageBackground
-				source={{uri: photo && photo.uri}}
-				style={{
-					flex: 1
-				}}
-			>
-				<View
-					style={{
-						flex: 1,
-						flexDirection: 'column',
-						padding: 15,
-						justifyContent: 'flex-end'
-					}}
-				>
-					<View
-						style={{
-							flexDirection: 'row',
-							justifyContent: 'space-between'
-						}}
-					>
-						<TouchableOpacity
-							onPress={retakePicture}
-							style={{
-								width: 130,
-								height: 40,
-
-								alignItems: 'center',
-								//borderRadius: 4
-							}}
-						>
-							<Text
-								style={{
-									color: '#fff',
-									fontSize: 20
-								}}
-							>
-								Re-take
-							</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							onPress={savePhoto}
-							style={{
-								width: 130,
-								height: 40,
-
-								alignItems: 'center',
-								//borderRadius: 4
-							}}
-						>
-							<Text
-								style={{
-									color: '#fff',
-									fontSize: 20
-								}}
-							>
-								save photo
 							</Text>
 						</TouchableOpacity>
 					</View>

@@ -32,6 +32,11 @@ export default function Page({navigation}) {
               <Text style={s.link}>Map</Text>
             </Pressable>
           </Link>
+          <Link href="/(tabs)/camera" asChild >
+            <Pressable >
+              <Text style={s.link}>Camera</Text>
+            </Pressable>
+          </Link>          
 <Pressable
        style={s.button}
        onPress={() => navigation.toggleDrawer()}>

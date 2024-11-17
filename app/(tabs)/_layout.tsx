@@ -8,6 +8,7 @@ import { NavigationContainer, useNavigation, useRoute } from '@react-navigation/
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import map  from '@/app/(tabs)/map';
+import camera  from '@/app/(tabs)/camera';
 import add from '@/app/(tabs)/artifacts/add';
 import edit from '@/app/(tabs)/artifacts/edit';
 import show from '@/app/(tabs)/artifacts/show';
@@ -56,6 +57,7 @@ function Home({ navigation }) {
 			<CustomButton title="Edit" onPress={() => navigation.navigate('/artifacts/edit')} />
 
 			<CustomButton title="Go to Map" onPress={() => navigation.navigate('map')} />
+			<CustomButton title="Camera" onPress={() => navigation.navigate('camera')} />
 			{ (userSession) ? (
 
 				<CustomButton title="Sign Out" 
@@ -260,6 +262,7 @@ function App() {
 				<Stack.Screen name="Register" options={{ title: 'Register' }} component={Register}/>
 				
 				<Stack.Screen name="map" options={{ title: 'Map Title' }} component={map}/>
+				<Stack.Screen name="camera" options={{ title: 'Camera' }} component={camera}/>
 				<Stack.Screen name="add" options={{ title: 'ddd' }} component={edit} />
 			</Stack.Navigator>
 		</NavigationContainer>

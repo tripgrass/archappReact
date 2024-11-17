@@ -1,20 +1,29 @@
 import  AddEdit  from '@/components/AddEdit';
-import { FlatList, Platform, StyleSheet, Text, View } from 'react-native';
-import { useState, useEffect } from 'react';
 import  {ArtifactsService}  from '@/utilities/ArtifactsService';
+import { FlatList, Platform, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams, useGlobalSearchParams, Link } from 'expo-router';
+import { useSession } from '@/utilities/AuthContext';
+import { useState, useEffect } from 'react';
 
 function EditArtifact({ route, navigation }) {
 		const local = useLocalSearchParams();
 		const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
-
 		const [artifact, setArtifact] = useState(null);	
 		const [artifacts, setArtifacts] = useState([]);	
+		const { userSession } = useSession();
+
 		useEffect(() => {
 				if( artifactId ){
-	        ArtifactsService.getById(artifactId)
-	            .then(result => setArtifact(result))
-	            .catch(console.log('.error'))
+					{ (userSession) ? (
+            ArtifactsService({
+            		method:'getById',
+            		id:artifactId
+            })
+            .then( (results) => {
+                setArtifact(results)
+            })
+            .catch(console.log('.error'))
+          ) : null }
 	      }
     }, []);    
 

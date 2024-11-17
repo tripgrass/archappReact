@@ -18,7 +18,7 @@ const App = () => {
     fetchData();
   }, []);
 
-  const [errorMsg, setErrorMsg] = useState(null);
+//  const [errorMsg, setErrorMsg] = useState(null);
 const mapRef = useRef<any>(null);    
  const [currentLocation, setCurrentLocation] = useState(null);
 const [initialRegion, setInitialRegion] = useState(null);
@@ -96,7 +96,7 @@ let { status } = await Location.requestForegroundPermissionsAsync();
         .catch((error) => {
           console.log('error', error);
           if( '401' == error.status ){
-            setError('email', { type: 'custom', message: 'Password and Email do not match.' });
+            //setError('email', { type: 'custom', message: 'Password and Email do not match.' });
               console.log('401');
           }
         })
