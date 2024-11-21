@@ -15,12 +15,18 @@ const App = ({navigation}) => {
     const pathname = usePathname();
     console.log(pathname);
 	
-	const [artifacts, setArtifacts] = useState([]); 
-	useEffect(() => {
-		ArtifactsService.getAll()
-			.then(results => setArtifacts(results))
-			.catch(console.log('.error'))
-	}, []);
+   const [artifacts, setArtifacts] = useState([]); 
+   useEffect(() => {
+        { (userSession) ? (
+
+            ArtifactsService({method:'getAll'})
+                .then( (results) => {
+                    setArtifacts(results)
+                })
+                .catch((error) => console.log('in profile getall .error', error))
+            ) : null }
+   }, []);
+
 
 	return (
 	

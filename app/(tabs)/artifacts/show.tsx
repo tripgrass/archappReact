@@ -22,7 +22,7 @@ function ShowArtifact({ route, navigation }) {
 		        	method:'getById',
 		        	id:artifactId
 		        }).then(result => setup(result))
-		            .catch(console.log('.error'))
+		            .catch(console.log('in show.tsx .error'))
 				}
 			}
     }, [isFocused]);    

@@ -123,6 +123,9 @@ export default function App({galleryState, stateChanger, cameraState, setCameraS
         setPreviewVisible(false)
         setCameraState(false)
     }
+    function toggleCamera() {
+        setCameraState(false);
+    }
     function toggleCameraFacing() {
         setFacing(current => (current === 'back' ? 'front' : 'back'));
     }
@@ -131,7 +134,7 @@ export default function App({galleryState, stateChanger, cameraState, setCameraS
     }
 
     return (
-    <View style={styles.container}>
+        <>
         {cameraState ? (
             <View style={[s.formWrapperCamera,{backgroundColor:'#484848'}]}>  
                 <View style={{flex: 1,width: '100%',overflow:'hidden',borderRadius:30}}>
@@ -178,6 +181,7 @@ export default function App({galleryState, stateChanger, cameraState, setCameraS
                         }}
                       >
                         <TouchableOpacity
+                          onPress={toggleCamera}
                           style={{
                             height: 50,
                             width: 50
@@ -265,10 +269,11 @@ export default function App({galleryState, stateChanger, cameraState, setCameraS
                   )}
                             </View>
                     </View>     
+    
                         ) : (
                             <></>
                         )}
-    </View>
+                        </>
   );
 }
 

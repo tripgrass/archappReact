@@ -13,13 +13,13 @@ export const axiosWrapper = async function({
     }){
     const baseUrl = 'https://zkd.b51.mytemp.website/api/';
     const API_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN; // or usesession
-    console.log('API_TOKEN',API_TOKEN);
+    //console.log('API_TOKEN',API_TOKEN);
     const userSessionStore = ( Platform.OS !== "web" ) ? await SecureStore.getItemAsync("userSession") : await AsyncStorage.getItem("userSession");
     const userSession =  userSessionStore ? JSON.parse(userSessionStore) : null;
     const token = userSession?.token ? userSession?.token : API_TOKEN;
     const user = userSession?.user ? userSession?.user : null;
-        console.log('in else!!!!!!!!');
-        console.log('token',token);
+        //console.log('in else!!!!!!!!');
+        //console.log('token',token);
 
     switch (method) {
         case 'get':
@@ -36,12 +36,10 @@ export const axiosWrapper = async function({
                     "Content-Type": "multipart/form-data"                         
                 }        
             };    
-            console.log('wrapper getConfig', getConfig);
-
             const results = await axios.request(getConfig).then( (result) => {
                 console.log('in wrapper results', results);
                 if( 'undefined' != typeof result.data ){
-                    console.log('axios request return:',result.data.data);
+                   // console.log('axios request return:',result.data.data);
                     return result.data.data;
                 }
             })
@@ -63,25 +61,11 @@ export const axiosWrapper = async function({
                     "Content-Type": "multipart/form-data"                         
                 }
             };
-            console.log('wrapper post token: ', token);
-for (const pair of data.entries()) {
-  console.log(pair[0], pair[1]);
-}
-            axios.request(postConfig)
-                .then( (result) => {
-                    console.log('result of axios:', result);
-                    if( 'undefined' != typeof result.data ){
-                        //setMachineSession("stuff");
-                        router.replace('/map');
-                    }
-                })
-                .catch((error) => {
-                    console.log('error', error);
-                    if( '401' == error.status ){
-                        setError('email', { type: 'custom', message: 'Password and Email do not match.' });
-                            console.log('401');
-                    }
-                })
+            const postResults = await axios.request(postConfig).catch((error) => {
+                console.log(error);
+            });
+            return postResults;
+
     } 
 };
 

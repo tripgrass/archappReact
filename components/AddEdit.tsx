@@ -1,5 +1,5 @@
 import axios from 'axios';
-import {Alert, FlatList, Image, ImageBackground, Keyboard, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native'
+import {Alert, FlatList, Image, ImageBackground, Input, Keyboard, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View} from 'react-native'
 import {ArtifactsService}  from '@/utilities/ArtifactsService';
 import { Asset } from 'expo-asset';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,6 +8,7 @@ import Compressor from 'compressorjs';
 import CustomButton from '@/components/Button';
 import FilePicker from '@/components/FilePicker';
 import FormData from 'form-data';
+import ImageMeta from '@/components/ImageMeta';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
 import React, { useState, useEffect, useRef } from 'react'
@@ -20,7 +21,9 @@ import { useSession } from '@/utilities/AuthContext';
 import * as MediaLibrary from 'expo-media-library';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from "expo-location";
-import CameraV  from '@/app/(tabs)/camera';
+import CameraWrapper  from '@/app/(tabs)/camera';
+import _ from "lodash";
+import { useIsFocused } from '@react-navigation/native'
 
 import Constants from 'expo-constants';
 
@@ -28,40 +31,100 @@ const s = require('@/components/style');
 
 let camera: CameraView
 
-export default function AddEdit( {navigation, artifact} ) {
-
-	const isEdit = artifact ? true : false;
-
+export default function AddEdit( {navigation, id_dela_artifact} ) {
+console.log('addedit artifactId', id_dela_artifact);
+	const isEdit = id_dela_artifact ? true : false;
+	const isFocused = useIsFocused()
+	const [origImageIds, setOrigImageIds] = useState({});	
+	const [artifactId, setArtifactId] = useState(id_dela_artifact ? id_dela_artifact : null);	
+	const [artifact, setArtifact] = useState(null);	
+	const [artifacts, setArtifacts] = useState([]);
+	const [galleryImages, setGalleryImages] = useState({});
+	const formFields = {
+		id:null,
+		name : null,
+		title: null,
+		address:null,
+		city:null,
+		state:null,
+		zipcode:null
+	};
 	var artifactImages = [];
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
 	
 	const pageTitle = null;//!artifact ? 'Add an Artifact' : 'Edit ' + artifact.name;
-	if('undefined' != typeof artifact && 'undefined' != typeof artifact?.images){
-		var counter = 0;
-		Object.keys(artifact.images).forEach((k, i) => {
-			var thisImage = {
-				id:artifact.images[k].id,
-				uri:imageBaseUrl + artifact.images[k].name
-			};
-			artifactImages[counter] =  thisImage;
-			counter++;
-		});
-	}
-	const [galleryImages, setGalleryImages] = useState(artifactImages);
 
-	Object.keys(galleryImages).forEach((k, i) => {
-		console.log('galleryImage k', k);
-		console.log('galleryImage ::', galleryImages[k]);
-	});
-
-	var defaultValues = artifact ? artifact : {};
-	defaultValues.latitude = artifact?.latitude;
-	defaultValues.longitude = artifact?.longitude;
+	var artifact_id = artifactId ? artifactId : null;
+	var defaultValues = {};
 	const { register, setError, getValues, setValue, handleSubmit, control, reset, formState: { errors } } = useForm({
 		defaultValues: defaultValues
 	});
+
+	function setup(artifact){
+
+console.log('ARTOFACT as artifact', artifact);
+//				setValue('latitude', JSON.stringify(latitude) );
+		setScale(artifact.scale);
+		defaultValues = {};
+		Object.keys(formFields).forEach((k, i) => {
+			defaultValues[k] = artifact[k];
+		});
+		defaultValues.latitude = JSON.stringify(artifact?.latitude);
+		defaultValues.longitude = JSON.stringify(artifact?.longitude);
+		if('undefined' != typeof artifact && 'undefined' != typeof artifact?.images){
+			var counter = 0;
+			var imageIds = [];
+			Object.keys(artifact.images).forEach((k, i) => {
+				var thisImage = {
+					id:artifact.images[k].id,
+					uri:imageBaseUrl + artifact.images[k].name
+				};
+				artifactImages[counter] =  thisImage;
+				imageIds.push(artifact.images[k].id);
+				counter++;
+			});
+			if( !origImageIds[artifact.id] ){
+				newOrigImages = origImageIds;
+				newOrigImages[artifact.id] = imageIds;
+				setOrigImageIds(newOrigImages);
+			}
+			else{
+				setOrigImageIds("empty");				
+			}
+			if( artifactImages.length > 0 ){
+				console.log('artifactImages', artifactImages);
+				setGalleryImages(artifactImages);		
+				defaultValues.images = artifactImages;
+			}
+			else{
+				setGalleryImages({});		
+				defaultValues.images = {};				
+			}
+		}		
+		//console.log('ARTOFACT!! defaultvalues::: ', defaultValues);
+		reset({ ...defaultValues });
+		setArtifact(artifact);
+
+	}
+	useEffect(() => {
+		if(isFocused){
+			if( id_dela_artifact ){
+		        ArtifactsService({
+		        	method:'getById',
+		        	id:id_dela_artifact
+		        })
+		        .then( result => setup(result) )
+		        .catch( console.log('IN INITIAL EDIT.TSX .error'))
+			}
+			else{
+			}
+		}
+    }, [isFocused]);         
 	const [image, setImage] = useState<string | null>(null);
-	const [scale, setScale] = useState(artifact?.scale ? artifact?.scale : 1);
+//	const [scale, setScale] = useState(artifact?.scale ? artifact?.scale : 1);
+	const [scale, setScale] = useState( 1);
+	const [slideoutState, setslideoutState] = useState('in');
+	const [imageState, setImageState] = useState(null);
 	const [previewVisible, setPreviewVisible] = useState(false)
 	const [capturedImage, setCapturedImage] = useState<any>(null)
 	const [cameraType, setCameraType] = useState();
@@ -74,11 +137,13 @@ export default function AddEdit( {navigation, artifact} ) {
 	const [fillLocationMode, setFillLocationMode] = useState('Manually Fill');
  	const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
  	const initialized = useRef(false);
-	    const [startCamera, setStartCamera] = useState(false)
-const { userSession } = useSession();
+	const [startCamera, setStartCamera] = useState(false)
+	const [imageMetaState, setImageMetaState] = useState('closed');
 
-	console.log('userSession!: ', userSession);	
+	const { userSession } = useSession();
+
 	const getData = async () => {
+		alert('getadta');
 		fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
 		setFillLocationMode(fillLocationModeVal);
 		if('Autofill Current Location' == fillLocationModeVal ){
@@ -89,7 +154,7 @@ const { userSession } = useSession();
 	};
 	if( Platform.OS !== "web" ){
 		useEffect( () => {
-			if (!initialized.current) {
+			if (!initialized.current && !artifactId ) {
 				getData();  
 				initialized.current = true;
 			}
@@ -175,13 +240,11 @@ const { userSession } = useSession();
 		};
 		axios.request(config)
 			.then( (result) => {
-				console.log('result from lookup', result.data.results[0]);
 		
 				if( 'undefined' != typeof result.data ){
 
 
 					var components = getAddressObject(result.data.results[0].address_components );
-				console.log('components',components);
 					setValue('address', components.home + " " + components.street);
 					setValue('city', components.city);
 					setValue('state', components.region);
@@ -208,7 +271,6 @@ const { userSession } = useSession();
 		const state = navigation.getState();
 		const currentIndex = state.index;
 		const currentScreen = state.routes[currentIndex].name;
-	    console.log('currentScreen',currentScreen);
 	    if( "edit" == currentScreen ){
 	    	// check params = if coming from view add a param of source
 	    	console.log('isEditscreen!!!!!!!!!!');
@@ -218,31 +280,51 @@ const { userSession } = useSession();
 			router.replace('/');		
 		}    
 	}
+	const onSubmitTest = data => {
+		console.log('origImageIds:' , origImageIds);
+//	    	navigation.navigate('ProfileTab');
+		var form = new FormData();
+		var images = [];
+		var i = 0;
+		galleryImages.forEach(selectedImage => {
+			console.log('selectedImage.id', selectedImage.id);
+			if( !origImageIds[artifact.id].includes( selectedImage.id ) ){
+				console.log('is not in orig');
+			}
+			else{
+				console.log('is in orig');
+			}
+		});
+	}
 	const onSubmit = data => {
 		var form = new FormData();
 		var images = [];
 		var i = 0;
 		galleryImages.forEach(selectedImage => {
-			if( Platform.OS == "web" ){
-				form.append('source', 'web');
-				form.append('images[' + i + ']', selectedImage);
+			console.log('artifact.id', artifact.id);
+			console.log('origImageIds', origImageIds);
+			if( !origImageIds[artifact.id].includes( selectedImage.id ) ){
+				if( Platform.OS == "web" ){
+					form.append('source', 'web');
+					form.append('images[' + i + ']', selectedImage);
+				}
+				else{
+					form.append('source','phone');
+					const uri =
+					( Platform.OS === "android" || Platform.OS === "web" )
+						? selectedImage.uri
+						: selectedImage.uri.replace("file://", "");
+					const filename = selectedImage.uri.split("/").pop();
+					const match = /\.(\w+)$/.exec(filename as string);
+					const ext = match?.[1];
+					const type = match ? `image/${match[1]}` : `image`;
+					form.append('images[' + i + ']', {
+						uri,
+						name: `image.${ext}`,
+						type,
+					} as any);
+				} 
 			}
-			else{
-				form.append('source','phone');
-				const uri =
-				( Platform.OS === "android" || Platform.OS === "web" )
-					? selectedImage.uri
-					: selectedImage.uri.replace("file://", "");
-				const filename = selectedImage.uri.split("/").pop();
-				const match = /\.(\w+)$/.exec(filename as string);
-				const ext = match?.[1];
-				const type = match ? `image/${match[1]}` : `image`;
-				form.append('images[' + i + ']', {
-					uri,
-					name: `image.${ext}`,
-					type,
-				} as any);
-			} 
 			i++;
 
 		});
@@ -267,42 +349,14 @@ const { userSession } = useSession();
             	url:'artifacts',
             	data:form
             }).then( (results) => {
+            	console.log('after submit results', results);
+		    	navigation.navigate('ProfileTab');
+
             	// route to edit?
 		}).catch(console.log('.error'))					
 	};
 
 	const handleToggle = ( event ) => { setSelectedIndex( event.nativeEvent.selectedSegmentIndex); };
-	const postArt = async () => {
-		const formdata = new FormData();
-		formdata.append("name", "rando");
-		const requestOptions = {
-			headers: {
-					Accept: "application/json",
-					"Content-Type": "application/json",
-					"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiMjJhZDRhNGIwODA0ZDkwMTM4MzY1NzljNGQxYWFlNWI1ODc2YjYzNWY3YjdiYTJkMzI3MTUwZGRhOTAxZWQ4YjdmMDM2NTc3MDJiNmI2M2QiLCJpYXQiOjE3MjkwNDczNjUuMDgwNzY4LCJuYmYiOjE3MjkwNDczNjUuMDgwNzcsImV4cCI6MTc2MDU4MzM2NS4wNzYyMiwic3ViIjoiIiwic2NvcGVzIjpbIioiXX0.q-FYTDDONhdz0NrGHBheUJqRmIxv6mlUtDOjfO2Wqi-reupe_fTaQujRkApYM_XvcyA8cN5x1qiucu-DzKbDN0PwzgLPuuQxt5L0qRQ2mWRx7rk_C0bT18nXQgwARljS2gIxihIjJGQAeoajwxm4Mhl7ziZ6tOjpVmokOEgWyGTPfqAd1mxIIfS2hhZuTU2F3T-J0ujqLjdUK1xX6bM_Vt_NYnfWkc-tCE5am1DmDiO33l63iQ6N8aUrfHhkQBLCiAtmMCw0h9EsD_d8L-37kPL7vDDoOUPPaE-NeZ4NpAQc_qpmfHIuOiAG7HX7KTWVqoapu9awue2SvaxZHQo9prkoCqN7uwxGXeSDBo2KXioIhP38Q_UKNaaih42Bw04WcJveSeIt8nAxHoA6Plyim9-BL2MY1Rq2ARS5PiLlEz1lSBrJeRzB-Tf8CaSBVuTCaA19mvGwLaOV4BC1YlCRwAaC_ASjrJrkU2xFwFi2tcu9-57GfJI9kVQhSS4Gja4_MkZ-LCVVaSYU0s08e-sFBoKJI6OtZKHAhruC8-nfu4UX3Q3-26KTMiKOlfw7ETwHYA2oCRyjYPre8DS-StH9chqdyb4Zml-V6SLBasrWlmWb-8fJOsFxWRHsRD4lD6TcAN98I_uWgTUZjOOZ5BjtCBYTIpA4CxEtyQCfP0g2By0",
-			},
-			method: "POST",
-			body: formdata,
-			redirect: "follow"
-		};
-		let config = {
-			method: 'post',
-			maxBodyLength: Infinity,
-			url: 'https://zkd.b51.mytemp.website/api/artifacts?name=what',
-			headers: { 
-				'Accept': 'application/json', 
-				'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzIiwianRpIjoiMjJhZDRhNGIwODA0ZDkwMTM4MzY1NzljNGQxYWFlNWI1ODc2YjYzNWY3YjdiYTJkMzI3MTUwZGRhOTAxZWQ4YjdmMDM2NTc3MDJiNmI2M2QiLCJpYXQiOjE3MjkwNDczNjUuMDgwNzY4LCJuYmYiOjE3MjkwNDczNjUuMDgwNzcsImV4cCI6MTc2MDU4MzM2NS4wNzYyMiwic3ViIjoiIiwic2NvcGVzIjpbIioiXX0.q-FYTDDONhdz0NrGHBheUJqRmIxv6mlUtDOjfO2Wqi-reupe_fTaQujRkApYM_XvcyA8cN5x1qiucu-DzKbDN0PwzgLPuuQxt5L0qRQ2mWRx7rk_C0bT18nXQgwARljS2gIxihIjJGQAeoajwxm4Mhl7ziZ6tOjpVmokOEgWyGTPfqAd1mxIIfS2hhZuTU2F3T-J0ujqLjdUK1xX6bM_Vt_NYnfWkc-tCE5am1DmDiO33l63iQ6N8aUrfHhkQBLCiAtmMCw0h9EsD_d8L-37kPL7vDDoOUPPaE-NeZ4NpAQc_qpmfHIuOiAG7HX7KTWVqoapu9awue2SvaxZHQo9prkoCqN7uwxGXeSDBo2KXioIhP38Q_UKNaaih42Bw04WcJveSeIt8nAxHoA6Plyim9-BL2MY1Rq2ARS5PiLlEz1lSBrJeRzB-Tf8CaSBVuTCaA19mvGwLaOV4BC1YlCRwAaC_ASjrJrkU2xFwFi2tcu9-57GfJI9kVQhSS4Gja4_MkZ-LCVVaSYU0s08e-sFBoKJI6OtZKHAhruC8-nfu4UX3Q3-26KTMiKOlfw7ETwHYA2oCRyjYPre8DS-StH9chqdyb4Zml-V6SLBasrWlmWb-8fJOsFxWRHsRD4lD6TcAN98I_uWgTUZjOOZ5BjtCBYTIpA4CxEtyQCfP0g2By0', 
-				'Cookie': 'XSRF-TOKEN=eyJpdiI6IjdlbXRyTHFmVS9udFNpUTRaTENCUnc9PSIsInZhbHVlIjoiQndGNk1hYlBYZUk0Y1ZYOWxLZ3B5T2dqaG1heW9pS2txYzJybzBjelR2RXRRYjQyYmlMZlVEcnU1VDE2bVROb3BlVUd2b3J3SVpTZmNVb24xYktYZitnSUo3bGorQTFhdm1SSFJ2d1d3N1hGQmx6all4WVJJbTRUY29UVFlaS2IiLCJtYWMiOiI1ZjUwNzNlMmJmODU2MDNiNzE4MzU0ZjdkYjljZWFiNGJiOGNmNTgzODMwM2IzOGI0MGEyZDFmY2JiZmE0MWIyIiwidGFnIjoiIn0%3D; laravel_session=eyJpdiI6ImFmcG5Jc0JRT2NvTjZPRTIrci9yWlE9PSIsInZhbHVlIjoiZGRBTURBRVlsenB5d3RPb3d0Q1Bna1c3WHZKdG9ZbzMvTkZHb0dwTWQ2akFCOEZQWkZXejdFRUk1T2VNQjRFR2NjRFY0OWFxSTBlYitXck5UVThpcm5UNjBpMGN0UmJIMEtTOEZBNGw0R1UxMkVlbzl1cmlXMy9TNXFOLzdvNzIiLCJtYWMiOiI3ZjBlOWU2ZDU3ZTQwZmViMjQ1OGI5YjJmY2FlMDg5N2NmZTQ5MGEyNGMzNmRiZjkwNWMyOWJhYjU4MDE3M2RlIiwidGFnIjoiIn0%3D'
-			}
-		};
-		axios.request(config)
-		.then((response) => {
-			console.log(JSON.stringify(response.data));
-		})
-		.catch((error) => {
-			console.log(error);
-		});
-	}
 	const __clearLocation = async () => {
 		console.log('onpress CLEARlOCATION...');
 		setValue('latitude', null );
@@ -319,7 +373,6 @@ const { userSession } = useSession();
 		if (status !== "granted") {
 			return;
 		}
-
 		let location = await Location.getCurrentPositionAsync({});
 		var latitude = location.coords.latitude;
 		var longitude = location.coords.longitude;
@@ -375,21 +428,15 @@ fileObj.uri = URL.createObjectURL(fileObj);
 		console.log('result await', base64);
 	
 
-		if (base64) {
-
-   
-
-//console.log('new uri', uri);
+		if (base64 && base64?.assets ) {
 			console.log('PICKIMAGE SUCCESS');
-			console.log(base64.assets[0]);
 //			galleryImages.push(result.assets[0]);
 //						galleryImages.push(uri);
-	const cloneDeep = _.cloneDeep(galleryImages);
-
+			const cloneDeep = _.cloneDeep(galleryImages);
 			cloneDeep.push(base64.assets[0]);
 			setGalleryImages( cloneDeep );
 			console.log('galleryImages', cloneDeep);
-			setPreviewVisible(true)
+			setPreviewVisible(true);
 		}    
 		else{
 			console.log('error on pic' )
@@ -421,7 +468,8 @@ fileObj.uri = URL.createObjectURL(fileObj);
 		<>
 							
 
-			<CameraV galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraV>
+			<ImageMeta artifactId={artifact_id} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
+			<CameraWrapper galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraWrapper>
 
 						
 			<View style={[s.formButtonSection,{
@@ -488,7 +536,7 @@ fileObj.uri = URL.createObjectURL(fileObj);
 						/>
 					</View>
 			</View>					
-						{ artifact ? (
+						{ artifactId ? (
 							<View style={{
 								position:'absolute',
 								bottom:30,
@@ -517,8 +565,8 @@ fileObj.uri = URL.createObjectURL(fileObj);
 							</View>				
 							) : null }			
 			<ScrollView 
-				style={[s.mainContainer]} 
-				contentContainerStyle={s.mainContentContainer}
+				style={[s.mainContainer,{zIndex:-1}]} 
+				contentContainerStyle={[s.mainContentContainer]}
 			>
 				<View style={[s.formOuterWrapper,{paddingTop:128}]}>
 					<View style={s.formWrapper}>
@@ -779,19 +827,18 @@ fileObj.uri = URL.createObjectURL(fileObj);
 								</>) : null }						
 							</View>
 						</View>
-<View style={{flex:1, flexDirection:'row', marginTop:0, justifyContent: 'center',}}>
+						<View style={{flex:1 }}>
 							{galleryImages && galleryImages.length > 0 ? (
 								<FlatList
-									contentContainerStyle={[s.iconWrapper,{ marginLeft:'auto',marginRight:'auto',flex:1, flexDirection:'row',maxWidth:'1100px', alignItems: 'center'}]}
+									contentContainerStyle={{ flexGrow:1,paddingTop:20, marginRight:'auto'}}
 									horizontal={true} 
-									showsHorizontalScrollIndicator={false} 
+									showsHorizontalScrollIndicator={true} 
 									data={galleryImages}
 									extraData={galleryImages}
 									keyExtractor={(item, index) => {return  index.toString();}}
 									renderItem={ ({ item, index }) => (
+										<View key={item.id} serverId={item.id} style={{}}>
 										<Image source={{uri:item.uri}} /* Use item to set the image source */
-											key={item.id}
-											serverId={item.id}
 											style={{
 												width:150,
 												height:150,
@@ -800,6 +847,38 @@ fileObj.uri = URL.createObjectURL(fileObj);
 												margin:6
 											}}
 										/>
+										<Pressable 
+									style={({pressed}) => [
+													{
+											backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+											alignItems: 'center',
+											justifyContent: 'center',
+											borderRadius: 20,
+											height:40,
+											width:40,
+											position:'absolute',
+											top:-7,
+											right:-7,
+											elevation: 3,
+											marginRight:5,
+											boxShadow: '0px 2px 2px #d8d8d8'						        
+													}
+									]}
+										onPress={ () => { 
+											item.name="test";
+
+										setslideoutState( 'out' );
+										setImageState( item );
+										}}
+								>
+									<Ionicons name="pencil-outline" size={30} color="" style={{
+												display:'flex-inline',
+												height:30,
+												width:30,
+												borderRadius:16,								
+									}}/>
+									</Pressable>
+										</View>
 									)}
 								/>
 							) : (

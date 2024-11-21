@@ -12,15 +12,19 @@ export const ArtifactsService = async function({
                 method:'post',
                 url:'artifacts/store',
                 data:data
+            }).catch((error) => {
+                console.log(error);
             });
             return results;
+                console.log('ArtifactsService create', results);
+            break;
 
         case 'getAll':
-            console.log('getall data: ', data);
             var results = await axiosWrapper({
                 method:'get',
                 url:'artifacts'
             });
+            console.log('ArtifactsService getall', results);
             return results;
             break;
 

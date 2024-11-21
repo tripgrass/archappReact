@@ -11,6 +11,7 @@ module.exports = StyleSheet.create({
         padding: 10,
         color:'white',
         width:'100%',
+        elevation:1
     },
     mainContentContainer: {
         //alignItems: 'center',
@@ -80,7 +81,7 @@ module.exports = StyleSheet.create({
         elevation:3,
     },        
     iconWrapper:{
-        width:'100%'
+        width:'100%',
     },    
     h1:{
         fontSize:30,
