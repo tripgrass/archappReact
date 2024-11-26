@@ -24,6 +24,7 @@ import * as Location from "expo-location";
 import CameraWrapper  from '@/app/(tabs)/camera';
 import _ from "lodash";
 import { useIsFocused } from '@react-navigation/native'
+import { useAssets } from "expo-asset";
 
 import Constants from 'expo-constants';
 
@@ -31,15 +32,17 @@ const s = require('@/components/style');
 
 let camera: CameraView
 
-export default function AddEdit( {navigation, id_dela_artifact} ) {
-console.log('addedit artifactId', id_dela_artifact);
-	const isEdit = id_dela_artifact ? true : false;
+export default function AddEdit( {navigation, initArtifactId} ) {
+console.log('addedit artifactId', initArtifactId);
+	const isEdit = initArtifactId ? true : false;
 	const isFocused = useIsFocused()
-	const [origImageIds, setOrigImageIds] = useState({});	
-	const [artifactId, setArtifactId] = useState(id_dela_artifact ? id_dela_artifact : null);	
+	const [origImageIds, setOrigImageIds] = useState([{}]);	
+	const [artifactId, setArtifactId] = useState(initArtifactId ? initArtifactId : null);	
 	const [artifact, setArtifact] = useState(null);	
 	const [artifacts, setArtifacts] = useState([]);
-	const [galleryImages, setGalleryImages] = useState({});
+	const [galleryImages, setGalleryImages] = useState([]);
+	const [loadState, setLoadState] = useState("initial");
+	const [saveState, setSaveState] = useState(null);
 	const formFields = {
 		id:null,
 		name : null,
@@ -53,24 +56,39 @@ console.log('addedit artifactId', id_dela_artifact);
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
 	
 	const pageTitle = null;//!artifact ? 'Add an Artifact' : 'Edit ' + artifact.name;
-
-	var artifact_id = artifactId ? artifactId : null;
+	const [fillLocationMode, setFillLocationMode] = useState('Manually Fill');
+	const [locationLookupState, setlocationLookupState] = useState('initial');
 	var defaultValues = {};
-	const { register, setError, getValues, setValue, handleSubmit, control, reset, formState: { errors } } = useForm({
-		defaultValues: defaultValues
+	const { register, setError, getValues, setFocus, setValue, handleSubmit, control, reset, formState: { errors } } = useForm({
+		defaultValues: defaultValues,
 	});
 
-	function setup(artifact){
+	function setupInitialArtifact(artifact){
+		setLoadState("loading");
 
-console.log('ARTOFACT as artifact', artifact);
+console.log('setu[ artfact', artifact);
 //				setValue('latitude', JSON.stringify(latitude) );
-		setScale(artifact.scale);
+		if( (artifact.scale && "null" != artifact.scale) ){
+			setScale(artifact.scale);
+		}
+		else{
+			setScale(1);
+		}
+		setArtifact( artifact );
+//		setScale( (artifact.scale && "null" != artifact.scale) ? artifact.scale : 1 );
+	//	setScale( 1);
 		defaultValues = {};
 		Object.keys(formFields).forEach((k, i) => {
-			defaultValues[k] = artifact[k];
+			if('null' !== artifact[k] ){
+				// api is returing null as string  - should clean that up at the api
+				defaultValues[k] = artifact[k];
+			}
 		});
 		defaultValues.latitude = JSON.stringify(artifact?.latitude);
 		defaultValues.longitude = JSON.stringify(artifact?.longitude);
+		if( defaultValues.latitude && defaultValues.longitude && defaultValues.address ){
+			setlocationLookupState('loaded')
+		}
 		if('undefined' != typeof artifact && 'undefined' != typeof artifact?.images){
 			var counter = 0;
 			var imageIds = [];
@@ -84,45 +102,51 @@ console.log('ARTOFACT as artifact', artifact);
 				counter++;
 			});
 			if( !origImageIds[artifact.id] ){
-				newOrigImages = origImageIds;
+				var newOrigImages = _.cloneDeep(origImageIds);
 				newOrigImages[artifact.id] = imageIds;
 				setOrigImageIds(newOrigImages);
 			}
 			else{
-				setOrigImageIds("empty");				
+				setOrigImageIds([artifact.id = []]);				
 			}
+
 			if( artifactImages.length > 0 ){
 				console.log('artifactImages', artifactImages);
 				setGalleryImages(artifactImages);		
 				defaultValues.images = artifactImages;
 			}
 			else{
-				setGalleryImages({});		
-				defaultValues.images = {};				
+				setGalleryImages([]);		
+				defaultValues.images = [{}];				
 			}
-		}		
-		//console.log('ARTOFACT!! defaultvalues::: ', defaultValues);
+		}
+		else{
+			setGalleryImages([]);		
+			defaultValues.images = [{}];				
+		}
 		reset({ ...defaultValues });
 		setArtifact(artifact);
-
+		setLoadState("loaded");
 	}
 	useEffect(() => {
 		if(isFocused){
-			if( id_dela_artifact ){
+			setLoadState("loading");
+			if( initArtifactId ){
 		        ArtifactsService({
 		        	method:'getById',
-		        	id:id_dela_artifact
+		        	id:initArtifactId
 		        })
-		        .then( result => setup(result) )
+		        .then( result => setupInitialArtifact(result) )
 		        .catch( console.log('IN INITIAL EDIT.TSX .error'))
 			}
 			else{
+				setLoadState("loaded");
 			}
 		}
     }, [isFocused]);         
 	const [image, setImage] = useState<string | null>(null);
 //	const [scale, setScale] = useState(artifact?.scale ? artifact?.scale : 1);
-	const [scale, setScale] = useState( 1);
+	const [scale, setScale] = useState(1);
 	const [slideoutState, setslideoutState] = useState('in');
 	const [imageState, setImageState] = useState(null);
 	const [previewVisible, setPreviewVisible] = useState(false)
@@ -133,8 +157,6 @@ console.log('ARTOFACT as artifact', artifact);
 	const [facing, setFacing] = useState<CameraType>('back');
 	const [permission, requestPermission] = useCameraPermissions();
 	const { session, isLoading } = useSession();
-	const [locationLookupState, setlocationLookupState] = useState('initial');
-	const [fillLocationMode, setFillLocationMode] = useState('Manually Fill');
  	const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
  	const initialized = useRef(false);
 	const [startCamera, setStartCamera] = useState(false)
@@ -142,20 +164,17 @@ console.log('ARTOFACT as artifact', artifact);
 
 	const { userSession } = useSession();
 
-	const getData = async () => {
-		alert('getadta');
+	const getLocationData = async () => {
 		fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
 		setFillLocationMode(fillLocationModeVal);
 		if('Autofill Current Location' == fillLocationModeVal ){
 			__useCurrentLocation('loaded');
 		}
-		else{
-		}
 	};
 	if( Platform.OS !== "web" ){
 		useEffect( () => {
 			if (!initialized.current && !artifactId ) {
-				getData();  
+				getLocationData();  
 				initialized.current = true;
 			}
 		})	
@@ -268,6 +287,8 @@ console.log('ARTOFACT as artifact', artifact);
 		}       
 	}
 	const __onCancel = async ( ) => {
+		setGalleryImages([]);		
+		setLoadState('loading');
 		const state = navigation.getState();
 		const currentIndex = state.index;
 		const currentScreen = state.routes[currentIndex].name;
@@ -280,8 +301,13 @@ console.log('ARTOFACT as artifact', artifact);
 			router.replace('/');		
 		}    
 	}
+	const onErrors = errors => {
+		//console.error(errors);
+	}
 	const onSubmitTest = data => {
+		console.log('test');
 		console.log('origImageIds:' , origImageIds);
+		console.log('data', data);
 //	    	navigation.navigate('ProfileTab');
 		var form = new FormData();
 		var images = [];
@@ -297,12 +323,19 @@ console.log('ARTOFACT as artifact', artifact);
 		});
 	}
 	const onSubmit = data => {
+		setSaveState('saving');
+		console.log('saveState', saveState);
+		console.log('data', data);
 		var form = new FormData();
 		var images = [];
 		var i = 0;
 		galleryImages.forEach(selectedImage => {
-			console.log('artifact.id', artifact.id);
-			console.log('origImageIds', origImageIds);
+			//console.log('artifact.id', artifact.id);
+			//console.log('origImageIds', origImageIds);
+			//console.log('seleectedImage', selectedImage);
+			if( !origImageIds[artifact.id] ){
+				origImageIds[artifact.id] = [];
+			}
 			if( !origImageIds[artifact.id].includes( selectedImage.id ) ){
 				if( Platform.OS == "web" ){
 					form.append('source', 'web');
@@ -328,8 +361,8 @@ console.log('ARTOFACT as artifact', artifact);
 			i++;
 
 		});
-		if( isEdit && artifact?.id ){
-			form.append('id',artifact.id);
+		if( isEdit && data?.id ){
+			form.append('id',data.id);
 		}
 		form.append('name',data.name);
 		form.append('address', data.address);
@@ -349,16 +382,27 @@ console.log('ARTOFACT as artifact', artifact);
             	url:'artifacts',
             	data:form
             }).then( (results) => {
-            	console.log('after submit results', results);
-		    	navigation.navigate('ProfileTab');
-
-            	// route to edit?
-		}).catch(console.log('.error'))					
+            	console.log('after submit results', results.data);
+            	var newArtifact = results.data.artifact;
+            	setArtifact(newArtifact);
+            	setArtifactId(newArtifact.id);
+            	setSaveState('saved');
+            	setTimeout(function(){
+	            	setSaveState(null);
+			}, 1000);
+		    	//navigation.navigate('ProfileTab');
+		}).catch((error) => {
+			console.log('saving error:',error);
+			setSaveState(null);
+            })				
 	};
-
-	const handleToggle = ( event ) => { setSelectedIndex( event.nativeEvent.selectedSegmentIndex); };
+	const [assets, error] = useAssets( [require('../assets/images/loading.gif'), require('../assets/images/saving.gif')]);
+	const loadingIcon = ( assets?.length  ? assets[0] : null );
+	const savingIcon = ( assets?.length  ? assets[1] : null );
+	const handleToggle = ( event ) => { 
+		setSelectedIndex( event.nativeEvent.selectedSegmentIndex); 
+	};
 	const __clearLocation = async () => {
-		console.log('onpress CLEARlOCATION...');
 		setValue('latitude', null );
 		setValue('longitude', null );	
 		setValue('address', null );	
@@ -373,63 +417,47 @@ console.log('ARTOFACT as artifact', artifact);
 		if (status !== "granted") {
 			return;
 		}
-		let location = await Location.getCurrentPositionAsync({});
-		var latitude = location.coords.latitude;
-		var longitude = location.coords.longitude;
-		setValue('latitude', JSON.stringify(latitude) );
-		setValue('longitude', JSON.stringify(longitude) );	
-		reverseCoordinateLookup(latitude, longitude);	
-		if(lookupState ){
-			setlocationLookupState( lookupState );
+		try {
+			let location = await Location.getCurrentPositionAsync({});
+			var latitude = location.coords.latitude;
+			var longitude = location.coords.longitude;
+			setValue('latitude', JSON.stringify(latitude) );
+			setValue('longitude', JSON.stringify(longitude) );	
+			reverseCoordinateLookup(latitude, longitude);	
+			if(lookupState ){
+				setlocationLookupState( lookupState );
+			}
+		} catch (exceptionVar) {
+			console.log('exceptionVar', exceptionVar);
 		}
 	}
-	
- const handleFileChange = event => {
-    const fileObj = event.target.files && event.target.files[0];
-    if (!fileObj) {
-      return;
-    }
-
-    console.log('fileObj is', fileObj);
-
-    event.target.value = null;
-fileObj.uri = URL.createObjectURL(fileObj);
-    //console.log(event.target.files);
-
-    //console.log(fileObj);
-    //console.log(fileObj.name);
-	const cloneDeep = _.cloneDeep(galleryImages);
-	cloneDeep.push(fileObj);
-	setGalleryImages( cloneDeep );
-	setPreviewVisible(true)
-
-    console.log('galleryImages',cloneDeep);
-
-  };
+	const navigateToShow = () => {
+		console.log('view navigate artifactId',artifact);											
+		navigation.navigate('show', { params: { artifactId: artifact.id } })
+	}
+	const handleFileChange = event => {
+		const fileObj = event.target.files && event.target.files[0];
+		if (!fileObj) {
+			return;
+		}
+		//console.log('fileObj is', fileObj);
+		event.target.value = null;
+		fileObj.uri = URL.createObjectURL(fileObj);
+		const cloneDeep = _.cloneDeep(galleryImages);
+		cloneDeep.push(fileObj);
+		setGalleryImages( cloneDeep );
+		setPreviewVisible(true)
+	};
 	const __pickImage = async () => {
-		/*
-		let result = await ImagePicker.launchImageLibraryAsync({
+		let  base64  = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.All,
-			allowsEditing: true,
 			base64: false,
+			allowsEditing: true,
 			aspect: [4, 3],
-			quality: 1,
-		});
-*/
-	let  base64  = await ImagePicker.launchImageLibraryAsync({
-		mediaTypes: ImagePicker.MediaTypeOptions.All,
-		base64: false,
-		allowsEditing: true,
-		aspect: [4, 3],
-		quality: 1
-      });
-
-
-		console.log('result await', base64);
-	
-
+			quality: 1
+	      });
 		if (base64 && base64?.assets ) {
-			console.log('PICKIMAGE SUCCESS');
+			console.log('PICKIMAGE SUCCESS galleryImages', galleryImages);
 //			galleryImages.push(result.assets[0]);
 //						galleryImages.push(uri);
 			const cloneDeep = _.cloneDeep(galleryImages);
@@ -448,12 +476,13 @@ fileObj.uri = URL.createObjectURL(fileObj);
 			alert('waiting');
 			}
 
+				setStartCamera(true)
 			if (!permission.granted) {
 				// Camera permissions are not granted yet.
-				alert('not granted');
+//				alert('not granted');
 			}    
 			else{
-				setStartCamera(true)
+//				setStartCamera(true)
 			}
 	}
 	const __removePhoto = () => {
@@ -468,82 +497,83 @@ fileObj.uri = URL.createObjectURL(fileObj);
 		<>
 							
 
-			<ImageMeta artifactId={artifact_id} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
-			<CameraWrapper galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraWrapper>
+			<ImageMeta galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
+			<CameraWrapper galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraWrapper>		
+			{ "loaded" == loadState ? (										
 
-						
-			<View style={[s.formButtonSection,{
-					paddingTop:50,
-					backgroundColor:'rgba(255,255,255,1)',
-					elevation:2,
-					padding:0,
-					position:'absolute'
-				}]}>
-				<View style={{
+				<View style={[s.formButtonSection,{
+						paddingTop:50,
+						backgroundColor:'rgba(255,255,255,1)',
+						elevation:2,
+						padding:0,
+						position:'absolute'
+					}]}>
+					<View style={{
 						borderTopWidth: 1,
-					    borderColor: '#e0e0e0',
-					    borderStyle: 'solid',				
-					    width:'100%',
-					    padding:20,
-					    paddingTop:7,				 
-					    paddingBottom:14,				 
-				        flexDirection:'row'						
-					}}>		
-						<Pressable 
-							style={({pressed}) => [
-											{
-									backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-									alignItems: 'center',
-									justifyContent: 'center',
-									borderRadius: 20,
-									height:40,
-									marginTop:10,
-									width:40,
-									elevation: 3,
-									marginRight:5,
-									boxShadow: '0px 2px 2px #d8d8d8'						        
-											}
-							]}
-							onPress={ () => { __onCancel() }}
+						    borderColor: '#e0e0e0',
+						    borderStyle: 'solid',				
+						    width:'100%',
+						    padding:20,
+						    paddingTop:7,				 
+						    paddingBottom:14,				 
+					        flexDirection:'row'						
+						}}>		
+							<Pressable 
+								style={({pressed}) => [
+												{
+										backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderRadius: 20,
+										height:40,
+										marginTop:10,
+										width:40,
+										elevation: 3,
+										marginRight:5,
+										boxShadow: '0px 2px 2px #d8d8d8'						        
+												}
+								]}
+								onPress={ () => { __onCancel() }}
 
-						>
-							<Ionicons name="arrow-back-outline" size={30} color="" style={{
-										display:'flex-inline',
-										height:30,
-										width:30,
-										borderRadius:16,								
-							}}/>
-						</Pressable>																						
-						<CustomButton
-							styles={{
-								borderRadius: 20,
-								elevation: 3,
-								color:'black',
-								marginLeft: 'auto',					    		
-							}}						
-							title={ "Cancel" }
-							onPress={ () => { __onCancel() }}
-						/>
-						<CustomButton
-							styles={{
-								borderRadius: 20,
-								elevation: 3,
-								color:'black',
-								marginLeft: 20,					    		
-							}}						
-							title={ isEdit ? "Update" : "Save" }
-							onPress={handleSubmit(onSubmit)}
-						/>
+							>
+								<Ionicons name="arrow-back-outline" size={30} color="" style={{
+											display:'flex-inline',
+											height:30,
+											width:30,
+											borderRadius:16,								
+								}}/>
+							</Pressable>
+								<CustomButton
+									styles={{
+										borderRadius: 20,
+										elevation: 3,
+										color:'black',
+										marginLeft: 'auto',					    		
+									}}						
+									title={ "Cancel" }
+									onPress={ () => { __onCancel() }}
+								/>
+								<CustomButton
+									styles={{
+										borderRadius: 20,
+										elevation: 3,
+										color:'black',
+										marginLeft: 20,					    		
+									}}						
+									title={ artifactId ? "Update" : "Save" }
+									onPress={handleSubmit(onSubmit, onErrors)}
+							/>
 					</View>
-			</View>					
+				</View>	
+			) : null }				
 						{ artifactId ? (
 							<View style={{
 								position:'absolute',
 								bottom:30,
 								left:10,
-								zIndex:999
+								zIndex:2
 							}}>
-									<Pressable 
+									<Pressable artifact={artifact}
 										style={({pressed}) => [
 														{
 												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
@@ -558,17 +588,66 @@ fileObj.uri = URL.createObjectURL(fileObj);
 												boxShadow: '0px 2px 2px #d8d8d8'						        
 														}
 										]}
-										onPress={() => { navigation.navigate('show', { params: { artifactId: 24 } }) }}
+										onPress={ () => { navigateToShow() }}
 									>
 										<Text>View</Text>
 									</Pressable> 
 							</View>				
-							) : null }			
+						) : null }
+						{ "loaded" != loadState ? (										
+						<View style={{
+							zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
+							backgroundColor:'white', justifyContent:'center', flex:1, alignItems:'center'}}
+						>					
+							<Image source={ loadingIcon } /* Use item to set the image source */
+			                            style={{
+			                                width:150,
+			                                height:150,
+			                            }}
+			                        />  
+						</View>
+						) : ( null ) }
+						{ ("saving" == saveState )? (										
+							<View style={{
+								zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
+								backgroundColor:'rgba(0,0,0,.7)', justifyContent:'center', flex:1, alignItems:'center'}}
+							>							
+								<Image source={ savingIcon } /* Use item to set the image source */
+				                            style={{
+				                                width:150,
+				                                height:150,
+				                            }}
+				                        />  
+				                        <Text
+				                        	style={{
+				                        		color:'white',
+				                        		marginTop:20,
+				                        		fontSize:20,
+				                        		fontWeight:'bold'
+				                        	}}
+				                        >Saving...</Text>
+							</View>
+						) : ( null ) }											
+						{ ("saved" == saveState )? (										
+							<View style={{
+								zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
+								backgroundColor:'rgba(255,255,255,.8)', justifyContent:'center', flex:1, alignItems:'center'}}
+							>							
+				                        <Text
+				                        	style={{
+				                        		marginTop:20,
+				                        		fontSize:20,
+				                        		fontWeight:'bold'
+				                        	}}
+				                        >Saved!</Text>
+							</View>
+						) : ( null ) }																	
 			<ScrollView 
 				style={[s.mainContainer,{zIndex:-1}]} 
 				contentContainerStyle={[s.mainContentContainer]}
 			>
-				<View style={[s.formOuterWrapper,{paddingTop:128}]}>
+				<View style={[s.formOuterWrapper,{paddingTop:128,minHeight:'100vh'}]}>
+
 					<View style={s.formWrapper}>
 						<View style={s.formSection}>
 
@@ -576,8 +655,8 @@ fileObj.uri = URL.createObjectURL(fileObj);
 								<Text style={s.label}>Name</Text>
 								<Controller
 									control={control}
-
-
+									name="name"
+									rules={{ required: true }}
 									render={({field: { onChange, onBlur, value }}) => (
 										<TextInput
 											style={s.input}
@@ -586,8 +665,6 @@ fileObj.uri = URL.createObjectURL(fileObj);
 											value={(value) ? value : ""}
 										/>
 									)}
-									name="name"
-									rules={{ required: true }}
 								/>
 								<Text style={{color:'white', height:'30px'}}>
 									{errors.name && errors.name.message }
@@ -652,80 +729,99 @@ fileObj.uri = URL.createObjectURL(fileObj);
 
 						<View style={s.formSection}>
 							<View style={s.fieldWrapper}>
-								<View style={s.labelWrapper}>
-									<Text style={s.label}>Address</Text>
+								<View style={[s.label,{width:'100%', flex:1,flexDirection:'row'}]}>
+									<Text >Address
+									</Text>
+									<Text style={{color:'red', marginLeft:'auto'}}>
+										{errors.address && errors.address.message }
+									</Text>
 								</View>
 								<Controller
 									control={control}
-									render={({field: { onChange, onBlur, value="" }}) => (
+									rules={{ required: "*" }}									
+									name="address"									
+									render={({
+										field: { onChange, onBlur, value, name, ref },
+										fieldState: { invalid, isTouched, isDirty, error },
+										formState
+									}) => (
 										<TextInput
-											style={s.input}
+											style={[s.input, errors.address ? s.inputError : null ]}										
 											onBlur={onBlur}
 											onChangeText={value => onChange(value)}
 											value={(value) ? value : ""}
 										/>
 									)}
-									name="address"
-								/>
+								/>								
 							</View>
 							<View style={s.fieldsWrapperContainer}>
 								<View style={s.fieldsWrapper}>
-									<Text style={s.label}>City</Text>
+									<View style={[s.label,{width:'100%', flex:1,flexDirection:'row'}]}>
+										<Text >City
+										</Text>
+										<Text style={{color:'red', marginLeft:'auto'}}>
+											{errors.city && errors.city.message }
+										</Text>
+									</View>
 									<Controller
+										name="city"
+										rules={{ required: "*" }}
 										control={control}
 										render={({field: { onChange, onBlur, value="" }}) => (
 											<TextInput
-												style={s.input}
+												style={[s.input, errors.city ? s.inputError : null ]}
 												onBlur={onBlur}
 												onChangeText={value => onChange(value)}
 												value={(value) ? value : ""}
+												error={Boolean(errors.city)}
+        											helperText={errors.city ? errors.city.message : ""}
 											/>
 										)}
-										name="city"
-									/>
+									/>																	
 								</View>
 								<View style={{}}>
-									<Text style={s.label}>State</Text>
+									<View style={[s.label,{width:'100', flex:1,flexDirection:'row'}]}>
+										<Text >State
+										</Text>
+										<Text style={{color:'red', marginLeft:'auto'}}>
+											{errors.state && errors.state.message }
+										</Text>
+									</View>
 									<Controller
+										name="state"
+										rules={{ required: "*" }}										
 										control={control}
 										render={({field: { onChange, onBlur, value="" }}) => (
-											<TextInput
-												style={{
-															backgroundColor: 'white',
-															borderColor: 'none',
-															height: 40,
-															padding: 10,
-															borderRadius: 4,        
-															width:70											
-												}}
+										<TextInput
+												style={[s.input, errors.state ? s.inputError : null ]}
 												onBlur={onBlur}
 												onChangeText={value => onChange(value)}
 												value={(value) ? value : ""}
 											/>
 										)}
-										name="state"
 									/>
 								</View>						
 								<View style={{}}>
-									<Text style={s.label}>Zipcode</Text>
+									<View style={[s.label,{width:'100', flex:1,flexDirection:'row'}]}>
+										<Text >Zipcode
+										</Text>
+										<Text style={{color:'red', marginLeft:'auto'}}>
+											{errors.zipcode && errors.zipcode.message }
+										</Text>
+									</View>
+
 									<Controller
 										control={control}
+										name="zipcode"
+										rules={{ required: "*" }}																				
 										render={({field: { onChange, onBlur, value="" }}) => (
 											<TextInput
-												style={{
-															backgroundColor: 'white',
-															borderColor: 'none',
-															height: 40,
-															padding: 10,
-															borderRadius: 4,        
-															width:100											
-												}}
+												style={[s.input, errors.zipcode ? s.inputError : null ]}
 												onBlur={onBlur}
 												onChangeText={value => onChange(value)}
 												value={(value) ? value : ""}
 											/>
 										)}
-										name="zipcode"
 									/>
 								</View>						
 
@@ -900,8 +996,7 @@ fileObj.uri = URL.createObjectURL(fileObj);
 							}
 						</View>
 
-					</View>
-					
+					</View> 				
 				</View>
 				<StatusBar style={{display:'block'}} />			
 							

@@ -3,11 +3,13 @@ import Checkbox from 'expo-checkbox';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState } from 'react';
 import CustomButton from '@/components/Button';
+import {ImagesService}  from '@/utilities/ImagesService';
+import _ from "lodash";
 
 import { useForm, Controller } from 'react-hook-form';
 
 const s = require('@/components/style');
-export default function App({ artifactId, slideoutState, setslideoutState, imageState, setImageState }) {
+export default function App({ artifactId, galleryState, galleryStateChanger, slideoutState, setslideoutState, imageState, setImageState }) {
     //console.log('slideoutState',slideoutState);
     //console.log('imageState', imageState);
     let defaultValues = {};
@@ -69,15 +71,66 @@ useEffect(() => {
             form.append('user_name', parsedUserSession?.user?.name );
             form.append('user_email', parsedUserSession?.user?.email );
         }
-            ArtifactsService({
-                method:'create',
-                url:'artifacts',
-                data:form
-            }).then( (results) => {
-                // route to edit?
-        }).catch(console.log('.error'))                 
+                        
         */
+                ImagesService({
+                    method:'create',
+                    id:imageState.id,
+                    data:form
+                })
+                .then( result => {
+                    console.log(result);
+                    const cloneDeep = _.cloneDeep(galleryState);
+                    Object.keys(cloneDeep).forEach((k, i) => {
+                        if( imageState.id  == cloneDeep[k].id ){
+                            cloneDeep.splice(k);
+                        }
+                    });            
+                    galleryStateChanger( cloneDeep );                    
+                    toggleSlideout();                    
+                })
+                .catch( console.log('IN INITIAL EDIT.TSX .error')) 
+
     };    
+    const removeImage = data => {
+        var form = new FormData();
+        form.append('artifact_id', (artifactId ? artifactId : null));
+        if( imageState?.id ){
+            // you're editing an existing db image 
+            form.append('id',imageState.id);
+        }
+        else{
+
+        }
+        console.log('DE;ETE');
+        /*
+        if( userSession ){
+            var parsedUserSession = JSON.parse(userSession);
+            form.append('user_name', parsedUserSession?.user?.name );
+            form.append('user_email', parsedUserSession?.user?.email );
+        }
+                             
+        */
+                ImagesService({
+                    method:'delete',
+                    artifact_id:artifactId,
+                    id:imageState.id
+                })
+                .then( result => {
+                    console.log(result);
+                    const cloneDeep = _.cloneDeep(galleryState);
+                    Object.keys(cloneDeep).forEach((k, i) => {
+                        if( imageState.id  == cloneDeep[k].id ){
+                            cloneDeep.splice(k);
+                        }
+                    });            
+                    galleryStateChanger( cloneDeep );                    
+                    toggleSlideout();                    
+                })
+                .catch( console.log('IN INITIAL EDIT.TSX .error')) 
+
+    };   
+
 function clearYear() {
 
 }
@@ -265,7 +318,7 @@ function toggleSlideout() {
                                 marginLeft: 'auto',                             
                             }}                      
                             title={ "Remove" }
-                            onPress={ () => { removeImage() }}
+                            onPress={handleSubmit(removeImage)}
                         />                                            
                     </View>
 

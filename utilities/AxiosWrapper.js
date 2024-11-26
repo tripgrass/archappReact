@@ -66,6 +66,25 @@ export const axiosWrapper = async function({
             });
             return postResults;
 
+    case 'delete':
+            params.user = user;
+            const getDeleteConfig = {
+                method: 'DELETE',
+                maxBodyLength: Infinity,
+                params:params,
+                url: baseUrl + url,
+                headers: { 
+                    'Authorization': `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data"                         
+                }        
+            };    
+            const deleteResults = await axios.request(getDeleteConfig).then( (deleteResults) => {
+                return deleteResults;
+            })
+            .catch((error) => {
+                console.log('wrapper error', error);
+            })
+            return deleteResults;
     } 
 };
 

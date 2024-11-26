@@ -89,11 +89,15 @@ module.exports = StyleSheet.create({
     },
     input:{
         backgroundColor: 'white',
-        borderColor: 'none',
         height: 40,
         padding: 10,
         borderRadius: 4,  
-        width:'100%'      
+        width:'100%'
+    },
+    inputError:{
+        borderWidth: 1,
+        borderColor: 'red',
+        borderStyle: 'solid'
     },
     labelWrapper:{
         display: 'flex-inline',

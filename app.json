@@ -15,10 +15,10 @@
     "ios": {
       "supportsTablet": true
     },
-    "android":{
-      "config":{
-        "googleMaps":{
-          "apiKey" : "AIzaSyBSm8FeujWMFA5t3Exz_YXYSMJ6N5E-jYA"
+    "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBSm8FeujWMFA5t3Exz_YXYSMJ6N5E-jYA"
         }
       },
       "adaptiveIcon": {
@@ -36,9 +36,12 @@
               "pathPrefix": "/records"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
-      ]      
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -47,7 +50,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

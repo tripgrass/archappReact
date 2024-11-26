@@ -1,4 +1,6 @@
 import { Button, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import CustomButton from '@/components/Button';
+
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
@@ -88,17 +90,18 @@ export default function App({galleryState, stateChanger, cameraState, setCameraS
     // Camera permissions are still loading.
         return <View />;
     }
-
-    if (!permission.granted) {
+/*
+    if (!permission.granted && cameraState ) {
         // Camera permissions are not granted yet.
         return (
+
             <View style={styles.container}>
                 <Text style={styles.message}>We need your permission to show the camera</Text>
                 <Button onPress={requestPermission} title="grant permission" />
             </View>
         );
     }
-  
+*/  
     const __takePicture = async () => {
         const photo: any = await camera.takePictureAsync()
         setPreviewVisible(true)
@@ -135,7 +138,24 @@ export default function App({galleryState, stateChanger, cameraState, setCameraS
 
     return (
         <>
-        {cameraState ? (
+        { (!permission.granted && cameraState ) ?
+         (
+
+            <View style={[s.formWrapperCamera,{backgroundColor:'#484848'}]}>  
+                <View style={{flex: 1,width: '100%',overflow:'hidden',borderRadius:30, justifyContent:'center', alignItems:'center', flexDirection:'column'}}>
+                    <Text style={[styles.message,{color:'white', fontSize:20, maxWidth:'80%'}]}>We need your permission to use the camera</Text>
+                    <CustomButton styles={{
+                                        marginTop:40,
+                                        elevation: 3,
+                                        color:'black'
+                                    }}  
+                        onPress={requestPermission} title="Grant Permission" />
+                </View>
+            </View>
+        ) : (null)
+    }
+
+        { ( cameraState && permission.granted) ? (
             <View style={[s.formWrapperCamera,{backgroundColor:'#484848'}]}>  
                 <View style={{flex: 1,width: '100%',overflow:'hidden',borderRadius:30}}>
 

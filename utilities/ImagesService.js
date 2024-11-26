@@ -1,31 +1,32 @@
 import { axiosWrapper } from '@/utilities/AxiosWrapper';
 
-export const ArtifactsService = async function({
+export const ImagesService = async function({
         method,
         id,
-        data,
-        url
+        artifact_id,
+        data
     }){
+console.log('method:', method);
     switch (method) {
         case 'create':
             console.log('create data: ', data);
             var results = await axiosWrapper({
                 method:'post',
-                url:'artifacts/store',
+                url:'images/store',
                 data:data
             }).catch((error) => {
                 console.log(error);
             });
             return results;
-                console.log('ArtifactsService create', results);
+                console.log('ImagesService create', results);
             break;
 
         case 'getAll':
             var results = await axiosWrapper({
                 method:'get',
-                url:'artifacts'
+                url:"images"
             });
-            console.log('ArtifactsService getall', results);
+            console.log('ImagesService getall', results);
             return results;
             break;
 
@@ -33,19 +34,22 @@ export const ArtifactsService = async function({
             console.log('in getbyid service');
             var results = await axiosWrapper({
                 method:'get',
-                url:'artifacts/'+id,
+                url:'images/'+id,
                 params:{id:id}
             });
             return results;
 
         case 'delete' :
+            console.log('delete in service:::');
             var results = await axiosWrapper({
                 method:'delete',
-                url:'artifacts/'+id + '/delete',
-                params:{id:id}
+                url:'images/'+ id + '/delete',
+                params:{
+                    image_id: id,
+                    artifact_id: artifact_id
+                }
             });
-            return results;
-            break;
+            return results;            
     }
 
 }

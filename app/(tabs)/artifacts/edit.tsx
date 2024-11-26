@@ -39,7 +39,7 @@ console.log('artifactID ', artifactId);
 */
     return (
 			<>
-				{artifactId ? <AddEdit id_dela_artifact={artifactId} navigation={navigation}/> : <></> }
+				{artifactId ? <AddEdit initArtifactId={artifactId} navigation={navigation}/> : <></> }
  			</>
     );
 }

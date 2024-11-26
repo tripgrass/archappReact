@@ -19,11 +19,26 @@ export default function ProfileScreen({navigation}) {
 
             ArtifactsService({method:'getAll'})
                 .then( (results) => {
+
+                console.log('RESULTS OF getall',  results)
                     setArtifacts(results)
                 })
                 .catch((error) => console.log('in profile getall .error', error))
             ) : null }
    }, []);
+    const deleteArtifact = async ( id ) => { 
+        ArtifactsService({method:'delete',id:id})
+            .then( (results) => {
+                if( results.data ){
+                    console.log('RESULTS of delete',  results.data);
+                    if( results.data.deleteResult ){
+                        const newArtifacts = artifacts.filter(item => item.id !== id);
+                        setArtifacts(newArtifacts);                        
+                    }
+                }
+            })
+            .catch((error) => console.log('in profile getall .error', error))        
+    };
 
    return (
          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop:40, paddingBottom:30 }}>
@@ -41,7 +56,7 @@ export default function ProfileScreen({navigation}) {
                                 title="Edit"
                                 webbable={true}
                                 url={'/edit/' + item.id }                 
-                                styles={{marginRight:10}}
+                                styles={{marginRight:5, paddingHorizontal: 14 }}
                                 onPress={() => { navigation.navigate('edit', {
                                         params: { artifactId: item.id }
                                     }) 
@@ -55,7 +70,15 @@ export default function ProfileScreen({navigation}) {
                                 params: { artifactId: item.id }
                                     }) 
                                 }}
+                                styles={{marginRight:5, paddingHorizontal: 14 }}                                
                             />
+                            <CustomButton
+                                webbable={true}
+                                styles={{marginRight:5, paddingHorizontal: 14 }}
+                                title="Archive"
+                                onPress={ () => { deleteArtifact( item.id ) }}
+
+                            />                            
                         </View>
                     }           
                  /> ) :
