@@ -8,7 +8,6 @@ export const ArtifactsService = async function({
     }){
     switch (method) {
         case 'create':
-            console.log('create data: ', data);
             var results = await axiosWrapper({
                 method:'post',
                 url:'artifacts/store',
@@ -17,7 +16,6 @@ export const ArtifactsService = async function({
                 console.log(error);
             });
             return results;
-                console.log('ArtifactsService create', results);
             break;
 
         case 'getAll':
@@ -25,12 +23,10 @@ export const ArtifactsService = async function({
                 method:'get',
                 url:'artifacts'
             });
-            console.log('ArtifactsService getall', results);
             return results;
             break;
 
         case 'getById':
-            console.log('in getbyid service');
             var results = await axiosWrapper({
                 method:'get',
                 url:'artifacts/'+id,

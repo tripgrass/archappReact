@@ -37,7 +37,7 @@ export const axiosWrapper = async function({
                 }        
             };    
             const results = await axios.request(getConfig).then( (result) => {
-                console.log('in wrapper results', results);
+//                console.log('in wrapper results', result);
                 if( 'undefined' != typeof result.data ){
                    // console.log('axios request return:',result.data.data);
                     return result.data.data;
@@ -46,6 +46,7 @@ export const axiosWrapper = async function({
             .catch((error) => {
                 handleResponse(error);
             })
+  //              console.log('after axios wrapper get results', results);
             return results;
             
 
@@ -61,11 +62,26 @@ export const axiosWrapper = async function({
                     "Content-Type": "multipart/form-data"                         
                 }
             };
+            const postResults = await axios.request(postConfig).then( (postResult) => {
+                console.log('in wrapper results.data', postResult.data);
+                if( 'undefined' != typeof postResult.data ){
+
+                    console.log('axios request return has data');
+                    return postResult.data.data;
+                }
+            })
+            .catch((error) => {
+                handleResponse(error);
+            })
+                console.log('after axios wrapper get results', postResults);
+            return postResults;
+
+            /*
             const postResults = await axios.request(postConfig).catch((error) => {
                 console.log(error);
             });
             return postResults;
-
+            */
     case 'delete':
             params.user = user;
             const getDeleteConfig = {

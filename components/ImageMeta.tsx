@@ -1,9 +1,11 @@
-import { Button, Dimensions, Image, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Button, Dimensions, Image, Keyboard, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, SafeAreaView } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import CustomButton from '@/components/Button';
 import {ImagesService}  from '@/utilities/ImagesService';
+import { useIsFocused } from '@react-navigation/native';
+import { AutocompleteDropdown , AutocompleteDropdownContextProvider} from 'react-native-autocomplete-dropdown';
 import _ from "lodash";
 
 import { useForm, Controller } from 'react-hook-form';
@@ -16,22 +18,72 @@ export default function App({ artifactId, galleryState, galleryStateChanger, sli
     const { register, setError, getValues, setValue, getValue, handleSubmit, control, reset, formState: { errors } } = useForm({
         defaultValues:defaultValues
     }); 
+    const [currentImageId, setCurrentImageId] = useState( ( imageState?.id ? imageState.id : null ));    
     const [keyboardHeight, setKeyboardHeight] = useState(0);    
-    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);   
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);  
+    const isFocused = useIsFocused()
+    const [selectedItem, setSelectedItem] = useState(null);
+
+    const [loading, setLoading] = useState(false)
+    const [suggestionsList, setSuggestionsList] = useState(null)
+    const dropdownController = useRef(null)
+
+    const searchRef = useRef(null)
+
+    const getSuggestions = useCallback(async q => {
+        /*
+        const filterToken = q.toLowerCase()
+        console.log('getSuggestions', q)
+        if (typeof q !== 'string' || q.length < 3) {
+            setSuggestionsList(null)
+            return
+        }
+        setLoading(true)
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+        const items = await response.json()
+        const suggestions = items
+        .filter(item => item.title.toLowerCase().includes(filterToken))
+        .map(item => ({
+            id: item.id,
+            title: item.title,
+        }))
+        setSuggestionsList(suggestions)
+        setLoading(false)
+        */
+    }, [])
+
+    const onClearPress = useCallback(() => {
+        setSuggestionsList(null)
+    }, [])
+
+    const onOpenSuggestionsList = useCallback(isOpened => {}, [])
+    /* 
 useEffect(() => {
+    console.log('imageState', imageState);
+    console.log('>>>>>>>>>>>>');
+    console.log('>>>>>>>>>>>>');
+    console.log('>>>>>>>>>>>>');
+    console.log('>>>>>>>>>>>>');
+    console.log('>>>>>>>>>>>>');
+    console.log('>>>>>>>>>>>>');
+    console.log('>>>>>>>>>>>>');
     if( imageState ){
-//        console.log('has Image state!');
+        console.log('!!!!!!!!!!!!!has Image state!', imageState);
         defaultValues.name = imageState?.name;
         defaultValues.year = "2025";
         if( imageState?.year || !imageState.year ){
+            //defaultValues.year = imageState.year;
         }
     }
+    console.log('image defaultValues', defaultValues);
     reset({ ...defaultValues });
-  }, []);    
+  }, []); 
+ */   
+
   //  console.log( getValues() );
 
     const [isChecked, setChecked] = useState(false);
- useEffect(() => {
+    useEffect(() => {
         const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
         const hideSubscription = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
 
@@ -39,23 +91,28 @@ useEffect(() => {
             showSubscription.remove();
         };
     }, []);
-
+    useEffect(() => {
+        if( imageState?.id && imageState.id !== currentImageId ){
+            setCurrentImageId( imageState.id );
+            console.log('USE EFFECT ::: IMAGEsTATE', imageState);
+            setValue('year', imageState?.year ? JSON.stringify(imageState?.year) : null );
+            setValue('title', imageState?.title ? imageState?.title : null );
+        }
+    })
     const handleKeyboardShow = event => {
-        setIsKeyboardVisible(true);
+        //setIsKeyboardVisible(true);
         console.log('handle setIsKeyboardVisible', isKeyboardVisible);
         setKeyboardHeight(event.endCoordinates.height);
     };
 
     const handleKeyboardHide = event => {
         setKeyboardHeight(0);
-        setIsKeyboardVisible(false);
+        //setIsKeyboardVisible(false);
     }; 
     const updateImageMeta = data => {
         var form = new FormData();
         console.log('updateImage Data', data);
         console.log('updateImage imageState', imageState);
-        console.log('artifactid ', artifactId);
-        form.append('artifact_id', (artifactId ? artifactId : null));
         form.append('year',data.year);
         form.append('title', data.title);
         if( imageState?.id ){
@@ -80,6 +137,7 @@ useEffect(() => {
                 })
                 .then( result => {
                     console.log(result);
+                    /*
                     const cloneDeep = _.cloneDeep(galleryState);
                     Object.keys(cloneDeep).forEach((k, i) => {
                         if( imageState.id  == cloneDeep[k].id ){
@@ -88,6 +146,7 @@ useEffect(() => {
                     });            
                     galleryStateChanger( cloneDeep );                    
                     toggleSlideout();                    
+                    */
                 })
                 .catch( console.log('IN INITIAL EDIT.TSX .error')) 
 
@@ -136,12 +195,12 @@ function clearYear() {
 }
 function setHeight(){
     var screenHeight = Dimensions.get("window").height;
-        var newHeight = screenHeight - 87 - keyboardHeight;
+        var newHeight = screenHeight - keyboardHeight;
         //alert(newHeight);
         return newHeight;
 }
 function toggleSlideout() {
-
+    Keyboard.dismiss();
     setslideoutState(  "out" == slideoutState ? "in" : 'out' );
            // setValue('year', "2024");
             console.log("getValues('root.year')");
@@ -150,22 +209,42 @@ function toggleSlideout() {
 }
     return (
         <>
-       <ScrollView 
+       <View 
+                keyboardShouldPersistTaps='handled'       
                 style={[ 
                     ('out' == slideoutState) ? styles.mainWrapperOut : styles.mainWrapper,
 ('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:'', height:setHeight()} : {backgroundColor:'', height:'auto'} ) : {backgroundColor:''}                    
-                 ]} 
+                 ,{ backgroundColor:'white'}]} >
+                <View
 
-                contentContainerStyle={ [ ('out' == slideoutState) ? styles.wrapperOut : styles.wrapper ,
-('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:''} : {backgroundColor:''} ) : {backgroundColor:'white'}                    
+                style={ [ ('out' == slideoutState) ? styles.wrapperOut : styles.wrapper ,
+('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:'', } : {backgroundColor:''} ) : {backgroundColor:'white'}                    
 
-                    
-                    ]}
+                   , {paddingBottom:40} ]}
             > 
-                
-                <View style={ {height:'auto'}} >
-                    <View style={{flex:1, flexDirection:'row'}}>
-                        <TouchableOpacity
+                <View style={{flex:1, flexDirection:'row', marginBottom:30}}>
+                        <CustomButton
+                            styles={{
+                                borderRadius: 0,
+                                elevation: 3,
+                                color:'black',
+                                marginTop:0
+                            }}                      
+                            title={ "Save" }
+                            onPress={handleSubmit(updateImageMeta)}
+                        />                    
+                        <CustomButton
+                            styles={{
+                                borderRadius: 0,
+                                elevation: 3,
+                                marginTop:0,
+                                color:'black',
+                                marginLeft: 10,                             
+                            }}                      
+                            title={ "Remove" }
+                            onPress={handleSubmit(removeImage)}
+                        /> 
+<TouchableOpacity
                             onPress={toggleSlideout}
                             style={{
                                 height: 50,
@@ -182,49 +261,127 @@ function toggleSlideout() {
                                 height:50,
                                 width:50,
                             }}/>
-                        </TouchableOpacity>   
+                        </TouchableOpacity>                                                                      
+                </View>                
+                <View style={ {height:'auto'}} >
+
+                    <View style={{flex:1, flexDirection:'row'}}>
+                        
                         <Image source={{uri:imageState?.uri}} /* Use item to set the image source */
                             style={{
-                                width:50,
-                                height:50,
+                                width:'30%',
+                                aspectRatio:1,
                                 backgroundColor:'#d0d0d0',
                             }}
                         />             
-                        <Text style={styles.text}>{imageState?.fileName}</Text>
+                        <Text style={{
+                            marginTop:0, 
+                            fontSize: 14,
+                            maxWidth:'70%',
+                            color: 'black',
+                            paddingLeft:20                            
+                        }}>{imageState?.fileName}</Text>
                     </View>
-                    <View style={{flex:1, flexDirection:'row', marginTop:5, marginBottom:5}}>
-                        <Text style={s.label}>Make Primary Picture for Artifact</Text>
-                        
-                        <Checkbox
-                            style={{marginTop:5, marginLeft:8}}
-                            value={isChecked}
-                            onValueChange={setChecked}
-                            color={isChecked ? '#4630EB' : undefined}
-                        />
-                    </View>                                                             
-                     
-                    <View style={{}}>
-                        <Text style={s.label}>Year of Photograph</Text>
+                    <View style={{zIndex:9999, marginTop:10, marginBottom:10}}>
+                        <Text style={s.label}>Photographer (optional)</Text>
                         <Controller
+                            name="photographer"
                             control={control}
                             render={({field: { onChange, onBlur, value="" }}) => (
-                                    <TextInput
-                                        style={{
-                                            backgroundColor: 'white',
-                                            borderColor: 'black',
-                                            borderWidth:1,
-                                            height: 40,
-                                            padding: 10,
-                                            borderRadius: 4,        
-                                            width:100                                           
-                                        }}
-                                        onBlur={onBlur}
-                                        onChangeText={value => onChange(value)}
-                                        value={(value) ? value : ""}
-                                    />
+                            <AutocompleteDropdownContextProvider style={[
+                              { flex: 1, flexDirection: 'row', alignItems: 'center' },
+                              Platform.select({ ios: { zIndex: 1 } }),
+                            ]}>
+                                <AutocompleteDropdown
+                                    direction={'down'}
+                                    suggestionsListMaxHeight={200}
+                                    onChangeText={getSuggestions}
+                                    onSelectItem={setSelectedItem}
+                                    style={styles.input}
+                                    dataSet={[
+                                        { id: '1', title: 'Alpha' },
+                                        { id: '2', title: 'Beta' },
+                                        { id: '3', title: 'Gamma' },
+                                        { id: '4', title: 'Logan' },
+                                        { id: '5', title: 'Hammel' },
+                                        { id: '6', title: 'Xerxes' },
+                                    ]}
+                                    textInputProps={{
+                                        placeholder: 'Type to Search',
+                                        autoCorrect: false,
+                                        autoCapitalize: 'none',
+                                        style: {
+                                            borderRadius: 4,
+                                            color: 'black',
+                                            paddingLeft: 0,
+                                        },
+                                    }}
+                                    rightButtonsContainerStyle={{
+                                        right: 8,
+                                        alignSelf: 'center',
+                                    }}
+                                    inputContainerStyle={{
+                                        backgroundColor:'white',
+                                        borderRadius: 4,
+                                        paddingLeft:10,
+                                        borderWidth: 1,
+                                        borderColor: 'black',
+                                        borderStyle: 'solid'                                        
+                                    }}
+                                    suggestionsListContainerStyle={{
+                                        marginLeft:-44,
+                                        zIndex:9999,
+                                        marginTop:30,
+                                        backgroundColor:'#e8e8e8'
+
+                                    }}
+                                    suggestionsListTextStyle={{
+                                    }}
+                                    containerStyle={{ 
+                                        flexGrow: 1, 
+                                        flexShrink: 1 
+                                    }}                                
+                                />
+                            </AutocompleteDropdownContextProvider>
                             )}
-                            name="year"
                         />
+                    </View>                   
+
+                    <View style={{flex:1, flexDirection:'row', marginTop:5, marginBottom:5}}>
+                        <View style={{width:'50%'}}>
+                            <Text style={s.label}>Year of Photograph</Text>
+                            <Controller
+                                control={control}
+                                render={({field: { onChange, onBlur, value=imageState?.year }}) => (
+                                        <TextInput
+                                            style={{
+                                                backgroundColor: 'white',
+                                                borderColor: 'black',
+                                                borderWidth:1,
+                                                height: 40,
+                                                padding: 10,
+                                                borderRadius: 4,        
+                                                width:120                                           
+                                            }}
+                                            onBlur={onBlur}
+                                            onChangeText={value => onChange(value)}
+                                            value={(value) ? value : ""}
+                                        />
+                                )}
+                                name="year"
+                            />
+
+                        </View>
+                        <View>
+                            <Text style={[s.label]}>Make Primary Picture</Text>
+                            
+                            <Checkbox
+                                style={{marginTop:8}}
+                                value={isChecked}
+                                onValueChange={setChecked}
+                                color={isChecked ? 'black' : undefined}
+                            />
+                        </View>
 
                     </View>
                     <View style={{}}>
@@ -244,7 +401,7 @@ function toggleSlideout() {
                                         }}
                                         onBlur={onBlur}
                                         onChangeText={value => onChange(value)}
-                                        value={(value) ? value : "none"}
+                                        value={(value) ? value : ""}
                                     />
                             )}
                             name="title"
@@ -273,58 +430,9 @@ function toggleSlideout() {
                             name="alttext"
                         />
                     </View>                     
-                    <View style={{}}>
-                        <Text style={s.label}>Photographer (optional)</Text>
-                        <Controller
-                            control={control}
-                            render={({field: { onChange, onBlur, value="" }}) => (
-                                <TextInput
-                                    style={{
-                                        backgroundColor: 'white',
-                                        borderColor: 'black',
-                                        borderWidth:1,
-                                        height: 40,
-                                        padding: 10,
-                                        borderRadius: 4,        
-                                        width:'100%'                                           
-                                    }}
-                                    onBlur={onBlur}
-                                    onChangeText={value => onChange(value)}
-                                    value={(value) ? value : ""}
-                                />
-                            )}
-                            name="photographer"
-                        />
-                    </View> 
-                    <View style={{flex:1, flexDirection:'row'}}>
-                        <CustomButton
-                            styles={{
-                                borderRadius: 0,
-                                elevation: 3,
-                                marginTop:45,
-
-                                color:'black',
-                                marginRight: 'auto',                             
-                            }}                      
-                            title={ "Save" }
-                            onPress={handleSubmit(updateImageMeta)}
-                        />                    
-                        <CustomButton
-                            styles={{
-                                borderRadius: 0,
-                                elevation: 3,
-                                marginTop:45,
-                                color:'black',
-                                marginLeft: 'auto',                             
-                            }}                      
-                            title={ "Remove" }
-                            onPress={handleSubmit(removeImage)}
-                        />                                            
-                    </View>
-
                 </View>
-                
-            </ScrollView>
+            </View>
+            </View>
         </>
     );
 }
@@ -332,16 +440,18 @@ function toggleSlideout() {
 const styles = StyleSheet.create({
     mainWrapper:{
         color:'white',
-        elevation:5,
+        elevation:1,
         height:0,
-        position:'absolute'
+        zIndex:9999,
+        position:'absolute',
+        display:'none'
     },
     mainWrapperOut:{
         color:'white',
-        top:130,
-        width:'92%',
-        elevation:4,
+        top:50,
+        width:'96%',
         right:0,
+        zIndex:999999,
         position:'absolute',
 
     },    
@@ -419,4 +529,24 @@ const styles = StyleSheet.create({
     marginTop:20,
     paddingLeft:20
   },
+  plus: {
+    position: "absolute",
+    left: 15,
+    top: 10,
+  },
+input: {
+    display: "flex",
+    flexShrink: 0,
+    flexGrow: 0,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderColor: "#c7c6c1",
+    paddingVertical: 13,
+    paddingLeft: 12,
+    paddingRight: "5%",
+    width: "100%",
+    justifyContent: "flex-start",
+  },  
 });

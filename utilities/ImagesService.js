@@ -17,9 +17,12 @@ console.log('method:', method);
             }).catch((error) => {
                 console.log(error);
             });
+            console.log('ImagesService create', results);
             return results;
-                console.log('ImagesService create', results);
             break;
+
+
+
 
         case 'getAll':
             var results = await axiosWrapper({

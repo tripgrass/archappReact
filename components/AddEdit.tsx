@@ -67,6 +67,7 @@ console.log('addedit artifactId', initArtifactId);
 		setLoadState("loading");
 
 console.log('setu[ artfact', artifact);
+		setArtifactId(artifact.id);
 //				setValue('latitude', JSON.stringify(latitude) );
 		if( (artifact.scale && "null" != artifact.scale) ){
 			setScale(artifact.scale);
@@ -95,12 +96,19 @@ console.log('setu[ artfact', artifact);
 			Object.keys(artifact.images).forEach((k, i) => {
 				var thisImage = {
 					id:artifact.images[k].id,
+					fileName:artifact.images[k].name,
+					year:artifact.images[k].year,
+					title:artifact.images[k].title,
+					alttext:artifact.images[k].alttext,
 					uri:imageBaseUrl + artifact.images[k].name
 				};
+				console.log('this image', thisImage);
+				thisImage.counter = counter;
 				artifactImages[counter] =  thisImage;
 				imageIds.push(artifact.images[k].id);
 				counter++;
 			});
+			console.log('artifactImages', artifactImages);
 			if( !origImageIds[artifact.id] ){
 				var newOrigImages = _.cloneDeep(origImageIds);
 				newOrigImages[artifact.id] = imageIds;
@@ -286,9 +294,14 @@ console.log('setu[ artfact', artifact);
 			console.error("Error:", error);
 		}       
 	}
+	const openSlideout = imageItem => {
+		setslideoutState( 'out' );
+		setImageState( imageItem );
+	}
 	const __onCancel = async ( ) => {
 		setGalleryImages([]);		
 		setLoadState('loading');
+		setslideoutState( 'in' );
 		const state = navigation.getState();
 		const currentIndex = state.index;
 		const currentScreen = state.routes[currentIndex].name;
@@ -330,13 +343,14 @@ console.log('setu[ artfact', artifact);
 		var images = [];
 		var i = 0;
 		galleryImages.forEach(selectedImage => {
-			//console.log('artifact.id', artifact.id);
-			//console.log('origImageIds', origImageIds);
-			//console.log('seleectedImage', selectedImage);
-			if( !origImageIds[artifact.id] ){
+			console.log('artifactId', artifactId);
+		//	console.log('artifact.id', artifact.id);
+			console.log('origImageIds', origImageIds);
+			console.log('seleectedImage', selectedImage);
+			if( artifact?.id && "undefined" == typeof origImageIds[artifact.id] ){
 				origImageIds[artifact.id] = [];
 			}
-			if( !origImageIds[artifact.id].includes( selectedImage.id ) ){
+			if( ( artifact?.id && !origImageIds[artifact.id].includes( selectedImage.id ) ) || !artifact?.id){
 				if( Platform.OS == "web" ){
 					form.append('source', 'web');
 					form.append('images[' + i + ']', selectedImage);
@@ -348,6 +362,7 @@ console.log('setu[ artfact', artifact);
 						? selectedImage.uri
 						: selectedImage.uri.replace("file://", "");
 					const filename = selectedImage.uri.split("/").pop();
+					console.log('adding filename:', filename);
 					const match = /\.(\w+)$/.exec(filename as string);
 					const ext = match?.[1];
 					const type = match ? `image/${match[1]}` : `image`;
@@ -382,11 +397,15 @@ console.log('setu[ artfact', artifact);
             	url:'artifacts',
             	data:form
             }).then( (results) => {
-            	console.log('after submit results', results.data);
-            	var newArtifact = results.data.artifact;
+            	console.log('after submit results', results);
+            	var newArtifact = results;
+            	console.log('newartifact iages',newArtifact.images);
             	setArtifact(newArtifact);
             	setArtifactId(newArtifact.id);
+            	setupInitialArtifact(newArtifact);
+//            	setGalleryImages(newArtifact.images);
             	setSaveState('saved');
+
             	setTimeout(function(){
 	            	setSaveState(null);
 			}, 1000);
@@ -413,7 +432,9 @@ console.log('setu[ artfact', artifact);
 
 	}
 	const __useCurrentLocation = async ( lookupState ) => {
+
 		let { status } = await Location.requestForegroundPermissionsAsync();
+		console.log('geo status', status);
 		if (status !== "granted") {
 			return;
 		}
@@ -432,8 +453,10 @@ console.log('setu[ artfact', artifact);
 		}
 	}
 	const navigateToShow = () => {
-		console.log('view navigate artifactId',artifact);											
-		navigation.navigate('show', { params: { artifactId: artifact.id } })
+		console.log('------------->view navigate artifact.id',artifact.id);
+		console.log('------------->view navigate artifactId',artifactId);
+
+		navigation.navigate('show', { params: { artifactId: artifactId } })
 	}
 	const handleFileChange = event => {
 		const fileObj = event.target.files && event.target.files[0];
@@ -499,15 +522,18 @@ console.log('setu[ artfact', artifact);
 
 			<ImageMeta galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
 			<CameraWrapper galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraWrapper>		
-			{ "loaded" == loadState ? (										
+			{ ( "loaded" == loadState ) ? (										
 
 				<View style={[s.formButtonSection,{
 						paddingTop:50,
 						backgroundColor:'rgba(255,255,255,1)',
 						elevation:2,
+						zIndex: ("out" == slideoutState) ? -1 : 999,
 						padding:0,
-						position:'absolute'
-					}]}>
+						position:'absolute',
+					}
+						
+					]}>
 					<View style={{
 						borderTopWidth: 1,
 						    borderColor: '#e0e0e0',
@@ -641,7 +667,15 @@ console.log('setu[ artfact', artifact);
 				                        	}}
 				                        >Saved!</Text>
 							</View>
-						) : ( null ) }																	
+						) : ( null ) }
+						{ ("out" == slideoutState )? (										
+							<View style={{
+								zIndex:3, display:'block',position:'absolute',top:50, bottom:0,paddingBottom:50,width:'100%',
+								backgroundColor:'rgba(0,0,0,.5)', justifyContent:'center', flex:1, alignItems:'center'}}
+							>							
+							</View>
+						) : ( null ) }											
+
 			<ScrollView 
 				style={[s.mainContainer,{zIndex:-1}]} 
 				contentContainerStyle={[s.mainContentContainer]}
@@ -653,6 +687,7 @@ console.log('setu[ artfact', artifact);
 
 							<View style={s.fieldWrapper}>
 								<Text style={s.label}>Name</Text>
+
 								<Controller
 									control={control}
 									name="name"
@@ -961,10 +996,7 @@ console.log('setu[ artfact', artifact);
 													}
 									]}
 										onPress={ () => { 
-											item.name="test";
-
-										setslideoutState( 'out' );
-										setImageState( item );
+											openSlideout(item);
 										}}
 								>
 									<Ionicons name="pencil-outline" size={30} color="" style={{
