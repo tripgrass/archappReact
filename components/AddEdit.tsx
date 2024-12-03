@@ -63,6 +63,7 @@ console.log('addedit artifactId', initArtifactId);
 		defaultValues: defaultValues,
 	});
 
+ 
 	function setupInitialArtifact(artifact){
 		setLoadState("loading");
 
@@ -455,7 +456,7 @@ console.log('setu[ artfact', artifact);
 	const navigateToShow = () => {
 		console.log('------------->view navigate artifact.id',artifact.id);
 		console.log('------------->view navigate artifactId',artifactId);
-
+		setLoadState("loading");
 		navigation.navigate('show', { params: { artifactId: artifactId } })
 	}
 	const handleFileChange = event => {

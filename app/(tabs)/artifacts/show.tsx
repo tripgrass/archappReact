@@ -7,6 +7,7 @@ import { useLocalSearchParams, useGlobalSearchParams, Link } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native'
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Asset, useAssets } from 'expo-asset';
 
 function ShowArtifact({ route, navigation }) {
 	const [artifact, setArtifact] = useState(null);	
@@ -15,28 +16,20 @@ function ShowArtifact({ route, navigation }) {
 	const local = useLocalSearchParams();
 	const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
 
-//	console.log('show artifact===============', artifact);
 	const [artifacts, setArtifacts] = useState([]);
 	const [galleryImages, setGalleryImages] = useState([]);
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
+	const [assets, error] = useAssets( [require('../../../assets/images/loading.gif'), require('../../../assets/images/saving.gif')]);
+	const loadingIcon = ( assets?.length  ? assets[0] : null );
 
-	const navigateToEdit = () => {
-	console.log('edit navigate artifactId',artifact);											
-
-		navigation.navigate('edit', { params: { artifactId: artifact.id } })
-	}
 
 	function setup(result){
-
 		setArtifact(result);
-		console.log('setup ion show result', result);
 		setGalleryImages(result.images);
 		setLoadState('loaded');
 	}
 	useEffect(() => {
-		console.log('useeffect in show::::::::');
 		 if(isFocused){
-		console.log('useeffect in show isFocused::::::::');
 			setLoadState('loading');
 			if( artifactId ){
 		        ArtifactsService({
@@ -60,49 +53,36 @@ function ShowArtifact({ route, navigation }) {
     }, [isFocused]);    
 
     return (
-			<View style={styles.container}>
-				{ 'loading' == loadState ? (
-				null ) : (
-					<ArtifactView route={route} artifact={artifact} navigation={navigation} galleryImages={galleryImages} setGalleryImages={setGalleryImages}></ArtifactView>
-					) }			
+    	<>
+			{ 'loading' == loadState ? (
+				<View style={{
+					zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
+					backgroundColor:'white', justifyContent:'center', flex:1, alignItems:'center'}}
+				>					
+					<Image source={ loadingIcon } /* Use item to set the image source */
+                        style={{
+                            width:150,
+                            height:150,
+                        }}
+					/>  
+				</View>
 
- 			</View>
+			) : (
+				<View style={viewStyles.container}>
+					<ArtifactView setLoadState={setLoadState} route={route} artifact={artifact} navigation={navigation} galleryImages={galleryImages} setGalleryImages={setGalleryImages}></ArtifactView>
+	 			</View>
+			) }
+		</>
     );
 }
 
-const styles = StyleSheet.create({
+const viewStyles = StyleSheet.create({
 	container: {
 		flex: 1,
 		justifyContent:'center',
 		alignItems:'center',
 		padding: 16
 
-	},
-	header:{
-		position:'absolute',
-		textAlign:'left',
-		top:Constants.statusBarHeight + 5,
-		left:0,
-		right:0,
-		backgroundColor:'white'
-	},
-	headerText:{
-		textAlign:'left',
-		fontSize:26,
-		marginLeft:16,
-		lineHeight:72,
-		fontWeight:'600'
-	},	
-	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		marginBottom: 16,
-	},
-	item: {
-		backgroundColor: '#f5f5f5',
-		padding: 10,
-		marginVertical: 8,
-		borderRadius: 8,
-	},
+	}
 });
 export default ShowArtifact;

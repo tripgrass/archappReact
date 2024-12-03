@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import CustomButton from '@/components/Button';
 import {ImagesService}  from '@/utilities/ImagesService';
+import {PersonsService}  from '@/utilities/PersonsService';
 import { useIsFocused } from '@react-navigation/native';
 import { AutocompleteDropdown , AutocompleteDropdownContextProvider} from 'react-native-autocomplete-dropdown';
 import _ from "lodash";
@@ -12,8 +13,6 @@ import { useForm, Controller } from 'react-hook-form';
 
 const s = require('@/components/style');
 export default function App({ artifactId, galleryState, galleryStateChanger, slideoutState, setslideoutState, imageState, setImageState }) {
-    //console.log('slideoutState',slideoutState);
-    //console.log('imageState', imageState);
     let defaultValues = {};
     const { register, setError, getValues, setValue, getValue, handleSubmit, control, reset, formState: { errors } } = useForm({
         defaultValues:defaultValues
@@ -22,41 +21,38 @@ export default function App({ artifactId, galleryState, galleryStateChanger, sli
     const [keyboardHeight, setKeyboardHeight] = useState(0);    
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);  
     const isFocused = useIsFocused()
-    const [selectedItem, setSelectedItem] = useState(null);
 
     const [loading, setLoading] = useState(false)
     const [suggestionsList, setSuggestionsList] = useState(null)
-    const dropdownController = useRef(null)
+    const [photographers, setPhotographers] = useState(null);
 
-    const searchRef = useRef(null)
-
-    const getSuggestions = useCallback(async q => {
-        /*
-        const filterToken = q.toLowerCase()
-        console.log('getSuggestions', q)
-        if (typeof q !== 'string' || q.length < 3) {
-            setSuggestionsList(null)
-            return
-        }
-        setLoading(true)
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts')
-        const items = await response.json()
-        const suggestions = items
-        .filter(item => item.title.toLowerCase().includes(filterToken))
-        .map(item => ({
-            id: item.id,
-            title: item.title,
-        }))
-        setSuggestionsList(suggestions)
-        setLoading(false)
-        */
-    }, [])
-
-    const onClearPress = useCallback(() => {
-        setSuggestionsList(null)
-    }, [])
-
-    const onOpenSuggestionsList = useCallback(isOpened => {}, [])
+    if( !photographers ){
+        setPhotographers(['this']);
+        data = {
+            "personas" : [
+                "Photographer"
+            ]
+        };
+        PersonsService({
+                method:'getAll',
+                data:data
+            })
+            .then( result => {
+                console.log('photogrpahers result', result);
+const suggestions = result
+      .map(item => ({
+        id: item.id,
+        title: item.firstname + " " + item.lastname,
+      }))
+            setPhotographers(result);
+    setSuggestionsList(suggestions);                
+            })
+            .catch((error) => {
+            console.log('!!!!!!!!!!!!!!! error:',error);
+            setPhotographers(['this']);
+        }); 
+    }
+    
     /* 
 useEffect(() => {
     console.log('imageState', imageState);
@@ -91,7 +87,22 @@ useEffect(() => {
             showSubscription.remove();
         };
     }, []);
+    const initList = async () => { 
+
+               
+
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+        const items = await response.json()
+        const suggestions = items
+          .map(item => ({
+            id: item.id,
+            title: item.title,
+          }))
+
+          setSuggestionsList(suggestions); 
+    }           
     useEffect(() => {
+        initList();
         if( imageState?.id && imageState.id !== currentImageId ){
             setCurrentImageId( imageState.id );
             console.log('USE EFFECT ::: IMAGEsTATE', imageState);
@@ -99,6 +110,39 @@ useEffect(() => {
             setValue('title', imageState?.title ? imageState?.title : null );
         }
     })
+
+
+  const [selectedItem, setSelectedItem] = useState(null)
+  const dropdownController = useRef(null)
+
+  const searchRef = useRef(null)
+
+  const getSuggestions = useCallback(async q => {
+    const filterToken = q.toLowerCase()
+    console.log('getSuggestions', q)
+    if (typeof q !== 'string' || q.length < 0) {
+      setSuggestionsList(null)
+      return
+    }
+    setLoading(true)
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+    const items = await response.json()
+    console.log('items',items);
+    const suggestions = items
+      .filter(item => item.title.toLowerCase().includes(filterToken))
+      .map(item => ({
+        id: item.id,
+        title: item.title,
+      }))
+    setSuggestionsList(suggestions)
+    setLoading(false)
+  }, [])
+
+  const onClearPress = useCallback(() => {
+    setSuggestionsList(null)
+  }, [])
+
+  const onOpenSuggestionsList = useCallback(isOpened => {}, [])    
     const handleKeyboardShow = event => {
         //setIsKeyboardVisible(true);
         console.log('handle setIsKeyboardVisible', isKeyboardVisible);
@@ -244,7 +288,7 @@ function toggleSlideout() {
                             title={ "Remove" }
                             onPress={handleSubmit(removeImage)}
                         /> 
-<TouchableOpacity
+                        <TouchableOpacity
                             onPress={toggleSlideout}
                             style={{
                                 height: 50,
@@ -269,12 +313,16 @@ function toggleSlideout() {
                         
                         <Image source={{uri:imageState?.uri}} /* Use item to set the image source */
                             style={{
+                                borderWidth:1,
+                                borderColor:'#d8d8d8',
+                                borderRadius:4,
                                 width:'30%',
                                 aspectRatio:1,
                                 backgroundColor:'#d0d0d0',
                             }}
                         />             
                         <Text style={{
+                            display:'none',
                             marginTop:0, 
                             fontSize: 14,
                             maxWidth:'70%',
@@ -292,20 +340,35 @@ function toggleSlideout() {
                               { flex: 1, flexDirection: 'row', alignItems: 'center' },
                               Platform.select({ ios: { zIndex: 1 } }),
                             ]}>
+
                                 <AutocompleteDropdown
+          ref={searchRef}
+          controller={controller => {
+            dropdownController.current = controller
+          }}
+          // initialValue={'1'}
+          dataSet={suggestionsList}
+          onChangeText={getSuggestions}
+          onSelectItem={item => {
+            item && setSelectedItem(item.id)
+          }}
+          debounce={600}
+          suggestionsListMaxHeight={Dimensions.get('window').height * 0.4}
+          onClear={onClearPress}
+          //  onSubmit={(e) => onSubmitSearch(e.nativeEvent.text)}
+          onOpenSuggestionsList={onOpenSuggestionsList}
+          loading={loading}
+          useFilter={false} // set false to prevent rerender twice
+          
+          //renderItem={(item, text) => <Text style={{ color: '#fff', padding: 15 }}>{item.title}</Text>}
+          inputHeight={50}
+          showChevron={true}
+          closeOnBlur={true}
+          showClear={true}
+
+
                                     direction={'down'}
-                                    suggestionsListMaxHeight={200}
-                                    onChangeText={getSuggestions}
-                                    onSelectItem={setSelectedItem}
                                     style={styles.input}
-                                    dataSet={[
-                                        { id: '1', title: 'Alpha' },
-                                        { id: '2', title: 'Beta' },
-                                        { id: '3', title: 'Gamma' },
-                                        { id: '4', title: 'Logan' },
-                                        { id: '5', title: 'Hammel' },
-                                        { id: '6', title: 'Xerxes' },
-                                    ]}
                                     textInputProps={{
                                         placeholder: 'Type to Search',
                                         autoCorrect: false,
@@ -340,12 +403,14 @@ function toggleSlideout() {
                                     containerStyle={{ 
                                         flexGrow: 1, 
                                         flexShrink: 1 
-                                    }}                                
-                                />
+                                    }}                      
+        />
                             </AutocompleteDropdownContextProvider>
                             )}
                         />
                     </View>                   
+
+
 
                     <View style={{flex:1, flexDirection:'row', marginTop:5, marginBottom:5}}>
                         <View style={{width:'50%'}}>

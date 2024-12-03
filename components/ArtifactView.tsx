@@ -6,33 +6,23 @@ import { useIsFocused } from '@react-navigation/native'
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryImages }) {
-//	const [artifact, setArtifact] = useState(null);	
-	const [loadState, setLoadState] = useState('loading');	
+function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryImages, setLoadState }) {
 	const isFocused = useIsFocused()
 	const local = useLocalSearchParams();
 	const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
 
-//	console.log('show artifact===============', artifact);
 	const [artifacts, setArtifacts] = useState([]);
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
-	useEffect(() => {
-		console.log('useeffect in artView::::::::');
-		 if(isFocused){
-		console.log('useeffect in artView isfocused:::::::: artifact', artifact);
-			setLoadState('loading');
-		}
-    }, [isFocused]);    
 
 	const navigateToEdit = () => {
-	console.log('edit navigate artifactId',artifact);											
 
+		setLoadState('loading');
 		navigation.navigate('edit', { params: { artifactId: artifact.id } })
 	}
     return (
 			<>
-				<View style={styles.header}>
-					<Text style={styles.headerText}>{artifact?.name}</Text>
+				<View style={viewStyles.header}>
+					<Text style={viewStyles.headerText}>{artifact?.name}</Text>
 
 				</View>
 					<View style={{display:'flex',flex:1, justifyContent:'center', alignItems:'center', marginTop:150}}>
@@ -96,14 +86,8 @@ function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryIm
     );
 }
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		justifyContent:'center',
-		alignItems:'center',
-		padding: 16
-
-	},
+const viewStyles = StyleSheet.create({
+	
 	header:{
 		position:'absolute',
 		textAlign:'left',
@@ -118,17 +102,6 @@ const styles = StyleSheet.create({
 		marginLeft:16,
 		lineHeight:72,
 		fontWeight:'600'
-	},	
-	title: {
-		fontSize: 24,
-		fontWeight: 'bold',
-		marginBottom: 16,
-	},
-	item: {
-		backgroundColor: '#f5f5f5',
-		padding: 10,
-		marginVertical: 8,
-		borderRadius: 8,
-	},
+	}
 });
 export default ArtifactView;
