@@ -3,6 +3,7 @@ import { Platform, StyleSheet } from 'react-native';
 import Constants from 'expo-constants';
 
 module.exports = StyleSheet.create({
+
     mainContainer: {
         flex: 1,
         minHeight:'100vh',
@@ -11,7 +12,7 @@ module.exports = StyleSheet.create({
         padding: 10,
         color:'white',
         width:'100%',
-        elevation:1
+        elevation:1,
     },
     mainContentContainer: {
         //alignItems: 'center',

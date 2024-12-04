@@ -26,6 +26,129 @@ export default function App({ artifactId, galleryState, galleryStateChanger, sli
     const [suggestionsList, setSuggestionsList] = useState(null)
     const [photographers, setPhotographers] = useState(null);
 
+const styles = StyleSheet.create({
+    mainWrapper:{
+        color:'white',
+        elevation:1,
+        height:0,
+        zIndex:9999,
+        position:'absolute',
+        display:'none',
+        backgroundColor:'white'
+    },
+    mainWrapperOut:{
+        color:'white',
+        top:0,
+        width:'100%',
+        right:0,
+        zIndex:999999,
+        position:'absolute',
+        backgroundColor:'white'
+
+    },
+    mainWrapperOutKeyboard:{
+        color:'white',
+        width:'100%',
+        right:0,
+        zIndex:999999,
+        position:'absolute',
+        backgroundColor:'white'
+
+    },        
+    wrapper:{
+        marginTop:0,
+    },
+    wrapperOut:{
+        marginTop:0,
+        elevation: 4,  
+        transition: '3s',        
+        justifyContent: 'right',
+        flex:1,
+        top: 50,
+        right: 0, 
+        width: '100%',
+        padding:20,
+//        minHeight:300,  
+        borderColor:'#d8d8d8',
+        borderWidth:1,  
+        borderWidthTop:0,
+        //height: 300,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 10,
+            height: 20,
+        },
+        shadowOpacity: 1,
+        shadowRadius: 3.84,
+    },
+  containerVoid: {
+},
+  containerOutVoid: {
+},
+
+  container: {
+    flex: 1,
+    backgroundColor:'white',
+    position: 'absolute',
+    top:0,
+    right: -280, 
+    height:0,
+    width: '80%', 
+    transition: '3s'
+  },
+  containerOut: {
+    flex: 1,
+    position: 'absolute',
+    top:0,
+    right: 0, 
+    width: '92%',
+    padding:20,
+    minHeight:300,  
+    borderColor:'#d8d8d8',
+    borderWidth:1,  
+    borderWidthTop:0,
+    //height: 300,
+    shadowColor: "#000",
+    shadowOffset: {
+        width: 10,
+        height: 20,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 3.84,
+
+    elevation: 4,    
+    backgroundColor:'white',
+    transition: '3s',
+  },  
+  text: {
+    fontSize: 12,
+    color: 'black',
+    maxWidth:'60%',
+    marginTop:20,
+    paddingLeft:20
+  },
+  plus: {
+    position: "absolute",
+    left: 15,
+    top: 10,
+  },
+input: {
+    display: "flex",
+    flexShrink: 0,
+    flexGrow: 0,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderColor: "#c7c6c1",
+    paddingVertical: 13,
+    paddingLeft: 12,
+    paddingRight: "5%",
+    width: "100%",
+    justifyContent: "flex-start",
+  },  
+});
+
     if( !photographers ){
         setPhotographers(['this']);
         data = {
@@ -87,22 +210,7 @@ useEffect(() => {
             showSubscription.remove();
         };
     }, []);
-    const initList = async () => { 
-
-               
-
-        const response = await fetch('https://jsonplaceholder.typicode.com/posts')
-        const items = await response.json()
-        const suggestions = items
-          .map(item => ({
-            id: item.id,
-            title: item.title,
-          }))
-
-          setSuggestionsList(suggestions); 
-    }           
     useEffect(() => {
-        initList();
         if( imageState?.id && imageState.id !== currentImageId ){
             setCurrentImageId( imageState.id );
             console.log('USE EFFECT ::: IMAGEsTATE', imageState);
@@ -118,6 +226,7 @@ useEffect(() => {
   const searchRef = useRef(null)
 
   const getSuggestions = useCallback(async q => {
+    /*
     const filterToken = q.toLowerCase()
     console.log('getSuggestions', q)
     if (typeof q !== 'string' || q.length < 0) {
@@ -136,22 +245,27 @@ useEffect(() => {
       }))
     setSuggestionsList(suggestions)
     setLoading(false)
+    */
   }, [])
 
   const onClearPress = useCallback(() => {
     setSuggestionsList(null)
   }, [])
 
-  const onOpenSuggestionsList = useCallback(isOpened => {}, [])    
+  const onOpenSuggestionsList = useCallback(isOpened => {
+
+    //console.log('IS OPENININGIN');
+  }, [])    
     const handleKeyboardShow = event => {
-        //setIsKeyboardVisible(true);
+        setIsKeyboardVisible(true);
         console.log('handle setIsKeyboardVisible', isKeyboardVisible);
         setKeyboardHeight(event.endCoordinates.height);
+        console.log('keyboard height', keyboardHeight);
     };
 
     const handleKeyboardHide = event => {
         setKeyboardHeight(0);
-        //setIsKeyboardVisible(false);
+        setIsKeyboardVisible(false);
     }; 
     const updateImageMeta = data => {
         var form = new FormData();
@@ -253,16 +367,16 @@ function toggleSlideout() {
 }
     return (
         <>
-       <View 
+<View 
                 keyboardShouldPersistTaps='handled'       
                 style={[ 
                     ('out' == slideoutState) ? styles.mainWrapperOut : styles.mainWrapper,
-('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:'', height:setHeight()} : {backgroundColor:'', height:'auto'} ) : {backgroundColor:''}                    
+('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:'', } : {backgroundColor:'', height:'auto'} ) : {backgroundColor:''}                    
                  ,{ backgroundColor:'white'}]} >
                 <View
 
                 style={ [ ('out' == slideoutState) ? styles.wrapperOut : styles.wrapper ,
-('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:'', } : {backgroundColor:''} ) : {backgroundColor:'white'}                    
+('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:'red', height:200, overflow:'hidden' } : {backgroundColor:''} ) : {backgroundColor:'white'}                    
 
                    , {paddingBottom:40} ]}
             > 
@@ -330,41 +444,41 @@ function toggleSlideout() {
                             paddingLeft:20                            
                         }}>{imageState?.fileName}</Text>
                     </View>
-                    <View style={{zIndex:9999, marginTop:10, marginBottom:10}}>
+                    <View style={{}}>
                         <Text style={s.label}>Photographer (optional)</Text>
                         <Controller
                             name="photographer"
                             control={control}
                             render={({field: { onChange, onBlur, value="" }}) => (
                             <AutocompleteDropdownContextProvider style={[
-                              { flex: 1, flexDirection: 'row', alignItems: 'center' },
+                              { flex: 1, flexDirection: 'row', alignItems: 'center', zIndex:99999 },
                               Platform.select({ ios: { zIndex: 1 } }),
                             ]}>
 
                                 <AutocompleteDropdown
-          ref={searchRef}
-          controller={controller => {
-            dropdownController.current = controller
-          }}
-          // initialValue={'1'}
-          dataSet={suggestionsList}
-          onChangeText={getSuggestions}
-          onSelectItem={item => {
-            item && setSelectedItem(item.id)
-          }}
-          debounce={600}
-          suggestionsListMaxHeight={Dimensions.get('window').height * 0.4}
-          onClear={onClearPress}
-          //  onSubmit={(e) => onSubmitSearch(e.nativeEvent.text)}
-          onOpenSuggestionsList={onOpenSuggestionsList}
-          loading={loading}
-          useFilter={false} // set false to prevent rerender twice
-          
-          //renderItem={(item, text) => <Text style={{ color: '#fff', padding: 15 }}>{item.title}</Text>}
-          inputHeight={50}
-          showChevron={true}
-          closeOnBlur={true}
-          showClear={true}
+                                      ref={searchRef}
+                                      controller={controller => {
+                                        dropdownController.current = controller
+                                      }}
+                                      // initialValue={'1'}
+                                      dataSet={suggestionsList}
+                                      onChangeText={getSuggestions}
+                                      onSelectItem={item => {
+                                        item && setSelectedItem(item.id)
+                                      }}
+                                      debounce={600}
+                                      //suggestionsListMaxHeight={Dimensions.get('window').height * 0.2}
+                                      onClear={onClearPress}
+                                      //  onSubmit={(e) => onSubmitSearch(e.nativeEvent.text)}
+                                      onOpenSuggestionsList={onOpenSuggestionsList}
+                                      loading={loading}
+                                      useFilter={false} // set false to prevent rerender twice
+                                      
+                                      //renderItem={(item, text) => <Text style={{ color: '#fff', padding: 15 }}>{item.title}</Text>}
+                                      inputHeight={50}
+                                      showChevron={true}
+                                      closeOnBlur={true}
+                                      showClear={true}
 
 
                                     direction={'down'}
@@ -396,15 +510,16 @@ function toggleSlideout() {
                                         zIndex:9999,
                                         marginTop:30,
                                         backgroundColor:'#e8e8e8'
-
+                                        //height:filteredMembers.length * 70
                                     }}
                                     suggestionsListTextStyle={{
                                     }}
                                     containerStyle={{ 
                                         flexGrow: 1, 
+                                        flex:1,
                                         flexShrink: 1 
                                     }}                      
-        />
+                                />
                             </AutocompleteDropdownContextProvider>
                             )}
                         />
@@ -412,7 +527,7 @@ function toggleSlideout() {
 
 
 
-                    <View style={{flex:1, flexDirection:'row', marginTop:5, marginBottom:5}}>
+                    <View style={{flex:1, flexDirection:'row', marginTop:5, marginBottom:5, zIndex:-1}}>
                         <View style={{width:'50%'}}>
                             <Text style={s.label}>Year of Photograph</Text>
                             <Controller
@@ -449,7 +564,7 @@ function toggleSlideout() {
                         </View>
 
                     </View>
-                    <View style={{}}>
+                    <View style={{zIndex:-1}}>
                         <Text style={s.label}>Title</Text>
                         <Controller
                             control={control}
@@ -472,7 +587,7 @@ function toggleSlideout() {
                             name="title"
                         />
                     </View> 
-                    <View >
+                    <View style={{flex:1, height:150, zIndex:-1}}>
                         <Text style={s.label}>Alt Text</Text>
                         <Controller
                             control={control}
@@ -497,121 +612,9 @@ function toggleSlideout() {
                     </View>                     
                 </View>
             </View>
+        
             </View>
         </>
     );
 }
 
-const styles = StyleSheet.create({
-    mainWrapper:{
-        color:'white',
-        elevation:1,
-        height:0,
-        zIndex:9999,
-        position:'absolute',
-        display:'none'
-    },
-    mainWrapperOut:{
-        color:'white',
-        top:50,
-        width:'96%',
-        right:0,
-        zIndex:999999,
-        position:'absolute',
-
-    },    
-    wrapper:{
-        marginTop:0,
-    },
-    wrapperOut:{
-        marginTop:0,
-        elevation: 4,  
-        height:'auto',  
-        backgroundColor:'white',
-        transition: '3s',        
-        justifyContent: 'right',
-        flex:1,
-        top:0,
-        right: 0, 
-        width: '100%',
-        padding:20,
-//        minHeight:300,  
-        borderColor:'#d8d8d8',
-        borderWidth:1,  
-        borderWidthTop:0,
-        //height: 300,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 10,
-            height: 20,
-        },
-        shadowOpacity: 1,
-        shadowRadius: 3.84,
-    },
-  containerVoid: {
-},
-  containerOutVoid: {
-},
-
-  container: {
-    flex: 1,
-    backgroundColor:'white',
-    position: 'absolute',
-    top:0,
-    right: -280, 
-    height:0,
-    width: '80%', 
-    transition: '3s'
-  },
-  containerOut: {
-    flex: 1,
-    position: 'absolute',
-    top:0,
-    right: 0, 
-    width: '92%',
-    padding:20,
-    minHeight:300,  
-    borderColor:'#d8d8d8',
-    borderWidth:1,  
-    borderWidthTop:0,
-    //height: 300,
-    shadowColor: "#000",
-    shadowOffset: {
-        width: 10,
-        height: 20,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-
-    elevation: 4,    
-    backgroundColor:'white',
-    transition: '3s',
-  },  
-  text: {
-    fontSize: 12,
-    color: 'black',
-    maxWidth:'60%',
-    marginTop:20,
-    paddingLeft:20
-  },
-  plus: {
-    position: "absolute",
-    left: 15,
-    top: 10,
-  },
-input: {
-    display: "flex",
-    flexShrink: 0,
-    flexGrow: 0,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderColor: "#c7c6c1",
-    paddingVertical: 13,
-    paddingLeft: 12,
-    paddingRight: "5%",
-    width: "100%",
-    justifyContent: "flex-start",
-  },  
-});

@@ -519,9 +519,6 @@ console.log('setu[ artfact', artifact);
 
 	return (
 		<>
-							
-
-			<ImageMeta galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
 			<CameraWrapper galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraWrapper>		
 			{ ( "loaded" == loadState ) ? (										
 
@@ -593,34 +590,7 @@ console.log('setu[ artfact', artifact);
 					</View>
 				</View>	
 			) : null }				
-						{ artifactId ? (
-							<View style={{
-								position:'absolute',
-								bottom:30,
-								left:10,
-								zIndex:2
-							}}>
-									<Pressable artifact={artifact}
-										style={({pressed}) => [
-														{
-												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-												alignItems: 'center',
-												justifyContent: 'center',
-												borderRadius: 40,
-												height:80,
-												width:80,
-												elevation: 8,
-												marginLeft: 'auto',					    		
-												marginRight:5,
-												boxShadow: '0px 2px 2px #d8d8d8'						        
-														}
-										]}
-										onPress={ () => { navigateToShow() }}
-									>
-										<Text>View</Text>
-									</Pressable> 
-							</View>				
-						) : null }
+
 						{ "loaded" != loadState ? (										
 						<View style={{
 							zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
@@ -669,13 +639,37 @@ console.log('setu[ artfact', artifact);
 				                        >Saved!</Text>
 							</View>
 						) : ( null ) }
-						{ ("out" == slideoutState )? (										
+						{ ( artifactId  && "out" !== slideoutState ) ? (
 							<View style={{
-								zIndex:3, display:'block',position:'absolute',top:50, bottom:0,paddingBottom:50,width:'100%',
-								backgroundColor:'rgba(0,0,0,.5)', justifyContent:'center', flex:1, alignItems:'center'}}
-							>							
-							</View>
-						) : ( null ) }											
+								position:'absolute',
+								bottom:30,
+								left:10,
+								zIndex:2
+							}}>
+									<Pressable artifact={artifact}
+										style={({pressed}) => [
+														{
+												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+												alignItems: 'center',
+												justifyContent: 'center',
+												borderRadius: 40,
+												height:80,
+												width:80,
+												elevation: 8,
+												marginLeft: 'auto',					    		
+												marginRight:5,
+												boxShadow: '0px 2px 2px #d8d8d8'						        
+														}
+										]}
+										onPress={ () => { navigateToShow() }}
+									>
+										<Text>View</Text>
+									</Pressable> 
+							</View>				
+						) : null }						
+{ ( "out" == slideoutState ) ? (
+			<ImageMeta galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
+			) : (																	
 
 			<ScrollView 
 				style={[s.mainContainer,{zIndex:-1}]} 
@@ -1034,6 +1028,8 @@ console.log('setu[ artfact', artifact);
 				<StatusBar style={{display:'block'}} />			
 							
 			</ScrollView>
+		 ) }
+
 		</>
 	)
 }
