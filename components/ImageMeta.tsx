@@ -4,16 +4,17 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import CustomButton from '@/components/Button';
 import {ImagesService}  from '@/utilities/ImagesService';
-import {PersonsService}  from '@/utilities/PersonsService';
 import { useIsFocused } from '@react-navigation/native';
 import { AutocompleteDropdown , AutocompleteDropdownContextProvider} from 'react-native-autocomplete-dropdown';
 import _ from "lodash";
+import { LogBox } from 'react-native';
 
 import { useForm, Controller } from 'react-hook-form';
 
 const s = require('@/components/style');
-export default function App({ artifactId, galleryState, galleryStateChanger, slideoutState, setslideoutState, imageState, setImageState }) {
+export default function App({ artifactId, galleryState, galleryStateChanger, slideoutState, setslideoutState, imageState, setImageState, photographers }) {
     let defaultValues = {};
+//    console.log('prop!!!! PhotographERS' , photographers);
     const { register, setError, getValues, setValue, getValue, handleSubmit, control, reset, formState: { errors } } = useForm({
         defaultValues:defaultValues
     }); 
@@ -23,63 +24,25 @@ export default function App({ artifactId, galleryState, galleryStateChanger, sli
     const isFocused = useIsFocused()
 
     const [loading, setLoading] = useState(false)
-    const [suggestionsList, setSuggestionsList] = useState(null)
-    const [photographers, setPhotographers] = useState(null);
-
+    const [suggestionsList, setSuggestionsList] = useState(photographers)
+    const notificationBarHeight = 50;
+useEffect(() => {
+    LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
+}, [])
 const styles = StyleSheet.create({
     mainWrapper:{
-        color:'white',
-        elevation:1,
-        height:0,
-        zIndex:9999,
-        position:'absolute',
-        display:'none',
-        backgroundColor:'white'
+
     },
     mainWrapperOut:{
-        color:'white',
-        top:0,
-        width:'100%',
-        right:0,
-        zIndex:999999,
-        position:'absolute',
-        backgroundColor:'white'
+      
 
     },
-    mainWrapperOutKeyboard:{
-        color:'white',
-        width:'100%',
-        right:0,
-        zIndex:999999,
-        position:'absolute',
-        backgroundColor:'white'
-
-    },        
+          
     wrapper:{
         marginTop:0,
     },
     wrapperOut:{
-        marginTop:0,
-        elevation: 4,  
-        transition: '3s',        
-        justifyContent: 'right',
-        flex:1,
-        top: 50,
-        right: 0, 
-        width: '100%',
-        padding:20,
-//        minHeight:300,  
-        borderColor:'#d8d8d8',
-        borderWidth:1,  
-        borderWidthTop:0,
-        //height: 300,
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 10,
-            height: 20,
-        },
-        shadowOpacity: 1,
-        shadowRadius: 3.84,
+        
     },
   containerVoid: {
 },
@@ -149,32 +112,7 @@ input: {
   },  
 });
 
-    if( !photographers ){
-        setPhotographers(['this']);
-        data = {
-            "personas" : [
-                "Photographer"
-            ]
-        };
-        PersonsService({
-                method:'getAll',
-                data:data
-            })
-            .then( result => {
-                console.log('photogrpahers result', result);
-const suggestions = result
-      .map(item => ({
-        id: item.id,
-        title: item.firstname + " " + item.lastname,
-      }))
-            setPhotographers(result);
-    setSuggestionsList(suggestions);                
-            })
-            .catch((error) => {
-            console.log('!!!!!!!!!!!!!!! error:',error);
-            setPhotographers(['this']);
-        }); 
-    }
+    
     
     /* 
 useEffect(() => {
@@ -226,45 +164,55 @@ useEffect(() => {
   const searchRef = useRef(null)
 
   const getSuggestions = useCallback(async q => {
-    /*
-    const filterToken = q.toLowerCase()
+    
+    const filterToken = q.toLowerCase();
     console.log('getSuggestions', q)
-    if (typeof q !== 'string' || q.length < 0) {
-      setSuggestionsList(null)
+    if (typeof q !== 'string' || q.length < 2) {
+      setSuggestionsList(photographers)
       return
     }
-    setLoading(true)
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts')
-    const items = await response.json()
-    console.log('items',items);
-    const suggestions = items
+//    setLoading(true)
+//    const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+  //  const items = await response.json()
+    //console.log('items',items);
+  //  console.log('photographes', photographers);
+    const suggestions = photographers
       .filter(item => item.title.toLowerCase().includes(filterToken))
       .map(item => ({
         id: item.id,
         title: item.title,
       }))
+      console.log(suggestions);
     setSuggestionsList(suggestions)
-    setLoading(false)
-    */
+  //  setLoading(false)
+    
   }, [])
 
   const onClearPress = useCallback(() => {
-    setSuggestionsList(null)
+    setSuggestionsList(photographers)
   }, [])
 
   const onOpenSuggestionsList = useCallback(isOpened => {
 
-    //console.log('IS OPENININGIN');
+    console.log('IS OPENININGIN');
   }, [])    
     const handleKeyboardShow = event => {
-        setIsKeyboardVisible(true);
-        console.log('handle setIsKeyboardVisible', isKeyboardVisible);
+        console.log('handlekey show');
+       // setIsKeyboardVisible(true);
+//        console.log('handle setIsKeyboardVisible', isKeyboardVisible);
         setKeyboardHeight(event.endCoordinates.height);
-        console.log('keyboard height', keyboardHeight);
+        console.log('keyboardHeight', keyboardHeight);
     };
-
+    const onFocusKeyboard = event => {
+        console.log('onFocusKeyboard');
+          setIsKeyboardVisible(true);            
+    }
+    const onFocusKeyboardBlur = event => {
+        //    setIsKeyboardVisible(false);            
+    }
     const handleKeyboardHide = event => {
-        setKeyboardHeight(0);
+        console.log('handle hide');
+        //setKeyboardHeight(0);
         setIsKeyboardVisible(false);
     }; 
     const updateImageMeta = data => {
@@ -354,7 +302,6 @@ function clearYear() {
 function setHeight(){
     var screenHeight = Dimensions.get("window").height;
         var newHeight = screenHeight - keyboardHeight;
-        //alert(newHeight);
         return newHeight;
 }
 function toggleSlideout() {
@@ -367,19 +314,80 @@ function toggleSlideout() {
 }
     return (
         <>
-<View 
-                keyboardShouldPersistTaps='handled'       
+            <View 
                 style={[ 
-                    ('out' == slideoutState) ? styles.mainWrapperOut : styles.mainWrapper,
-('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:'', } : {backgroundColor:'', height:'auto'} ) : {backgroundColor:''}                    
-                 ,{ backgroundColor:'white'}]} >
-                <View
-
-                style={ [ ('out' == slideoutState) ? styles.wrapperOut : styles.wrapper ,
-('out' == slideoutState) ? (  isKeyboardVisible  ? {backgroundColor:'red', height:200, overflow:'hidden' } : {backgroundColor:''} ) : {backgroundColor:'white'}                    
-
-                   , {paddingBottom:40} ]}
-            > 
+                    ('out' == slideoutState) ? (
+                        {
+                            color:'white',
+                            width:'100%',
+                            flex:1,
+                        //        backgroundColor:'red'
+                        }
+                    ) : (
+                        {
+                            display:'none'
+                        }
+                    ),
+                    ('out' == slideoutState) ? (  isKeyboardVisible  ? 
+                        { 
+                            height:setHeight(), 
+                            marginTop: (-1 * ( notificationBarHeight + 20))
+                        } : 
+                        {
+                            backgroundColor:'',
+                            flex:1,
+                            flexDirection:'row',
+                            justifyContent:'flex-end'
+                        } 
+                    ) : 
+                        {
+                            backgroundColor:''
+                        },
+                        { 
+                             backgroundColor:'' 
+                        }
+                ]} >
+                <ScrollView
+                    keyboardShouldPersistTaps='handled'
+                    style={[
+                        {
+                            width:'100%', 
+                            backgroundColor:''  
+                            //paddingBottom:60
+                        },
+                        (  isKeyboardVisible  ? 
+                            { 
+                                 backgroundColor:'', 
+                            } : (null) ) 
+                    ]}
+                    contentContainerStyle={ [ {/*backgroundColor:'yellow'*/}, ('out' == slideoutState) ? {
+                        elevation: 4,  
+                        transition: '3s',        
+                        justifyContent: 'right',
+                        top: notificationBarHeight + 30,
+                        marginTop: notificationBarHeight,
+                        right: 0, 
+                        width: '98%',
+                        padding:20,
+                        position:'absolute',
+                        borderColor:'#d8d8d8',
+                        borderWidth:1,  
+                        borderWidthTop:0,
+                        //height: 300,
+                        shadowColor: "#000",
+                        shadowOffset: {
+                            width: 10,
+                            height: 20,
+                        },
+                        backgroundColor:'white',
+                        shadowOpacity: 1,
+                        shadowRadius: 3.84,
+                    } : styles.wrapper, 
+                    (  isKeyboardVisible  ? { 
+                        paddingBottom:( notificationBarHeight + 150 ),
+//                        backgroundColor:'blue', 
+                    } : (null) )
+                    ]}> 
                 <View style={{flex:1, flexDirection:'row', marginBottom:30}}>
                         <CustomButton
                             styles={{
@@ -421,7 +429,7 @@ function toggleSlideout() {
                             }}/>
                         </TouchableOpacity>                                                                      
                 </View>                
-                <View style={ {height:'auto'}} >
+                <View style={ {height:'auto', /*backgroundColor:'red',*/ flex:1}} >
 
                     <View style={{flex:1, flexDirection:'row'}}>
                         
@@ -430,7 +438,7 @@ function toggleSlideout() {
                                 borderWidth:1,
                                 borderColor:'#d8d8d8',
                                 borderRadius:4,
-                                width:'30%',
+                                width:'50%',
                                 aspectRatio:1,
                                 backgroundColor:'#d0d0d0',
                             }}
@@ -446,16 +454,11 @@ function toggleSlideout() {
                     </View>
                     <View style={{}}>
                         <Text style={s.label}>Photographer (optional)</Text>
-                        <Controller
-                            name="photographer"
-                            control={control}
-                            render={({field: { onChange, onBlur, value="" }}) => (
-                            <AutocompleteDropdownContextProvider style={[
-                              { flex: 1, flexDirection: 'row', alignItems: 'center', zIndex:99999 },
-                              Platform.select({ ios: { zIndex: 1 } }),
-                            ]}>
+                        
+                            <AutocompleteDropdownContextProvider style={{flex:1}}>
 
                                 <AutocompleteDropdown
+                                
                                       ref={searchRef}
                                       controller={controller => {
                                         dropdownController.current = controller
@@ -466,28 +469,31 @@ function toggleSlideout() {
                                       onSelectItem={item => {
                                         item && setSelectedItem(item.id)
                                       }}
-                                      debounce={600}
+                                      //debounce={600}
                                       //suggestionsListMaxHeight={Dimensions.get('window').height * 0.2}
                                       onClear={onClearPress}
+                                      onChevronPress= {() => dropdownController.current.toggle()}
+
                                       //  onSubmit={(e) => onSubmitSearch(e.nativeEvent.text)}
-                                      onOpenSuggestionsList={onOpenSuggestionsList}
-                                      loading={loading}
+                                      //onOpenSuggestionsList={onOpenSuggestionsList}
+                                      //loading={loading}
                                       useFilter={false} // set false to prevent rerender twice
                                       
-                                      //renderItem={(item, text) => <Text style={{ color: '#fff', padding: 15 }}>{item.title}</Text>}
+                                      renderItem={(item, text) => <Text style={{ color: 'black', padding: 15, backgroundColor:'',  }}>{item.title}</Text>}
                                       inputHeight={50}
                                       showChevron={true}
-                                      closeOnBlur={true}
-                                      showClear={true}
+                                      closeOnBlur={false}
+                                      //showClear={true}
 
 
                                     direction={'down'}
-                                    style={styles.input}
+                                    //style={styles.input}
                                     textInputProps={{
                                         placeholder: 'Type to Search',
                                         autoCorrect: false,
                                         autoCapitalize: 'none',
                                         style: {
+                                            height:40,
                                             borderRadius: 4,
                                             color: 'black',
                                             paddingLeft: 0,
@@ -495,6 +501,7 @@ function toggleSlideout() {
                                     }}
                                     rightButtonsContainerStyle={{
                                         right: 8,
+                                        height:40,
                                         alignSelf: 'center',
                                     }}
                                     inputContainerStyle={{
@@ -506,23 +513,22 @@ function toggleSlideout() {
                                         borderStyle: 'solid'                                        
                                     }}
                                     suggestionsListContainerStyle={{
-                                        marginLeft:-44,
+                                        marginLeft:-20,
                                         zIndex:9999,
                                         marginTop:30,
                                         backgroundColor:'#e8e8e8'
-                                        //height:filteredMembers.length * 70
                                     }}
                                     suggestionsListTextStyle={{
                                     }}
                                     containerStyle={{ 
                                         flexGrow: 1, 
                                         flex:1,
-                                        flexShrink: 1 
-                                    }}                      
+                                        flexShrink: 1 ,
+                                    }} 
                                 />
                             </AutocompleteDropdownContextProvider>
-                            )}
-                        />
+                        
+                        
                     </View>                   
 
 
@@ -543,7 +549,8 @@ function toggleSlideout() {
                                                 borderRadius: 4,        
                                                 width:120                                           
                                             }}
-                                            onBlur={onBlur}
+                                            onFocus={onFocusKeyboard}
+                                            onBlur={onFocusKeyboardBlur}
                                             onChangeText={value => onChange(value)}
                                             value={(value) ? value : ""}
                                         />
@@ -579,7 +586,8 @@ function toggleSlideout() {
                                             borderRadius: 4,        
                                             width:'100%'                                           
                                         }}
-                                        onBlur={onBlur}
+                                        onFocus={onFocusKeyboard}
+                                        onBlur={onFocusKeyboardBlur}
                                         onChangeText={value => onChange(value)}
                                         value={(value) ? value : ""}
                                     />
@@ -587,7 +595,7 @@ function toggleSlideout() {
                             name="title"
                         />
                     </View> 
-                    <View style={{flex:1, height:150, zIndex:-1}}>
+                    <View style={{/*flex:1, height:150,*/ zIndex:-1}}>
                         <Text style={s.label}>Alt Text</Text>
                         <Controller
                             control={control}
@@ -602,7 +610,8 @@ function toggleSlideout() {
                                             borderRadius: 4,        
                                             width:'100%'                                           
                                         }}
-                                        onBlur={onBlur}
+                                        onFocus={onFocusKeyboard}
+                                        onBlur={onFocusKeyboardBlur}
                                         onChangeText={value => onChange(value)}
                                         value={(value) ? value : ""}
                                     />
@@ -611,7 +620,7 @@ function toggleSlideout() {
                         />
                     </View>                     
                 </View>
-            </View>
+            </ScrollView>
         
             </View>
         </>

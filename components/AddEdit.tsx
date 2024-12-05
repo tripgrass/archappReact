@@ -25,6 +25,7 @@ import CameraWrapper  from '@/app/(tabs)/camera';
 import _ from "lodash";
 import { useIsFocused } from '@react-navigation/native'
 import { useAssets } from "expo-asset";
+import {PersonsService}  from '@/utilities/PersonsService';
 
 import Constants from 'expo-constants';
 
@@ -43,6 +44,8 @@ console.log('addedit artifactId', initArtifactId);
 	const [galleryImages, setGalleryImages] = useState([]);
 	const [loadState, setLoadState] = useState("initial");
 	const [saveState, setSaveState] = useState(null);
+	const [photographers, setPhotographers] = useState();
+
 	const formFields = {
 		id:null,
 		name : null,
@@ -62,11 +65,41 @@ console.log('addedit artifactId', initArtifactId);
 	const { register, setError, getValues, setFocus, setValue, handleSubmit, control, reset, formState: { errors } } = useForm({
 		defaultValues: defaultValues,
 	});
+//	useEffect(() => {
+//        setPhotographers(['that']);
+       
+   // })
 
- 
+	function getPhotographers(){
+		data = {
+			"personas" : [
+				"Photographer"
+			]
+		};
+        PersonsService({
+                method:'getAll',
+                data:data
+            })
+            .then( result => {
+                console.log('photogrpahers result', result);
+	const suggestions = result
+	      .map(item => ({
+	        id: item.id,
+	        title: item.firstname + " " + item.lastname,
+	      }))
+	      console.log('suggestions:::::::::::::::::::::', suggestions);
+
+            	setPhotographers(suggestions);
+			console.log('setPhotographers:::::::::::', photographers);
+            })
+            .catch((error) => {
+            console.log('!!!!!!!!!!!!!!! error:',error);
+            //setPhotographers(['this']);
+        }); 
+
+	}
 	function setupInitialArtifact(artifact){
 		setLoadState("loading");
-
 console.log('setu[ artfact', artifact);
 		setArtifactId(artifact.id);
 //				setValue('latitude', JSON.stringify(latitude) );
@@ -138,6 +171,9 @@ console.log('setu[ artfact', artifact);
 		setLoadState("loaded");
 	}
 	useEffect(() => {
+		if( !photographers ){
+			getPhotographers();
+		}
 		if(isFocused){
 			setLoadState("loading");
 			if( initArtifactId ){
@@ -668,7 +704,7 @@ console.log('setu[ artfact', artifact);
 							</View>				
 						) : null }						
 { ( "out" == slideoutState ) ? (
-			<ImageMeta galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
+			<ImageMeta photographers={photographers} galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
 			) : (																	
 
 			<ScrollView 

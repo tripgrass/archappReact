@@ -6,6 +6,7 @@ import { useSession } from '@/utilities/AuthContext';
 import { useState, useEffect } from 'react';
 
 
+
 function EditArtifact({ route, navigation }) {
 	console.log('in edit route:', route);
 		const local = useLocalSearchParams();
@@ -15,7 +16,7 @@ function EditArtifact({ route, navigation }) {
 		const { userSession } = useSession();
 //		console.log('USER SESSION', userSession);
 	const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
-console.log('artifactID ', artifactId);
+console.log('edit.tsx artifactID ', artifactId);
 
 					
 
