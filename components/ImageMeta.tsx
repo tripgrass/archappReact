@@ -139,7 +139,7 @@ useEffect(() => {
 
   //  console.log( getValues() );
 
-    const [isChecked, setChecked] = useState(false);
+    const [isPrimary, setChecked] = useState(false);
     useEffect(() => {
         const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
         const hideSubscription = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
@@ -220,7 +220,13 @@ useEffect(() => {
         console.log('updateImage Data', data);
         console.log('updateImage imageState', imageState);
         form.append('year',data.year);
+        form.append('person_id', selectedItem);
+        form.append('person_type', "photographer");
+        form.append('isPrimary', isPrimary);
+        console.log('isPrimary', isPrimary);
         form.append('title', data.title);
+        form.append('alttext', data.alttext);
+        form.append('artifact_id', artifactId);
         if( imageState?.id ){
             // you're editing an existing db image 
             form.append('id',imageState.id);
@@ -253,8 +259,9 @@ useEffect(() => {
                     galleryStateChanger( cloneDeep );                    
                     toggleSlideout();                    
                     */
-                })
-                .catch( console.log('IN INITIAL EDIT.TSX .error')) 
+                }).catch((error) => {
+                    console.log('saving error:',error);
+                })  
 
     };    
     const removeImage = data => {
@@ -291,8 +298,9 @@ useEffect(() => {
                     });            
                     galleryStateChanger( cloneDeep );                    
                     toggleSlideout();                    
-                })
-                .catch( console.log('IN INITIAL EDIT.TSX .error')) 
+                }).catch((error) => {
+                    console.log('saving error:',error);
+                })  
 
     };   
 
@@ -320,6 +328,7 @@ function toggleSlideout() {
                         {
                             color:'white',
                             width:'100%',
+                            marginTop:-76,
                             flex:1,
                         //        backgroundColor:'red'
                         }
@@ -331,7 +340,7 @@ function toggleSlideout() {
                     ('out' == slideoutState) ? (  isKeyboardVisible  ? 
                         { 
                             height:setHeight(), 
-                            marginTop: (-1 * ( notificationBarHeight + 20))
+                            //marginTop: (-1 * ( notificationBarHeight + 140))
                         } : 
                         {
                             backgroundColor:'',
@@ -561,13 +570,13 @@ function toggleSlideout() {
                         </View>
                         <View>
                             <Text style={[s.label]}>Make Primary Picture</Text>
-                            
-                            <Checkbox
-                                style={{marginTop:8}}
-                                value={isChecked}
-                                onValueChange={setChecked}
-                                color={isChecked ? 'black' : undefined}
-                            />
+        <Checkbox
+            name="primary"        
+                                                 style={{marginTop:8}}
+                                        value={isPrimary}
+                                        onValueChange={setChecked}
+                                        color={isPrimary ? 'black' : undefined}
+             />
                         </View>
 
                     </View>
