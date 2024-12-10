@@ -26,7 +26,7 @@ export default function Button(props) {
 					style={[PressClass, styles]}
 					onPress={onPress}
 				>
-					<Text style={TextClass}>{title}</Text>
+					<Text style={[TextClass]}>{title}</Text>
 				</Pressable>
 	 	);
 	 }

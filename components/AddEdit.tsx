@@ -26,6 +26,7 @@ import _ from "lodash";
 import { useIsFocused } from '@react-navigation/native'
 import { useAssets } from "expo-asset";
 import {PersonsService}  from '@/utilities/PersonsService';
+import {ImagesService}  from '@/utilities/ImagesService';
 
 import Constants from 'expo-constants';
 
@@ -34,7 +35,7 @@ const s = require('@/components/style');
 let camera: CameraView
 
 export default function AddEdit( {navigation, initArtifactId} ) {
-console.log('addedit artifactId', initArtifactId);
+//console.log('addedit artifactId', initArtifactId);
 	const isEdit = initArtifactId ? true : false;
 	const isFocused = useIsFocused()
 	const [origImageIds, setOrigImageIds] = useState([{}]);	
@@ -45,6 +46,7 @@ console.log('addedit artifactId', initArtifactId);
 	const [loadState, setLoadState] = useState("initial");
 	const [saveState, setSaveState] = useState(null);
 	const [photographers, setPhotographers] = useState();
+	const [counterTotal, setCounterTotal] = useState(0);
 
 	const formFields = {
 		id:null,
@@ -65,10 +67,18 @@ console.log('addedit artifactId', initArtifactId);
 	const { register, setError, getValues, setFocus, setValue, handleSubmit, control, reset, formState: { errors } } = useForm({
 		defaultValues: defaultValues,
 	});
-//	useEffect(() => {
+	useEffect(() => {
+		console.log('useffect! artifactId', artifactId);
+		console.log('useffect! initartifactId', initArtifactId);
+		if( !artifactId && initArtifactId ){
+			console.log('setting artifactId in useffect');
+			setArtifactId(initArtifactId);
+			setValue('id', initArtifactId);
+
+		}
 //        setPhotographers(['that']);
        
-   // })
+    })
 
 	function getPhotographers(){
 		data = {
@@ -87,19 +97,20 @@ console.log('addedit artifactId', initArtifactId);
 	        id: item.id,
 	        title: item.firstname + " " + item.lastname,
 	      }))
-	      console.log('suggestions:::::::::::::::::::::', suggestions);
+	     // console.log('suggestions:::::::::::::::::::::', suggestions);
 
             	setPhotographers(suggestions);
-			console.log('setPhotographers:::::::::::', photographers);
+		//	console.log('setPhotographers:::::::::::', photographers);
             })
             .catch((error) => {
-            console.log('!!!!!!!!!!!!!!! error:',error);
+            //console.log('!!!!!!!!!!!!!!! error:',error);
             //setPhotographers(['this']);
         }); 
 
 	}
 	function setupInitialArtifact(artifact){
 		setLoadState("loading");
+		artifactImages = [];
 console.log('setu[ artfact', artifact);
 		setArtifactId(artifact.id);
 //				setValue('latitude', JSON.stringify(latitude) );
@@ -125,7 +136,8 @@ console.log('setu[ artfact', artifact);
 			setlocationLookupState('loaded')
 		}
 		if('undefined' != typeof artifact && 'undefined' != typeof artifact?.images){
-			var counter = 0;
+			var counter = counterTotal;
+
 			var imageIds = [];
 			Object.keys(artifact.images).forEach((k, i) => {
 				var thisImage = {
@@ -134,6 +146,7 @@ console.log('setu[ artfact', artifact);
 					year:artifact.images[k].year,
 					title:artifact.images[k].title,
 					alttext:artifact.images[k].alttext,
+					person_id:artifact.images[k].person_id,
 					uri:imageBaseUrl + artifact.images[k].name
 				};
 				console.log('this image', thisImage);
@@ -142,7 +155,8 @@ console.log('setu[ artfact', artifact);
 				imageIds.push(artifact.images[k].id);
 				counter++;
 			});
-			console.log('artifactImages', artifactImages);
+			setCounterTotal(counter);
+			console.log('artifactImages line 149', artifactImages);
 			if( !origImageIds[artifact.id] ){
 				var newOrigImages = _.cloneDeep(origImageIds);
 				newOrigImages[artifact.id] = imageIds;
@@ -153,7 +167,7 @@ console.log('setu[ artfact', artifact);
 			}
 
 			if( artifactImages.length > 0 ){
-				console.log('artifactImages', artifactImages);
+				console.log('artifactImages line 160', artifactImages);
 				setGalleryImages(artifactImages);		
 				defaultValues.images = artifactImages;
 			}
@@ -175,8 +189,10 @@ console.log('setu[ artfact', artifact);
 			getPhotographers();
 		}
 		if(isFocused){
+
 			setLoadState("loading");
 			if( initArtifactId ){
+				console.log('LOOKING VIA API FOR ARTIFACT');
 		        ArtifactsService({
 		        	method:'getById',
 		        	id:initArtifactId
@@ -333,6 +349,7 @@ console.log('setu[ artfact', artifact);
 	}
 	const openSlideout = imageItem => {
 		setslideoutState( 'out' );
+		console.log('imageItem', imageItem);
 		setImageState( imageItem );
 	}
 	const __onCancel = async ( ) => {
@@ -354,10 +371,11 @@ console.log('setu[ artfact', artifact);
 	const onErrors = errors => {
 		//console.error(errors);
 	}
-	const onSubmitTest = data => {
+	const onSubmitVoid = data => {
 		console.log('test');
 		console.log('origImageIds:' , origImageIds);
 		console.log('data', data);
+		console.log('galleryImages', galleryImages);
 //	    	navigation.navigate('ProfileTab');
 		var form = new FormData();
 		var images = [];
@@ -372,15 +390,56 @@ console.log('setu[ artfact', artifact);
 			}
 		});
 	}
+	const saveImage = image => {
+console.log('saveImage data', image );
+		var form = new FormData();
+        form.append('artifact_id', artifactId);
+		imageMeta = {};
+		form.append('imagesMeta[0]', JSON.stringify( image ) );
+		if( Platform.OS == "web" ){
+			form.append('source', 'web');
+			form.append('images[0]', image );
+		}
+		else{
+			form.append('source','phone');
+			const uri =
+			( Platform.OS === "android" || Platform.OS === "web" )
+				? image.uri
+				: image.uri.replace("file://", "");
+			const filename = image.uri.split("/").pop();
+			console.log('adding filename:', filename);
+			const match = /\.(\w+)$/.exec(filename as string);
+			const ext = match?.[1];
+			const type = match ? `image/${match[1]}` : `image`;
+			form.append('images[0]', {
+				uri,
+				name: `image.${ext}`,
+				type,
+			} as any);
+
+		} 	
+		ImagesService({
+                method:'create',
+                data:form
+            })
+            .then( result => {
+                console.log('image save result',result);
+
+            }).catch((error) => {
+                console.log('saving error:',error);
+            })  			
+	}
 	const onSubmit = data => {
 		setSaveState('saving');
 		console.log('saveState', saveState);
 		console.log('data', data);
 		var form = new FormData();
+
 		var images = [];
 		var i = 0;
+		console.log('galleryImages', galleryImages);
 		galleryImages.forEach(selectedImage => {
-			console.log('artifactId', artifactId);
+			//console.log('artifactId', artifactId);
 		//	console.log('artifact.id', artifact.id);
 			console.log('origImageIds', origImageIds);
 			console.log('seleectedImage', selectedImage);
@@ -388,6 +447,13 @@ console.log('setu[ artfact', artifact);
 				origImageIds[artifact.id] = [];
 			}
 			if( ( artifact?.id && !origImageIds[artifact.id].includes( selectedImage.id ) ) || !artifact?.id){
+				imageMeta = {};
+				imageMeta.year = selectedImage.year;				
+				imageMeta.person_id = selectedImage.person_id;				
+				imageMeta.isPrimary = selectedImage.isPrimary;				
+				imageMeta.title = selectedImage.title;
+				console.log('imagesMeta', imageMeta);				
+				form.append('imagesMeta[' + i + ']', JSON.stringify(imageMeta) );
 				if( Platform.OS == "web" ){
 					form.append('source', 'web');
 					form.append('images[' + i + ']', selectedImage);
@@ -408,6 +474,7 @@ console.log('setu[ artfact', artifact);
 						name: `image.${ext}`,
 						type,
 					} as any);
+
 				} 
 			}
 			i++;
@@ -436,11 +503,13 @@ console.log('setu[ artfact', artifact);
             }).then( (results) => {
             	console.log('after submit results', results);
             	var newArtifact = results;
-            	console.log('newartifact iages',newArtifact.images);
+            	console.log('newartifact ',newArtifact);
+            	if( "undefined" != typeof newArtifact.images){
+	            	setGalleryImages(newArtifact.images);
+	            }
             	setArtifact(newArtifact);
             	setArtifactId(newArtifact.id);
             	setupInitialArtifact(newArtifact);
-//            	setGalleryImages(newArtifact.images);
             	setSaveState('saved');
 
             	setTimeout(function(){
@@ -505,6 +574,7 @@ console.log('setu[ artfact', artifact);
 		fileObj.uri = URL.createObjectURL(fileObj);
 		const cloneDeep = _.cloneDeep(galleryImages);
 		cloneDeep.push(fileObj);
+		console.log('setgalelryimages in handflefilechange', cloneDeep);
 		setGalleryImages( cloneDeep );
 		setPreviewVisible(true)
 	};
@@ -516,15 +586,20 @@ console.log('setu[ artfact', artifact);
 			aspect: [4, 3],
 			quality: 1
 	      });
+	      const counter = counterTotal;
 		if (base64 && base64?.assets ) {
 			console.log('PICKIMAGE SUCCESS galleryImages', galleryImages);
 //			galleryImages.push(result.assets[0]);
 //						galleryImages.push(uri);
 			const cloneDeep = _.cloneDeep(galleryImages);
+			base64.assets[0].counter = counter;
 			cloneDeep.push(base64.assets[0]);
+			console.log('set galleryImages in pickimage', cloneDeep);
+
 			setGalleryImages( cloneDeep );
-			console.log('galleryImages', cloneDeep);
 			setPreviewVisible(true);
+			setCounterTotal( ( counter + 1 ) );
+			saveImage( base64.assets[0] );
 		}    
 		else{
 			console.log('error on pic' )
@@ -603,26 +678,31 @@ console.log('setu[ artfact', artifact);
 											borderRadius:16,								
 								}}/>
 							</Pressable>
-								<CustomButton
-									styles={{
-										borderRadius: 20,
-										elevation: 3,
-										color:'black',
-										marginLeft: 'auto',					    		
-									}}						
-									title={ "Cancel" }
-									onPress={ () => { __onCancel() }}
-								/>
-								<CustomButton
-									styles={{
-										borderRadius: 20,
-										elevation: 3,
-										color:'black',
-										marginLeft: 20,					    		
-									}}						
-									title={ artifactId ? "Update" : "Save" }
-									onPress={handleSubmit(onSubmit, onErrors)}
-							/>
+								{ artifactId ? (
+									<>
+									<CustomButton
+											styles={{
+												borderRadius: 20,
+												elevation: 3,
+												color:'black',
+												marginLeft: 'auto',
+											}}						
+											title={ "Cancel" }
+											onPress={ () => { __onCancel() }}
+										/>
+									<CustomButton
+										styles={{
+											borderRadius: 20,
+											elevation: 3,
+											color:'black',
+											marginLeft: 20,					    		
+										}}						
+										title={ artifactId ? "Update" : "Save" }
+										onPress={handleSubmit(onSubmit, onErrors)}/>
+										</>
+									) : (null)
+								}
+
 					</View>
 				</View>	
 			) : null }				
@@ -704,7 +784,7 @@ console.log('setu[ artfact', artifact);
 							</View>				
 						) : null }						
 { ( "out" == slideoutState ) ? (
-			<ImageMeta photographers={photographers} galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
+			<ImageMeta photographers={photographers} galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} artifactPrimaryImageId={ artifact ? artifact.primary_image_id : null } slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
 			) : (																	
 
 			<ScrollView 
@@ -717,24 +797,26 @@ console.log('setu[ artfact', artifact);
 						<View style={s.formSection}>
 
 							<View style={s.fieldWrapper}>
-								<Text style={s.label}>Name</Text>
+								<View style={[s.label,{width:'100%', flex:1,flexDirection:'row'}]}>
 
+									<Text style={s.label}>Name</Text>
+									<Text style={{color:'red', marginLeft:'auto'}}>
+										{errors.name && errors.name.message }
+									</Text>
+								</View>
 								<Controller
 									control={control}
 									name="name"
-									rules={{ required: true }}
+									rules={{ required: "*" }}
 									render={({field: { onChange, onBlur, value }}) => (
 										<TextInput
-											style={s.input}
+											style={[s.input, errors.name ? s.inputError : null ]}	
 											onBlur={onBlur}
 											onChangeText={value => onChange(value)}
 											value={(value) ? value : ""}
 										/>
 									)}
 								/>
-								<Text style={{color:'white', height:'30px'}}>
-									{errors.name && errors.name.message }
-								</Text>
 							</View>
 						</View>
 						<View style={s.formSection}>
@@ -930,64 +1012,67 @@ console.log('setu[ artfact', artifact);
 						<View style={s.formSection}>
 							<View style={s.formSectionTitleWrapper}>
 								<Text style={s.formSectionTitle}>Images</Text>
-								{ (Platform.OS == 'web') ? 
-								(<FilePicker 
-									onChange={handleFileChange}
-								></FilePicker>) : null }
-								{( Platform.OS !== "web" ) ? (
-									<>
+									{ artifactId ? (
+										<>
+											{ (Platform.OS == 'web') ? 
+											(<FilePicker 
+												onChange={handleFileChange}
+											></FilePicker>) : null }
+											{( Platform.OS !== "web" ) ? (
+												<>
 
-								<Pressable 
-									style={({pressed}) => [
-													{
-											backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-											alignItems: 'center',
-											justifyContent: 'center',
-											borderRadius: 20,
-											height:40,
-											width:40,
-											elevation: 3,
-											marginLeft: 'auto',					    		
-											marginRight:25,
-											boxShadow: '0px 2px 2px #d8d8d8'						        
-													}
-									]}
-										onPress={ () => { __pickImage() }}
-								>
-									<Ionicons name="image-outline" size={30} color="" style={{
-												display:'flex-inline',
-												height:30,
-												width:30,
-												borderRadius:16,								
-									}}/>
-									</Pressable>						
-								<Pressable 
-									style={({pressed}) => [
-													{
-											backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-											alignItems: 'center',
-											justifyContent: 'center',
-											borderRadius: 20,
-											height:40,
-											width:40,
-											elevation: 3,
-											marginRight:5,
-											boxShadow: '0px 2px 2px #d8d8d8'						        
-													}
-									]}
-										onPress={ () => { 
-										__startCamera();
-										}}
-								>
-									<Ionicons name="camera-outline" size={30} color="" style={{
-												display:'flex-inline',
-												height:30,
-												width:30,
-												borderRadius:16,								
-									}}/>
-									</Pressable>
-								</>) : null }						
-							</View>
+											<Pressable 
+												style={({pressed}) => [
+																{
+														backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+														alignItems: 'center',
+														justifyContent: 'center',
+														borderRadius: 20,
+														height:40,
+														width:40,
+														elevation: 3,
+														marginLeft: 'auto',					    		
+														marginRight:25,
+														boxShadow: '0px 2px 2px #d8d8d8'						        
+																}
+												]}
+													onPress={ () => { __pickImage() }}
+											>
+												<Ionicons name="image-outline" size={30} color="" style={{
+															display:'flex-inline',
+															height:30,
+															width:30,
+															borderRadius:16,								
+												}}/>
+												</Pressable>						
+											<Pressable 
+												style={({pressed}) => [
+																{
+														backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+														alignItems: 'center',
+														justifyContent: 'center',
+														borderRadius: 20,
+														height:40,
+														width:40,
+														elevation: 3,
+														marginRight:5,
+														boxShadow: '0px 2px 2px #d8d8d8'						        
+																}
+												]}
+													onPress={ () => { 
+													__startCamera();
+													}}
+											>
+												<Ionicons name="camera-outline" size={30} color="" style={{
+															display:'flex-inline',
+															height:30,
+															width:30,
+															borderRadius:16,								
+												}}/>
+												</Pressable>
+											</>) : null }						
+								</> ) : null }
+							</View> 
 						</View>
 						<View style={{flex:1 }}>
 							{galleryImages && galleryImages.length > 0 ? (
@@ -999,6 +1084,7 @@ console.log('setu[ artfact', artifact);
 									extraData={galleryImages}
 									keyExtractor={(item, index) => {return  index.toString();}}
 									renderItem={ ({ item, index }) => (
+										( "undefined" != typeof item ) ? (
 										<View key={item.id} serverId={item.id} style={{}}>
 										<Image source={{uri:item.uri}} /* Use item to set the image source */
 											style={{
@@ -1038,6 +1124,7 @@ console.log('setu[ artfact', artifact);
 									}}/>
 									</Pressable>
 										</View>
+										) : (null)
 									)}
 								/>
 							) : (

@@ -12,9 +12,8 @@ import { LogBox } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 
 const s = require('@/components/style');
-export default function App({ artifactId, galleryState, galleryStateChanger, slideoutState, setslideoutState, imageState, setImageState, photographers }) {
+export default function App({ artifactId, artifactPrimaryImageId, galleryState, galleryStateChanger, slideoutState, setslideoutState, imageState, setImageState, photographers }) {
     let defaultValues = {};
-//    console.log('prop!!!! PhotographERS' , photographers);
     const { register, setError, getValues, setValue, getValue, handleSubmit, control, reset, formState: { errors } } = useForm({
         defaultValues:defaultValues
     }); 
@@ -24,141 +23,68 @@ export default function App({ artifactId, galleryState, galleryStateChanger, sli
     const isFocused = useIsFocused()
 
     const [loading, setLoading] = useState(false)
-    const [suggestionsList, setSuggestionsList] = useState(photographers)
+    const [suggestionsList, setSuggestionsList] = useState(photographers ? photographers : null)
     const notificationBarHeight = 50;
-useEffect(() => {
-    LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
-}, [])
-const styles = StyleSheet.create({
-    mainWrapper:{
-
-    },
-    mainWrapperOut:{
-      
-
-    },
-          
-    wrapper:{
-        marginTop:0,
-    },
-    wrapperOut:{
-        
-    },
-  containerVoid: {
-},
-  containerOutVoid: {
-},
-
-  container: {
-    flex: 1,
-    backgroundColor:'white',
-    position: 'absolute',
-    top:0,
-    right: -280, 
-    height:0,
-    width: '80%', 
-    transition: '3s'
-  },
-  containerOut: {
-    flex: 1,
-    position: 'absolute',
-    top:0,
-    right: 0, 
-    width: '92%',
-    padding:20,
-    minHeight:300,  
-    borderColor:'#d8d8d8',
-    borderWidth:1,  
-    borderWidthTop:0,
-    //height: 300,
-    shadowColor: "#000",
-    shadowOffset: {
-        width: 10,
-        height: 20,
-    },
-    shadowOpacity: 1,
-    shadowRadius: 3.84,
-
-    elevation: 4,    
-    backgroundColor:'white',
-    transition: '3s',
-  },  
-  text: {
-    fontSize: 12,
-    color: 'black',
-    maxWidth:'60%',
-    marginTop:20,
-    paddingLeft:20
-  },
-  plus: {
-    position: "absolute",
-    left: 15,
-    top: 10,
-  },
-input: {
-    display: "flex",
-    flexShrink: 0,
-    flexGrow: 0,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderColor: "#c7c6c1",
-    paddingVertical: 13,
-    paddingLeft: 12,
-    paddingRight: "5%",
-    width: "100%",
-    justifyContent: "flex-start",
-  },  
-});
-
-    
-    
-    /* 
-useEffect(() => {
-    console.log('imageState', imageState);
-    console.log('>>>>>>>>>>>>');
-    console.log('>>>>>>>>>>>>');
-    console.log('>>>>>>>>>>>>');
-    console.log('>>>>>>>>>>>>');
-    console.log('>>>>>>>>>>>>');
-    console.log('>>>>>>>>>>>>');
-    console.log('>>>>>>>>>>>>');
-    if( imageState ){
-        console.log('!!!!!!!!!!!!!has Image state!', imageState);
-        defaultValues.name = imageState?.name;
-        defaultValues.year = "2025";
-        if( imageState?.year || !imageState.year ){
-            //defaultValues.year = imageState.year;
-        }
-    }
-    console.log('image defaultValues', defaultValues);
-    reset({ ...defaultValues });
-  }, []); 
- */   
-
-  //  console.log( getValues() );
-
-    const [isPrimary, setChecked] = useState(false);
+    const [isPrimary, setIsPrimary] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [selectedItemTitle, setSelectedItemTitle] = useState(null);
+  //  console.log('suggestionsList', suggestionsList);
+//console.log('in imagemeta TSXimageState.person_id', imageState.person_id);
+//console.log('imageState', imageState);
+//console.log('artifactPrimaryImageId', artifactPrimaryImageId);
+console.log('galleryState', galleryState);
     useEffect(() => {
+        // hides development popup warning for autocompletedropdown in scrollview
+        LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
+
+        // setup keyboard handling
         const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
         const hideSubscription = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
 
+        if( selectedItem && photographers ){
+//setSelectedItem(3);
+Object.keys(photographers).forEach((k, i) => {
+    if( selectedItem == photographers[k].id ){
+        var selectedItemTitle = photographers[k].title;
+        setSelectedItemTitle(selectedItemTitle);
+//    console.log('title: ',photographers[k].title);
+//        alert(selectedItemTitle);
+//dropdownController.current.setInputText("selectedItemTitle");
+    }
+    //console.log('i',i);
+});
+            console.log('photographers', photographers);
+//            console.log('TITLE&&&&&&&&&', title);
+//dropdownController.current.setInputText('what');
+console.log('selecteditem', selectedItem);
+console.log('selecteditemTitle', selectedItemTitle);
+
+        }
+//setSelectedItem(3);
+//console.log('selectedItem',selectedItem);
+//console.log('dropdownController.current',dropdownController.current);
+//dropdownController.current.setItem({});
+//alert(2);
+//dropdownController.current.toggle();
+        // conditional seemed wrong;  was (imageState.id !== currentImageId);  
+        if( imageState?.id ){
+            if( imageState.id == currentImageId ){
+                setCurrentImageId( imageState.id );
+                console.log('USE EFFECT ::: IMAGEsTATE', imageState);
+                setValue('year', imageState?.year ? JSON.stringify(imageState?.year) : null );
+                setValue('title', imageState?.title ? imageState?.title : null );
+            }
+            if( artifactPrimaryImageId && artifactPrimaryImageId == imageState.id ){
+                setIsPrimary( true );    
+            }
+        }
         return () => {
             showSubscription.remove();
         };
-    }, []);
-    useEffect(() => {
-        if( imageState?.id && imageState.id !== currentImageId ){
-            setCurrentImageId( imageState.id );
-            console.log('USE EFFECT ::: IMAGEsTATE', imageState);
-            setValue('year', imageState?.year ? JSON.stringify(imageState?.year) : null );
-            setValue('title', imageState?.title ? imageState?.title : null );
-        }
     })
 
 
-  const [selectedItem, setSelectedItem] = useState(null)
+
   const dropdownController = useRef(null)
 
   const searchRef = useRef(null)
@@ -216,16 +142,25 @@ useEffect(() => {
         setIsKeyboardVisible(false);
     }; 
     const updateImageMeta = data => {
+
         var form = new FormData();
         console.log('updateImage Data', data);
         console.log('updateImage imageState', imageState);
+        console.log('o!!!!!11n save selecteditem', selectedItem);
+
         form.append('year',data.year);
+        imageState.year = data.year;
         form.append('person_id', selectedItem);
+        imageState.person_id = selectedItem;
         form.append('person_type', "photographer");
+        imageState.person_type = "photographer";
         form.append('isPrimary', isPrimary);
+        imageState.isPrimary = isPrimary;
         console.log('isPrimary', isPrimary);
         form.append('title', data.title);
+        imageState.title = data.title;
         form.append('alttext', data.alttext);
+        imageState.alttext = data.alttext;
         form.append('artifact_id', artifactId);
         if( imageState?.id ){
             // you're editing an existing db image 
@@ -234,6 +169,14 @@ useEffect(() => {
         else{
 
         }
+Object.keys(galleryState).forEach((k, i) => {
+    if( imageState.counter == galleryState[k].counter ){
+        if( imageState ){
+            console.log('add to galleryState 175', imageState);
+            galleryState[k] = imageState;
+        }
+    }
+});        
         /*
         if( userSession ){
             var parsedUserSession = JSON.parse(userSession);
@@ -242,34 +185,48 @@ useEffect(() => {
         }
                         
         */
-                ImagesService({
-                    method:'create',
-                    id:imageState.id,
-                    data:form
-                })
-                .then( result => {
-                    console.log(result);
-                    /*
-                    const cloneDeep = _.cloneDeep(galleryState);
-                    Object.keys(cloneDeep).forEach((k, i) => {
-                        if( imageState.id  == cloneDeep[k].id ){
-                            cloneDeep.splice(k);
-                        }
-                    });            
-                    galleryStateChanger( cloneDeep );                    
-                    toggleSlideout();                    
-                    */
-                }).catch((error) => {
-                    console.log('saving error:',error);
-                })  
+        if( imageState.id ){
+            ImagesService({
+                method:'create',
+                id:imageState.id,
+                data:form
+            })
+            .then( result => {
+                console.log(result);
+
+            }).catch((error) => {
+                console.log('saving error:',error);
+            })  
+        }
+        toggleSlideout();
+                
 
     };    
     const removeImage = data => {
         var form = new FormData();
         form.append('artifact_id', (artifactId ? artifactId : null));
+        toggleSlideout();                    
         if( imageState?.id ){
             // you're editing an existing db image 
             form.append('id',imageState.id);
+            ImagesService({
+                method:'delete',
+                artifact_id:artifactId,
+                id:imageState?.id
+            })
+            .then( result => {
+                console.log(result);
+                const cloneDeep = _.cloneDeep(galleryState);
+                Object.keys(cloneDeep).forEach((k, i) => {
+                    if( imageState?.id  == cloneDeep[k].id ){
+                        cloneDeep.splice(k);
+                    }
+                });  
+                console.log('remove image clonedeep update:', cloneDeep);          
+                galleryStateChanger( cloneDeep );                    
+            }).catch((error) => {
+                console.log('saving error:',error);
+            })              
         }
         else{
 
@@ -283,24 +240,7 @@ useEffect(() => {
         }
                              
         */
-                ImagesService({
-                    method:'delete',
-                    artifact_id:artifactId,
-                    id:imageState.id
-                })
-                .then( result => {
-                    console.log(result);
-                    const cloneDeep = _.cloneDeep(galleryState);
-                    Object.keys(cloneDeep).forEach((k, i) => {
-                        if( imageState.id  == cloneDeep[k].id ){
-                            cloneDeep.splice(k);
-                        }
-                    });            
-                    galleryStateChanger( cloneDeep );                    
-                    toggleSlideout();                    
-                }).catch((error) => {
-                    console.log('saving error:',error);
-                })  
+                
 
     };   
 
@@ -391,9 +331,10 @@ function toggleSlideout() {
                         backgroundColor:'white',
                         shadowOpacity: 1,
                         shadowRadius: 3.84,
+//                        paddingBottom:100
                     } : styles.wrapper, 
                     (  isKeyboardVisible  ? { 
-                        paddingBottom:( notificationBarHeight + 150 ),
+                        paddingBottom:( notificationBarHeight + 500 ),
 //                        backgroundColor:'blue', 
                     } : (null) )
                     ]}> 
@@ -461,6 +402,49 @@ function toggleSlideout() {
                             paddingLeft:20                            
                         }}>{imageState?.fileName}</Text>
                     </View>
+                                       
+
+
+
+                    <View style={{flex:1, flexDirection:'row', marginTop:5, marginBottom:5, zIndex:-1}}>
+
+                        <View style={{width:'50%'}}>
+                            <Text style={s.label}>Year of Photograph</Text>
+                            <Controller
+                                control={control}
+                                render={({field: { onChange, onBlur, value=imageState?.year }}) => (
+                                        <TextInput
+                                            style={{
+                                                backgroundColor: 'white',
+                                                borderColor: 'black',
+                                                borderWidth:1,
+                                                height: 40,
+                                                padding: 10,
+                                                borderRadius: 4,        
+                                                width:120                                           
+                                            }}
+                                            onFocus={onFocusKeyboard}
+                                            onBlur={onFocusKeyboardBlur}
+                                            onChangeText={value => onChange(value)}
+                                            value={(value) ? value : ""}
+                                        />
+                                )}
+                                name="year"
+                            />
+
+                        </View>
+                        <View>
+                            <Text style={[s.label]}>Make Primary Picture</Text>
+        <Checkbox
+            name="primary"        
+                                                 style={{marginTop:8}}
+                                        value={isPrimary}
+                                        onValueChange={setIsPrimary}
+                                        color={isPrimary ? 'black' : undefined}
+             />
+                        </View>
+
+                    </View>
                     <View style={{}}>
                         <Text style={s.label}>Photographer (optional)</Text>
                         
@@ -472,12 +456,14 @@ function toggleSlideout() {
                                       controller={controller => {
                                         dropdownController.current = controller
                                       }}
-                                      // initialValue={'1'}
-                                      dataSet={suggestionsList}
+//                                      initialValue={imageState?.person_id ? imageState?.person_id : 1}
+initialValue={{ id: (imageState?.person_id ? imageState?.person_id : null), title: ( selectedItemTitle ? selectedItemTitle : 'olding') }}
+                                        dataSet={suggestionsList}
                                       onChangeText={getSuggestions}
                                       onSelectItem={item => {
                                         item && setSelectedItem(item.id)
                                       }}
+                                      loading={loading}
                                       //debounce={600}
                                       //suggestionsListMaxHeight={Dimensions.get('window').height * 0.2}
                                       onClear={onClearPress}
@@ -485,20 +471,20 @@ function toggleSlideout() {
 
                                       //  onSubmit={(e) => onSubmitSearch(e.nativeEvent.text)}
                                       //onOpenSuggestionsList={onOpenSuggestionsList}
-                                      //loading={loading}
-                                      useFilter={false} // set false to prevent rerender twice
+//                                      loading={loading}
+                                      //useFilter={false} // set false to prevent rerender twice
                                       
                                       renderItem={(item, text) => <Text style={{ color: 'black', padding: 15, backgroundColor:'',  }}>{item.title}</Text>}
                                       inputHeight={50}
                                       showChevron={true}
                                       closeOnBlur={false}
-                                      //showClear={true}
+                                      showClear={true}
 
 
-                                    direction={'down'}
+                                    direction={'up'}
                                     //style={styles.input}
                                     textInputProps={{
-                                        placeholder: 'Type to Search',
+                                        placeholder:  'Type to Search',
                                         autoCorrect: false,
                                         autoCapitalize: 'none',
                                         style: {
@@ -538,47 +524,6 @@ function toggleSlideout() {
                             </AutocompleteDropdownContextProvider>
                         
                         
-                    </View>                   
-
-
-
-                    <View style={{flex:1, flexDirection:'row', marginTop:5, marginBottom:5, zIndex:-1}}>
-                        <View style={{width:'50%'}}>
-                            <Text style={s.label}>Year of Photograph</Text>
-                            <Controller
-                                control={control}
-                                render={({field: { onChange, onBlur, value=imageState?.year }}) => (
-                                        <TextInput
-                                            style={{
-                                                backgroundColor: 'white',
-                                                borderColor: 'black',
-                                                borderWidth:1,
-                                                height: 40,
-                                                padding: 10,
-                                                borderRadius: 4,        
-                                                width:120                                           
-                                            }}
-                                            onFocus={onFocusKeyboard}
-                                            onBlur={onFocusKeyboardBlur}
-                                            onChangeText={value => onChange(value)}
-                                            value={(value) ? value : ""}
-                                        />
-                                )}
-                                name="year"
-                            />
-
-                        </View>
-                        <View>
-                            <Text style={[s.label]}>Make Primary Picture</Text>
-        <Checkbox
-            name="primary"        
-                                                 style={{marginTop:8}}
-                                        value={isPrimary}
-                                        onValueChange={setChecked}
-                                        color={isPrimary ? 'black' : undefined}
-             />
-                        </View>
-
                     </View>
                     <View style={{zIndex:-1}}>
                         <Text style={s.label}>Title</Text>
@@ -635,4 +580,86 @@ function toggleSlideout() {
         </>
     );
 }
+const styles = StyleSheet.create({
+    mainWrapper:{
+
+    },
+    mainWrapperOut:{
+      
+
+    },
+          
+    wrapper:{
+        marginTop:0,
+    },
+    wrapperOut:{
+        
+    },
+  containerVoid: {
+},
+  containerOutVoid: {
+},
+
+  container: {
+    flex: 1,
+    backgroundColor:'white',
+    position: 'absolute',
+    top:0,
+    right: -280, 
+    height:0,
+    width: '80%', 
+    transition: '3s'
+  },
+  containerOut: {
+    flex: 1,
+    position: 'absolute',
+    top:0,
+    right: 0, 
+    width: '92%',
+    padding:20,
+    minHeight:300,  
+    borderColor:'#d8d8d8',
+    borderWidth:1,  
+    borderWidthTop:0,
+    //height: 300,
+    shadowColor: "#000",
+    shadowOffset: {
+        width: 10,
+        height: 20,
+    },
+    shadowOpacity: 1,
+    shadowRadius: 3.84,
+
+    elevation: 4,    
+    backgroundColor:'white',
+    transition: '3s',
+  },  
+  text: {
+    fontSize: 12,
+    color: 'black',
+    maxWidth:'60%',
+    marginTop:20,
+    paddingLeft:20
+  },
+  plus: {
+    position: "absolute",
+    left: 15,
+    top: 10,
+  },
+input: {
+    display: "flex",
+    flexShrink: 0,
+    flexGrow: 0,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderColor: "#c7c6c1",
+    paddingVertical: 13,
+    paddingLeft: 12,
+    paddingRight: "5%",
+    width: "100%",
+    justifyContent: "flex-start",
+  },  
+});
 

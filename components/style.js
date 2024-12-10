@@ -151,15 +151,17 @@ module.exports = StyleSheet.create({
         elevation:3,
         display:'inline-block',
         marginTop:10,
-        border: 'solid 1px #d8d8d8'
-    },
+        visibility:'hidden',
+        border: 'solid 1px #d8d8d8',
+    }, 
     pressableButtonText: {
         fontSize: 16,
         lineHeight: 21,
         fontWeight: 'bold',
         letterSpacing: 0.25,
         color: 'black',
-    },    
+    },   
+   
     pressableButtonAction: {
         marginTop:6,
         alignItems: 'center',
