@@ -25,7 +25,7 @@ function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryIm
 					<Text style={viewStyles.headerText}>{artifact?.name}</Text>
 
 				</View>
-					<View style={{display:'flex',flex:1, justifyContent:'center', alignItems:'center', marginTop:150}}>
+					<View style={{display:'flex',flex:1, justifyContent:'center', alignItems:'center', marginTop:150, backgroundColor:'', width:'100%'}}>
 							<>
 								<Text>{artifact?.address}</Text>
 								<Text>{artifact?.city}, {artifact?.state}</Text>

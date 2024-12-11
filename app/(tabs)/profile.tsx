@@ -8,13 +8,15 @@ import  {ArtifactsService}  from '@/utilities/ArtifactsService';
 const s = require('@/components/style');
 import { usePathname, useRouter, useSegments } from 'expo-router';
 
-export default function ProfileScreen({navigation}) {
+export default function ProfileScreen({  artifacts, setArtifacts }) {
     const router = useRouter();
     const { userSession, signOut, signIn } = useSession();
     const pathname = usePathname();
+    const navigation = useNavigation();
+    console.log('artifacts !!!!!!!!!!!!! in profile tab', navigation);
    
-   const [artifacts, setArtifacts] = useState([]); 
    useEffect(() => {
+    console.log('useffect in profile tab');
         { (userSession) ? (
 
             ArtifactsService({method:'getAll'})
@@ -41,47 +43,61 @@ export default function ProfileScreen({navigation}) {
     };
 
    return (
-         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop:40, paddingBottom:30 }}>
+         <View style={{ alignItems: 'center', justifyContent: 'center', paddingTop:40, paddingBottom:10, backgroundColor:'' }}>
             <Text style={{fontSize:16,fontWeight:'700'}}>Profile Screen</Text>
             { (userSession) ? (
-                <FlatList
-                    style={styles.container,{padding:20, marginBottom:30}}
-                    data={artifacts}
-                    keyExtractor={(item) => String(item.id)}
-                    renderItem={({ item, index }) => 
-                        <View key={index} style={{ maxWidth:'1200px', margin:'0 auto', display:'flex', flexWrap:'wrap',flexDirection:'row',width:'100%', alignItems:'center', marginTop:8}}>
-                            <Text style={{width:'30%',flexGrow: 1}}>{item.name}</Text>
+                <>
+                    <FlatList
+                        style={{paddingRight:20, marginBottom:0, paddinBottom:0, paddingLeft:20}}
+                        data={artifacts}
+                        keyExtractor={(item) => String(item.id)}
+                        renderItem={({ item, index }) => 
+                            <View key={index} style={{ backgroundColor:'', maxWidth:'1200px', margin:'0 auto', display:'flex', flexWrap:'wrap',flexDirection:'row',width:'100%', alignItems:'center', marginTop:8}}>
+                                <Text style={{width:'30%',flexGrow: 1}}>{item.name}</Text>
 
-                            <CustomButton
-                                title="Edit"
-                                webbable={true}
-                                url={'/edit/' + item.id }                 
-                                styles={{marginRight:5, paddingHorizontal: 14 }}
-                                onPress={() => { navigation.navigate('edit', {
-                                        params: { artifactId: item.id }
-                                    }) 
-                                }}
-                            />
-                            <CustomButton
-                                webbable={true}
-                                url={'/show/' + item.id }                 
-                                title="View"
-                                onPress={() => { navigation.navigate('show', {
-                                params: { artifactId: item.id }
-                                    }) 
-                                }}
-                                styles={{marginRight:5, paddingHorizontal: 14 }}                                
-                            />
-                            <CustomButton
-                                webbable={true}
-                                styles={{marginRight:5, paddingHorizontal: 14 }}
-                                title="Archive"
-                                onPress={ () => { deleteArtifact( item.id ) }}
+                                <CustomButton
+                                    title="Edit"
+                                    webbable={true}
+                                    url={'/edit/' + item.id }                 
+                                    styles={{marginRight:5, paddingHorizontal: 14 }}
+                                    onPress={() => { navigation.navigate('edit', {
+                                            params: { artifactId: item.id }
+                                        }) 
+                                    }}
+                                />
+                                <CustomButton
+                                    webbable={true}
+                                    url={'/show/' + item.id }                 
+                                    title="View"
+                                    onPress={() => { navigation.navigate('show', {
+                                    params: { artifactId: item.id }
+                                        }) 
+                                    }}
+                                    styles={{marginRight:5, paddingHorizontal: 14 }}                                
+                                />
+                                <CustomButton
+                                    webbable={true}
+                                    styles={{marginRight:5, paddingHorizontal: 14 }}
+                                    title="Archive"
+                                    onPress={ () => { deleteArtifact( item.id ) }}
 
-                            />                            
-                        </View>
-                    }           
-                 /> ) :
+                                />                            
+                            </View>
+                        }           
+                     /> 
+                    <View style={{ backgroundColor:'', maxWidth:'1200px', margin:'0 auto', padding:44, display:'flex', flexWrap:'wrap',flexDirection:'row',width:'100%', alignItems:'center'}}>
+                                <Text style={{width:'30%',flexGrow: 1}}></Text>
+
+                                <CustomButton
+                                    webbable={true}
+                                    title="New Artifact+"
+                                    onPress={() => { navigation.navigate('Add', {
+                                        }) 
+                                    }}
+                                />                            
+                            </View> 
+                 </>
+                 ) :
                 <>
                  <CustomButton title="Sign In" 
                     style={{margin:20}}
@@ -94,6 +110,8 @@ export default function ProfileScreen({navigation}) {
                 </Text>
                 </>
             }
+
+
          </View>
    );
  }
@@ -101,7 +119,8 @@ export default function ProfileScreen({navigation}) {
     container: {
         paddingTop:70,
         paddingBottom:100,
-        flex: 1,
+        height:300,
+        backgroundColor:'blue',
         justifyContent:'center',
         alignItems:'center',
         padding: 16

@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 
 
 function Add({ route, navigation }) {
-	const [lazyArtifactId, setLazyArtifactId] = useState(null);	
+	const [addArtifactId, setAddArtifactId] = useState(null);	
 
 	function createArtifactId(){
 		var form = new FormData();
@@ -20,23 +20,19 @@ function Add({ route, navigation }) {
 	        }).then( (results) => {
 	        	console.log('after submit results', results);
 	        	var newArtifact = results;
-	        	console.log('newartifact ',newArtifact);
-	  //      	setArtifact(newArtifact);
-	        	setLazyArtifactId(newArtifact.id);
-
-
+	        	setAddArtifactId(newArtifact.id);
 		}).catch((error) => {
 			console.log('saving error:',error);
 	    })				
 	}
 	useEffect(() => {
-		if( !lazyArtifactId ){
+		if( !addArtifactId ){
 			createArtifactId();
 		}
 	});
     return (
 			<>
-				<AddEdit navigation={navigation} initArtifactId={lazyArtifactId} />
+				<AddEdit navigation={navigation} initArtifactId={addArtifactId} />
 			</>
     );
 }

@@ -41,7 +41,6 @@ export default function AddEdit( {navigation, initArtifactId} ) {
 	const [origImageIds, setOrigImageIds] = useState([{}]);	
 	const [artifactId, setArtifactId] = useState(initArtifactId ? initArtifactId : null);	
 	const [artifact, setArtifact] = useState(null);	
-	const [artifacts, setArtifacts] = useState([]);
 	const [galleryImages, setGalleryImages] = useState([]);
 	const [loadState, setLoadState] = useState("initial");
 	const [saveState, setSaveState] = useState(null);
@@ -356,6 +355,15 @@ console.log('setu[ artfact', artifact);
 		setGalleryImages([]);		
 		setLoadState('loading');
 		setslideoutState( 'in' );
+					router.replace('/');		
+
+	    //const navigation = useNavigation();
+/*
+		navigation.navigate('edit', {
+	        params: { artifactId: item.id }
+	    })
+	    */
+	    /*
 		const state = navigation.getState();
 		const currentIndex = state.index;
 		const currentScreen = state.routes[currentIndex].name;
@@ -366,7 +374,8 @@ console.log('setu[ artfact', artifact);
 		}
 		else{
 			router.replace('/');		
-		}    
+		} 
+		*/   
 	}
 	const onErrors = errors => {
 		//console.error(errors);
@@ -392,6 +401,7 @@ console.log('setu[ artfact', artifact);
 	}
 	const saveImage = image => {
 console.log('saveImage data', image );
+		setSaveState('savingImage');
 		var form = new FormData();
         form.append('artifact_id', artifactId);
 		imageMeta = {};
@@ -424,9 +434,12 @@ console.log('saveImage data', image );
             })
             .then( result => {
                 console.log('image save result',result);
+				setSaveState(null);
+
 
             }).catch((error) => {
                 console.log('saving error:',error);
+				setSaveState(null);
             })  			
 	}
 	const onSubmit = data => {
@@ -434,9 +447,10 @@ console.log('saveImage data', image );
 		console.log('saveState', saveState);
 		console.log('data', data);
 		var form = new FormData();
-
+		form.append('temp', false);
 		var images = [];
 		var i = 0;
+		/*
 		console.log('galleryImages', galleryImages);
 		galleryImages.forEach(selectedImage => {
 			//console.log('artifactId', artifactId);
@@ -480,6 +494,7 @@ console.log('saveImage data', image );
 			i++;
 
 		});
+		*/
 		if( isEdit && data?.id ){
 			form.append('id',data.id);
 		}
@@ -559,8 +574,8 @@ console.log('saveImage data', image );
 		}
 	}
 	const navigateToShow = () => {
-		console.log('------------->view navigate artifact.id',artifact.id);
-		console.log('------------->view navigate artifactId',artifactId);
+		//console.log('------------->view navigate artifact.id',artifact.id);
+		//console.log('------------->view navigate artifactId',artifactId);
 		setLoadState("loading");
 		navigation.navigate('show', { params: { artifactId: artifactId } })
 	}
@@ -578,6 +593,37 @@ console.log('saveImage data', image );
 		setGalleryImages( cloneDeep );
 		setPreviewVisible(true)
 	};
+	const removeArtifactImage = data => {
+        var form = new FormData();
+        form.append('artifact_id', (artifactId ? artifactId : null));
+        if( imageState?.id ){
+            // you're editing an existing db image 
+            form.append('id',imageState.id);
+            ImagesService({
+                method:'delete',
+                artifact_id:artifactId,
+                id:imageState?.id
+            })
+            .then( result => {
+                console.log(result);
+                const cloneDeep = _.cloneDeep(galleryImages);
+                Object.keys(cloneDeep).forEach((k, i) => {
+                    if( imageState?.id  == cloneDeep[k].id ){
+                        cloneDeep.splice(k);
+                    }
+                });  
+                console.log('remove image clonedeep update:', cloneDeep);          
+                setGalleryImages( cloneDeep );         
+
+            }).catch((error) => {
+                console.log('saving error:',error);
+            })              
+        }
+        else{
+
+        }
+        console.log('DE;ETE');
+    };   
 	const __pickImage = async () => {
 		let  base64  = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -600,6 +646,8 @@ console.log('saveImage data', image );
 			setPreviewVisible(true);
 			setCounterTotal( ( counter + 1 ) );
 			saveImage( base64.assets[0] );
+			setImageState( base64.assets[0] );
+			console.log('imagestate in pickimage!!!!!!!!!!!!!!', imageState);
 		}    
 		else{
 			console.log('error on pic' )
@@ -626,8 +674,8 @@ console.log('saveImage data', image );
 	
 	
 	const hide = false;
-
-
+	//const navigation = useNavigation();
+	
 	return (
 		<>
 			<CameraWrapper galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraWrapper>		
@@ -694,11 +742,13 @@ console.log('saveImage data', image );
 										styles={{
 											borderRadius: 20,
 											elevation: 3,
-											color:'black',
 											marginLeft: 20,					    		
 										}}						
-										title={ artifactId ? "Update" : "Save" }
-										onPress={handleSubmit(onSubmit, onErrors)}/>
+										textStyles={{
+											color:( saveState == 'savingImage'  ? '#d8d8d8' : 'black' ),
+										}}
+										title={ artifactId ? ( saveState == 'savingImage' ? "Saving" : "Update") : "Save" }
+										onPress={ ( saveState == 'savingImage')  ? null : handleSubmit(onSubmit, onErrors) }/>
 										</>
 									) : (null)
 								}
@@ -755,7 +805,7 @@ console.log('saveImage data', image );
 				                        >Saved!</Text>
 							</View>
 						) : ( null ) }
-						{ ( artifactId  && "out" !== slideoutState ) ? (
+						{ ( artifact  && "out" !== slideoutState ) ? (
 							<View style={{
 								position:'absolute',
 								bottom:30,
@@ -1077,7 +1127,7 @@ console.log('saveImage data', image );
 						<View style={{flex:1 }}>
 							{galleryImages && galleryImages.length > 0 ? (
 								<FlatList
-									contentContainerStyle={{ flexGrow:1,paddingTop:20, marginRight:'auto'}}
+									contentContainerStyle={{ flexGrow:1,paddingTop:20, marginRight:'auto', paddingLeft:20}}
 									horizontal={true} 
 									showsHorizontalScrollIndicator={true} 
 									data={galleryImages}
@@ -1085,16 +1135,34 @@ console.log('saveImage data', image );
 									keyExtractor={(item, index) => {return  index.toString();}}
 									renderItem={ ({ item, index }) => (
 										( "undefined" != typeof item ) ? (
-										<View key={item.id} serverId={item.id} style={{}}>
+										<View key={item.id} serverId={item.id} style={{position:'relative', marginRight:15}}>
+										{ "savingImage" == saveState && item?.id == imageState?.id ? (										
+						<View style={{
+							zIndex:99999, width:150, position:'absolute',
+							backgroundColor:'rgba(0,0,0, .3)', justifyContent:'center', flex:1, alignItems:'center'}}
+						>					
+							<Image source={ loadingIcon } /* Use item to set the image source */
+			                            style={{
+			                                width:150,
+			                                height:150,
+			                            }}
+			                        />  
+						</View>
+						) : ( null
+										
+										) }
+
 										<Image source={{uri:item.uri}} /* Use item to set the image source */
 											style={{
 												width:150,
 												height:150,
 												backgroundColor:'#d0d0d0',
 												//resizeMode:'contain',
-												margin:6
 											}}
 										/>
+										{ "savingImage" == saveState && item?.id == imageState?.id ? (null) :(									
+
+										<>
 										<Pressable 
 									style={({pressed}) => [
 													{
@@ -1105,9 +1173,9 @@ console.log('saveImage data', image );
 											height:40,
 											width:40,
 											position:'absolute',
-											top:-7,
-											right:-7,
-											elevation: 3,
+											top:-14,
+											right:-14,
+											elevation: 4,
 											marginRight:5,
 											boxShadow: '0px 2px 2px #d8d8d8'						        
 													}
@@ -1116,13 +1184,46 @@ console.log('saveImage data', image );
 											openSlideout(item);
 										}}
 								>
-									<Ionicons name="pencil-outline" size={30} color="" style={{
+									<Ionicons name="pencil-outline" size={25} color="" style={{
+												display:'flex-inline',
+												height:25,
+												width:25,
+												borderRadius:12,								
+									}}/>
+									</Pressable>
+									<Pressable 
+									style={({pressed}) => [
+													{
+														display:'none',
+											backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+											alignItems: 'center',
+											justifyContent: 'center',
+											borderRadius: 20,
+											height:40,
+											//borderColor:'red',
+											//borderWidth:1,
+											width:40,
+											position:'absolute',
+											top:-7,
+											left:-7,
+											elevation: 3,
+											marginRight:5,
+											boxShadow: '0px 2px 2px #d8d8d8'						        
+													}
+									]}
+										onPress={ () => { 
+											removeArtifactImage(item);
+										}}
+								>
+									<Ionicons name="close-outline" size={30} color="" style={{
 												display:'flex-inline',
 												height:30,
 												width:30,
 												borderRadius:16,								
 									}}/>
 									</Pressable>
+									</>
+									) }
 										</View>
 										) : (null)
 									)}
@@ -1171,60 +1272,3 @@ const styles = StyleSheet.create({
 	},  
 });
 
-const GalleryImage = ({photo, removePhoto}: any) => {
-	console.log('sdsfds', photo)
-	return (
-		<View
-			style={{
-				backgroundColor: 'yellow',
-				flex: 1,
-				width: '200px',
-				height: '200px'
-			}}
-		>
-			<ImageBackground
-				source={{uri: photo && photo.uri}}
-				style={{
-					flex: 1
-				}}
-			>
-				<View
-					style={{
-						flex: 1,
-						flexDirection: 'column',
-						padding: 15,
-						justifyContent: 'flex-end'
-					}}
-				>
-					<View
-						style={{
-							flexDirection: 'row',
-							justifyContent: 'space-between'
-						}}
-					>
-						
-						<TouchableOpacity
-							onPress={removePhoto}
-							style={{
-								width: 130,
-								height: 40,
-
-								alignItems: 'center',
-								//borderRadius: 4
-							}}
-						>
-							<Text
-								style={{
-									color: '#fff',
-									fontSize: 20
-								}}
-							>
-								Delete
-							</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
-			</ImageBackground>
-		</View>
-	)
-}

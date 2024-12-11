@@ -11,7 +11,7 @@ type Props = {
 };
 
 export default function Button(props) {
-	const { onPress, title = 'Save', type='', styles, webbable=false, url=null } = props;
+	const { onPress, title = 'Save', type='', styles, textStyles, webbable=false, url=null } = props;
 		var PressClass = s.pressableButton;
 		var TextClass = s.pressableButtonText;
 	if(  Platform.OS == "web" && webbable ){
@@ -26,7 +26,7 @@ export default function Button(props) {
 					style={[PressClass, styles]}
 					onPress={onPress}
 				>
-					<Text style={[TextClass]}>{title}</Text>
+					<Text style={[TextClass, textStyles]}>{title}</Text>
 				</Pressable>
 	 	);
 	 }

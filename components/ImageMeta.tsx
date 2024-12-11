@@ -225,7 +225,7 @@ Object.keys(galleryState).forEach((k, i) => {
                 console.log('remove image clonedeep update:', cloneDeep);          
                 galleryStateChanger( cloneDeep );                    
             }).catch((error) => {
-                console.log('saving error:',error);
+                console.log('removeImage  error:',error);
             })              
         }
         else{

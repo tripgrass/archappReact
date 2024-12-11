@@ -9,11 +9,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import map  from '@/app/(tabs)/map';
 import camera  from '@/app/(tabs)/camera';
-import add from '@/app/(tabs)/artifacts/add';
+import AddTab from '@/app/(tabs)/artifacts/add';
 import edit from '@/app/(tabs)/artifacts/edit';
 import show from '@/app/(tabs)/artifacts/show';
 import home from '@/app/(tabs)/index';
-import profilePage from '@/app/(tabs)/profile';
+import ProfilePage from '@/app/(tabs)/profile';
 import artifacts from '@/app/(tabs)/artifacts';
 import SignIn from '@/app/sign-in';
 import Register from '@/app/register';
@@ -26,6 +26,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { useNavigationState } from '@react-navigation/native';
+import  {ArtifactsService}  from '@/utilities/ArtifactsService';
 
 import {
 	createDrawerNavigator,
@@ -80,6 +81,9 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MyTabs() {
+  const { userSession, signOut } = useSession();	
+	const [artifacts, setArtifacts] = useState([]); 
+
 	const navigationState = useNavigationState((state) => state);
 	const getNestedRouteName = (state: any): string | null => {
 	    if (!state) return null;
@@ -90,7 +94,19 @@ function MyTabs() {
 	    }
 	    return route.name;
 	};
+	useEffect(() => {
+    console.log('useffect in profile tab');
+        { (userSession) ? (
 
+            ArtifactsService({method:'getAll'})
+                .then( (results) => {
+
+                console.log('RESULTS OF getall',  results)
+                    setArtifacts(results)
+                })
+                .catch((error) => console.log('in profile getall .error', error))
+            ) : null }
+   }, []);
 	const currentRouteName = getNestedRouteName(navigationState);
 	const hideTabBarScreens = ['Add', 'edit'];
 
@@ -129,7 +145,12 @@ function MyTabs() {
          		headerShown: false,
        		}}
 			/>
-			<Tab.Screen name="Add" component={add} 
+			<Tab.Screen name="Add" 
+			children={()=>{
+						return(
+							<AddTab  initialParams={{artifacts:artifacts, setArtifacts:setArtifacts}}/>
+						)
+					}} 
 
 				options={{
          		headerShown: false,
@@ -145,8 +166,13 @@ function MyTabs() {
 				component={show}
 			/>
 
-			<Tab.Screen name="ProfileTab" component={ProfilesTab} 					
-				options={{
+			<Tab.Screen name="ProfileTab" 
+					children={()=>{
+						return(
+							<ProfilesTab  initialParams={{artifacts:artifacts, setArtifacts:setArtifacts}}/>
+						)
+					}}
+   				options={{
          		headerShown: false,
        		}}
 			/>
@@ -195,7 +221,8 @@ function CustomDrawerToggleButton({ tintColor, ...rest }: Props) {
     </Pressable>
   );
 }
-function ProfilesTab() {
+function ProfilesTab( data ) {
+	console.log('profiles data ', data.initialParams);
 	return (
 		<Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}
 			screenOptions={{
@@ -207,7 +234,11 @@ function ProfilesTab() {
 			}}
 
 		>
-			<Drawer.Screen name="Profile" component={profilePage} />
+			<Drawer.Screen name="Profile" children={()=>{
+						return(
+							<ProfilePage artifacts={data.initialParams.artifacts} setArtifacts={data.initialParams.setArtifacts}/>
+						)
+					}} />
 			<Drawer.Screen name="Settings" component={settings} />
 			<Drawer.Screen name="Your Artifacts" component={artifacts} />
 		</Drawer.Navigator>
@@ -218,6 +249,7 @@ function App() {
 	const { userSession, loadingUser } = useSession();
 	const [keys, setKeys] = useState([]);
 	const [fillLocationMode, setFillLocationMode] = useState([]);
+
 	useEffect( () => {
 		const getData = async () => {
 	    fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
@@ -225,6 +257,7 @@ function App() {
 			console.log('fillLocationMode',fillLocationModeVal);
 
 	  };
+
 	  getData();  
 
 	}, [] )
