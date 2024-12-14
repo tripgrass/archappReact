@@ -106,6 +106,8 @@ module.exports = StyleSheet.create({
         flexDirection:'row'        
     },
     label: {
+        fontSize:15,
+        marginBottom:1,
         margin:5,
         marginLeft: 0,
     },

@@ -83,6 +83,7 @@ const Tab = createBottomTabNavigator();
 function MyTabs() {
   const { userSession, signOut } = useSession();	
 	const [artifacts, setArtifacts] = useState([]); 
+	const [ tempId, setTempId] = useState( );
 
 	const navigationState = useNavigationState((state) => state);
 	const getNestedRouteName = (state: any): string | null => {
@@ -94,22 +95,40 @@ function MyTabs() {
 	    }
 	    return route.name;
 	};
+	function createArtifactId(){
+		var form = new FormData();
+		form.append('idOnly', true);
+		console.log('create from scratch:');
+		ArtifactsService({
+	        	method:'create',
+	        	url:'artifacts',
+	        	data:form
+	        }).then( (results) => {
+	        	console.log('ADD FILE ::::::::::::::::::after submit results', results);
+	        	var newArtifact = results;
+	        	setTempId(newArtifact.id);
+		}).catch((error) => {
+			console.log('saving error:',error);
+	    })				
+	}	
 	useEffect(() => {
-    console.log('useffect in profile tab');
-        { (userSession) ? (
+    console.log('useffect in layout:::::::');
+        if(userSession){
+        	if( !tempId){
+	        	createArtifactId();
+	        }
+					ArtifactsService({method:'getAll'})
+						.then( (results) => {
 
-            ArtifactsService({method:'getAll'})
-                .then( (results) => {
-
-                console.log('RESULTS OF getall',  results)
-                    setArtifacts(results)
-                })
-                .catch((error) => console.log('in profile getall .error', error))
-            ) : null }
+							console.log('RESULTS OF getall',  results)
+							setArtifacts(results)
+						})
+						.catch((error) => console.log('in profile getall .error', error))
+        }
    }, []);
 	const currentRouteName = getNestedRouteName(navigationState);
 	const hideTabBarScreens = ['Add', 'edit'];
-
+console.log('tempId:::::;;', tempId);
 	return (
 		<Tab.Navigator
 			screenOptions={({ route }) => ({
@@ -148,7 +167,7 @@ function MyTabs() {
 			<Tab.Screen name="Add" 
 			children={()=>{
 						return(
-							<AddTab  initialParams={{artifacts:artifacts, setArtifacts:setArtifacts}}/>
+							<AddTab  tempId={tempId} artifacts={artifacts} setArtifacts={setArtifacts}/>
 						)
 					}} 
 
@@ -169,7 +188,7 @@ function MyTabs() {
 			<Tab.Screen name="ProfileTab" 
 					children={()=>{
 						return(
-							<ProfilesTab  initialParams={{artifacts:artifacts, setArtifacts:setArtifacts}}/>
+							<ProfilesTab  initialParams={{artifacts:artifacts, setArtifacts:setArtifacts, tempId:tempId}}/>
 						)
 					}}
    				options={{

@@ -1,10 +1,12 @@
-import { Button, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Button, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CustomButton from '@/components/Button';
 
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { manipulateAsync, FlipType, SaveFormat } from 'expo-image-manipulator';
 import { useState } from 'react';
+import {ImagesService}  from '@/utilities/ImagesService';
+
 import _ from "lodash";
 
 let camera: CameraView
@@ -69,7 +71,7 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
                                     fontSize: 20
                                 }}
                             >
-                                save photo
+                                Save Photo
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -78,7 +80,7 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
         </View>
     )
 }
-export default function App({galleryState, stateChanger, cameraState, setCameraState}) {
+export default function App({galleryState, stateChanger, cameraState, setCameraState, artifactId, artifact}) {
 
     const [facing, setFacing] = useState<CameraType>('back');
     const [flash, setFlash] = useState<CameraType>('on');
@@ -121,6 +123,50 @@ export default function App({galleryState, stateChanger, cameraState, setCameraS
         );  
         const cloneDeep = _.cloneDeep(galleryState);    
         cloneDeep.push(manipResult);
+
+        //setSaveState('savingImage');
+        var form = new FormData();
+        form.append('artifact_id', artifactId);
+        if( "undefined" == typeof artifact || !artifact ){
+            form.append('temp', true);
+        }
+        imageMeta = {};
+        form.append('imagesMeta[0]', JSON.stringify( manipResult ) );
+        if( Platform.OS == "web" ){
+            form.append('source', 'web');
+            form.append('images[0]', manipResult );
+        }
+        else{
+            form.append('source','phone');
+            const uri =
+            ( Platform.OS === "android" || Platform.OS === "web" )
+                ? manipResult.uri
+                : manipResult.uri.replace("file://", "");
+            const filename = manipResult.uri.split("/").pop();
+            console.log('adding filename:', filename);
+            const match = /\.(\w+)$/.exec(filename as string);
+            const ext = match?.[1];
+            const type = match ? `image/${match[1]}` : `image`;
+            form.append('images[0]', {
+                uri,
+                name: `image.${ext}`,
+                type,
+            } as any);
+
+        }   
+        ImagesService({
+                method:'create',
+                data:form
+            })
+            .then( result => {
+                console.log('image save result',result);
+               // setSaveState(null);
+
+
+            }).catch((error) => {
+                console.log('saving error:',error);
+                //setSaveState(null);
+            })                      
         stateChanger( cloneDeep );
         setCapturedImage(null)
         setPreviewVisible(false)

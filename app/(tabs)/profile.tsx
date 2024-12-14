@@ -13,16 +13,14 @@ export default function ProfileScreen({  artifacts, setArtifacts }) {
     const { userSession, signOut, signIn } = useSession();
     const pathname = usePathname();
     const navigation = useNavigation();
-    console.log('artifacts !!!!!!!!!!!!! in profile tab', navigation);
    
    useEffect(() => {
-    console.log('useffect in profile tab');
         { (userSession) ? (
 
             ArtifactsService({method:'getAll'})
                 .then( (results) => {
 
-                console.log('RESULTS OF getall',  results)
+                //console.log('RESULTS OF getall',  results)
                     setArtifacts(results)
                 })
                 .catch((error) => console.log('in profile getall .error', error))

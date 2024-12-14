@@ -6,33 +6,12 @@ import { useState, useEffect } from 'react'
 
 
 
-function Add({ route, navigation }) {
-	const [addArtifactId, setAddArtifactId] = useState(null);	
-
-	function createArtifactId(){
-		var form = new FormData();
-		form.append('idOnly', true);
-
-		ArtifactsService({
-	        	method:'create',
-	        	url:'artifacts',
-	        	data:form
-	        }).then( (results) => {
-	        	console.log('after submit results', results);
-	        	var newArtifact = results;
-	        	setAddArtifactId(newArtifact.id);
-		}).catch((error) => {
-			console.log('saving error:',error);
-	    })				
-	}
-	useEffect(() => {
-		if( !addArtifactId ){
-			createArtifactId();
-		}
-	});
+function Add({ route, navigation, data, tempId }) {
+	console.log('add file data ', data);
+	console.log('add file tempId ', tempId);
     return (
 			<>
-				<AddEdit navigation={navigation} initArtifactId={addArtifactId} />
+				<AddEdit navigation={navigation} initArtifactId={tempId} />
 			</>
     );
 }

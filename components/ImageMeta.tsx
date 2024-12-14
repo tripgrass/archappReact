@@ -339,27 +339,28 @@ function toggleSlideout() {
                     } : (null) )
                     ]}> 
                 <View style={{flex:1, flexDirection:'row', marginBottom:30}}>
-                        <CustomButton
-                            styles={{
-                                borderRadius: 0,
-                                elevation: 3,
-                                color:'black',
-                                marginTop:0
-                            }}                      
-                            title={ "Save" }
-                            onPress={handleSubmit(updateImageMeta)}
-                        />                    
+
                         <CustomButton
                             styles={{
                                 borderRadius: 0,
                                 elevation: 3,
                                 marginTop:0,
                                 color:'black',
-                                marginLeft: 10,                             
                             }}                      
                             title={ "Remove" }
                             onPress={handleSubmit(removeImage)}
                         /> 
+                        <CustomButton
+                            styles={{
+                                borderRadius: 0,
+                                elevation: 3,
+                                color:'black',
+                                marginTop:0,
+                                marginLeft: 10,                             
+                            }}                      
+                            title={ "Save" }
+                            onPress={handleSubmit(updateImageMeta)}
+                        />                    
                         <TouchableOpacity
                             onPress={toggleSlideout}
                             style={{

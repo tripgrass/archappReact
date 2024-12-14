@@ -34,7 +34,7 @@ const s = require('@/components/style');
 
 let camera: CameraView
 
-export default function AddEdit( {navigation, initArtifactId} ) {
+export default function AddEdit( { initArtifactId } ) {
 //console.log('addedit artifactId', initArtifactId);
 	const isEdit = initArtifactId ? true : false;
 	const isFocused = useIsFocused()
@@ -46,10 +46,13 @@ export default function AddEdit( {navigation, initArtifactId} ) {
 	const [saveState, setSaveState] = useState(null);
 	const [photographers, setPhotographers] = useState();
 	const [counterTotal, setCounterTotal] = useState(0);
+	    const navigation = useNavigation();
 
 	const formFields = {
 		id:null,
 		name : null,
+		initial_year : null,
+		description: null,
 		title: null,
 		address:null,
 		city:null,
@@ -67,18 +70,30 @@ export default function AddEdit( {navigation, initArtifactId} ) {
 		defaultValues: defaultValues,
 	});
 	useEffect(() => {
-		console.log('useffect! artifactId', artifactId);
-		console.log('useffect! initartifactId', initArtifactId);
 		if( !artifactId && initArtifactId ){
-			console.log('setting artifactId in useffect');
 			setArtifactId(initArtifactId);
 			setValue('id', initArtifactId);
-
-		}
-//        setPhotographers(['that']);
-       
+		}       
     })
+	function getGrade( key ){
+		const gradeMapRev = {
+			1: "Prevailing",
+			5 : "Meaningful",
+			10: "Vital"
+		};		
+		const gradeMap = {
+			Prevailing : 1,
+			Meaningful : 5,
+			Vital : 10
+		};
+		if( typeof key === 'number' ){
+			return gradeMapRev[key];
+		}
+		else{
+			return gradeMap[key];
+		}
 
+	}
 	function getPhotographers(){
 		data = {
 			"personas" : [
@@ -96,14 +111,10 @@ export default function AddEdit( {navigation, initArtifactId} ) {
 	        id: item.id,
 	        title: item.firstname + " " + item.lastname,
 	      }))
-	     // console.log('suggestions:::::::::::::::::::::', suggestions);
-
-            	setPhotographers(suggestions);
-		//	console.log('setPhotographers:::::::::::', photographers);
-            })
+         	setPhotographers(suggestions);
+        })
             .catch((error) => {
-            //console.log('!!!!!!!!!!!!!!! error:',error);
-            //setPhotographers(['this']);
+            console.log('!!!!!!!!!!!!!!! error:',error);
         }); 
 
 	}
@@ -119,6 +130,17 @@ console.log('setu[ artfact', artifact);
 		else{
 			setScale(1);
 		}
+		if( (artifact.grade && "null" != artifact.grade && "undefined" != artifact.grade) ){
+			//gradeVal = getGrade(artifact.grade);
+			console.log('artifact grade !!!!!!!!!!!!!!!!!!!!!', artifact.grade);
+			//alert(artifact.grade);
+			setGrade( artifact.grade );
+			//setGrade(1);
+		}
+		else{
+			setGrade(1);
+		}	
+		console.log('after set Grade:', grade);	
 		setArtifact( artifact );
 //		setScale( (artifact.scale && "null" != artifact.scale) ? artifact.scale : 1 );
 	//	setScale( 1);
@@ -207,6 +229,7 @@ console.log('setu[ artfact', artifact);
 	const [image, setImage] = useState<string | null>(null);
 //	const [scale, setScale] = useState(artifact?.scale ? artifact?.scale : 1);
 	const [scale, setScale] = useState(1);
+	const [grade, setGrade] = useState( 1 );
 	const [slideoutState, setslideoutState] = useState('in');
 	const [imageState, setImageState] = useState(null);
 	const [previewVisible, setPreviewVisible] = useState(false)
@@ -355,15 +378,15 @@ console.log('setu[ artfact', artifact);
 		setGalleryImages([]);		
 		setLoadState('loading');
 		setslideoutState( 'in' );
-					router.replace('/');		
+//		router.back();
+//					router.replace('/');		
 
-	    //const navigation = useNavigation();
 /*
 		navigation.navigate('edit', {
-	        params: { artifactId: item.id }
+	        params: { artifactId: artifactId }
 	    })
 	    */
-	    /*
+	    
 		const state = navigation.getState();
 		const currentIndex = state.index;
 		const currentScreen = state.routes[currentIndex].name;
@@ -375,7 +398,7 @@ console.log('setu[ artfact', artifact);
 		else{
 			router.replace('/');		
 		} 
-		*/   
+		   
 	}
 	const onErrors = errors => {
 		//console.error(errors);
@@ -404,6 +427,9 @@ console.log('saveImage data', image );
 		setSaveState('savingImage');
 		var form = new FormData();
         form.append('artifact_id', artifactId);
+        if( !artifact ){
+			form.append('temp', true);
+        }
 		imageMeta = {};
 		form.append('imagesMeta[0]', JSON.stringify( image ) );
 		if( Platform.OS == "web" ){
@@ -505,7 +531,11 @@ console.log('saveImage data', image );
 		form.append('zipcode',data.zipcode);					
 		form.append('latitude',data.latitude);
 		form.append('longitude',data.longitude);
-		form.append('scale',scale);
+		form.append('initial_year',data.initial_year);
+		form.append('scale',scale);		
+		form.append('grade',grade);
+		form.append('description',data.description);
+		
 		if( userSession ){
 			var parsedUserSession = JSON.parse(userSession);
 			form.append('user_name', parsedUserSession?.user?.name );
@@ -678,7 +708,7 @@ console.log('saveImage data', image );
 	
 	return (
 		<>
-			<CameraWrapper galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera}></CameraWrapper>		
+			<CameraWrapper galleryState={galleryImages} stateChanger={setGalleryImages} cameraState={startCamera} setCameraState={setStartCamera} artifact={artifact} artifactId={artifactId}></CameraWrapper>		
 			{ ( "loaded" == loadState ) ? (										
 
 				<View style={[s.formButtonSection,{
@@ -725,7 +755,38 @@ console.log('saveImage data', image );
 											width:30,
 											borderRadius:16,								
 								}}/>
+
 							</Pressable>
+							{ ( artifact  && "out" !== slideoutState ) ? (
+							
+									<Pressable artifact={artifact}
+										style={({pressed}) => [
+														{
+												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderRadius: 20,
+										height:40,
+										marginTop:10,
+										width:40,
+										marginLeft:10,
+										elevation: 3,
+										marginRight:10,
+										boxShadow: '0px 2px 2px #d8d8d8'						        
+														}
+										]}
+										onPress={ () => { navigateToShow() }}
+									>
+										<Ionicons name="eye-outline" size={30} color="" style={{
+											display:'flex-inline',
+											height:30,
+											width:30,
+											borderRadius:16,								
+								}}/>
+									</Pressable> 
+										
+						) : null }										
+
 								{ artifactId ? (
 									<>
 									<CustomButton
@@ -747,7 +808,7 @@ console.log('saveImage data', image );
 										textStyles={{
 											color:( saveState == 'savingImage'  ? '#d8d8d8' : 'black' ),
 										}}
-										title={ artifactId ? ( saveState == 'savingImage' ? "Saving" : "Update") : "Save" }
+										title={  artifact ? ( saveState == 'savingImage' ? "Saving" : "Update") : "Save" }
 										onPress={ ( saveState == 'savingImage')  ? null : handleSubmit(onSubmit, onErrors) }/>
 										</>
 									) : (null)
@@ -805,34 +866,7 @@ console.log('saveImage data', image );
 				                        >Saved!</Text>
 							</View>
 						) : ( null ) }
-						{ ( artifact  && "out" !== slideoutState ) ? (
-							<View style={{
-								position:'absolute',
-								bottom:30,
-								left:10,
-								zIndex:2
-							}}>
-									<Pressable artifact={artifact}
-										style={({pressed}) => [
-														{
-												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-												alignItems: 'center',
-												justifyContent: 'center',
-												borderRadius: 40,
-												height:80,
-												width:80,
-												elevation: 8,
-												marginLeft: 'auto',					    		
-												marginRight:5,
-												boxShadow: '0px 2px 2px #d8d8d8'						        
-														}
-										]}
-										onPress={ () => { navigateToShow() }}
-									>
-										<Text>View</Text>
-									</Pressable> 
-							</View>				
-						) : null }						
+										
 { ( "out" == slideoutState ) ? (
 			<ImageMeta photographers={photographers} galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} artifactPrimaryImageId={ artifact ? artifact.primary_image_id : null } slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
 			) : (																	
@@ -845,31 +879,54 @@ console.log('saveImage data', image );
 
 					<View style={s.formWrapper}>
 						<View style={s.formSection}>
+						<View style={s.fieldsWrapperContainer}>
+								<View style={s.fieldsWrapper}>
+									<View style={[s.label,{width:'100%', flex:1,flexDirection:'row'}]}>
 
-							<View style={s.fieldWrapper}>
-								<View style={[s.label,{width:'100%', flex:1,flexDirection:'row'}]}>
-
-									<Text style={s.label}>Name</Text>
-									<Text style={{color:'red', marginLeft:'auto'}}>
-										{errors.name && errors.name.message }
-									</Text>
+										<Text style={s.label}>Name</Text>
+										<Text style={{color:'red', marginLeft:'auto'}}>
+											{errors.name && errors.name.message }
+										</Text>
+									</View>
+									<Controller
+										control={control}
+										name="name"
+										rules={{ required: "*" }}
+										render={({field: { onChange, onBlur, value }}) => (
+											<TextInput
+												style={[s.input, errors.name ? s.inputError : null ]}	
+												onBlur={onBlur}
+												onChangeText={value => onChange(value)}
+												value={(value) ? value : ""}
+											/>
+										)}
+									/>
 								</View>
-								<Controller
-									control={control}
-									name="name"
-									rules={{ required: "*" }}
-									render={({field: { onChange, onBlur, value }}) => (
-										<TextInput
-											style={[s.input, errors.name ? s.inputError : null ]}	
-											onBlur={onBlur}
-											onChangeText={value => onChange(value)}
-											value={(value) ? value : ""}
-										/>
-									)}
-								/>
-							</View>
-						</View>
-						<View style={s.formSection}>
+								<View style={[s.fieldWrapper,{minWidth:'18%'}]}>
+									<View style={[s.label,{width:'', flex:1,flexDirection:'row'}]}>
+
+										<Text style={s.label}>Year</Text>
+										<Text style={{color:'red', marginLeft:'auto'}}>
+											{errors.name && errors.name.message }
+										</Text>
+									</View>
+										<Controller
+											control={control}
+											name="initial_year"
+											render={({field: { onChange, onBlur, value="" }}) => (
+												<TextInput
+													style={[s.input, errors.initial_year ? s.inputError : null,{maxWidth:'100%'} ]}
+													onBlur={onBlur}
+													onChangeText={value => onChange(value)}
+													value={(value) ? value : ""}
+												/>
+											)}
+										/>	  						
+								</View>
+							</View>	
+						</View>	
+
+						<View style={[s.formSection, {marginTop:15}]}>
 							<View style={s.fieldWrapperHalf}>
 								<Text style={s.label}>Scale</Text>
 
@@ -882,6 +939,19 @@ console.log('saveImage data', image );
 
 							</View>
 						</View>        
+						<View style={[s.formSection, {marginTop:10}]}>
+							<View style={s.fieldWrapperHalf}>
+								<Text style={s.label}>Grade</Text>
+
+								<SegmentedControl
+									name='grade'
+									values={['Prevailing', 'Meaningful', 'Vital']}
+									selectedIndex={grade}
+									onChange={(event) => { setGrade(event.nativeEvent.selectedSegmentIndex) }}
+								/>							
+
+							</View>
+						</View>      
 						<View style={s.formSection}>
 							<View style={s.formSectionTitleWrapper}>
 								<Text style={s.formSectionTitle}>Location</Text>
@@ -902,6 +972,7 @@ console.log('saveImage data', image );
 													}
 									]}
 										onPress={ () => { 
+											console.log('pressed LOC button');
 											( ('initial' == locationLookupState && "Manually Fill" == fillLocationMode) || 'cleared' == locationLookupState ) ? 
 											__useCurrentLocation( 'loaded' )  : __clearLocation(); 
 										}}
@@ -928,8 +999,7 @@ console.log('saveImage data', image );
 						<View style={s.formSection}>
 							<View style={s.fieldWrapper}>
 								<View style={[s.label,{width:'100%', flex:1,flexDirection:'row'}]}>
-									<Text >Address
-									</Text>
+									<Text style={s.label}>Address</Text>
 									<Text style={{color:'red', marginLeft:'auto'}}>
 										{errors.address && errors.address.message }
 									</Text>
@@ -955,8 +1025,7 @@ console.log('saveImage data', image );
 							<View style={s.fieldsWrapperContainer}>
 								<View style={s.fieldsWrapper}>
 									<View style={[s.label,{width:'100%', flex:1,flexDirection:'row'}]}>
-										<Text >City
-										</Text>
+										<Text style={s.label}>City</Text>
 										<Text style={{color:'red', marginLeft:'auto'}}>
 											{errors.city && errors.city.message }
 										</Text>
@@ -979,8 +1048,7 @@ console.log('saveImage data', image );
 								</View>
 								<View style={{}}>
 									<View style={[s.label,{width:'100', flex:1,flexDirection:'row'}]}>
-										<Text >State
-										</Text>
+										<Text style={s.label}>State</Text>
 										<Text style={{color:'red', marginLeft:'auto'}}>
 											{errors.state && errors.state.message }
 										</Text>
@@ -1001,8 +1069,7 @@ console.log('saveImage data', image );
 								</View>						
 								<View style={{}}>
 									<View style={[s.label,{width:'100', flex:1,flexDirection:'row'}]}>
-										<Text >Zipcode
-										</Text>
+										<Text style={s.label}>Zip</Text>
 										<Text style={{color:'red', marginLeft:'auto'}}>
 											{errors.zipcode && errors.zipcode.message }
 										</Text>
@@ -1137,21 +1204,19 @@ console.log('saveImage data', image );
 										( "undefined" != typeof item ) ? (
 										<View key={item.id} serverId={item.id} style={{position:'relative', marginRight:15}}>
 										{ "savingImage" == saveState && item?.id == imageState?.id ? (										
-						<View style={{
-							zIndex:99999, width:150, position:'absolute',
-							backgroundColor:'rgba(0,0,0, .3)', justifyContent:'center', flex:1, alignItems:'center'}}
-						>					
-							<Image source={ loadingIcon } /* Use item to set the image source */
-			                            style={{
-			                                width:150,
-			                                height:150,
-			                            }}
-			                        />  
-						</View>
-						) : ( null
-										
-										) }
-
+											<View style={{
+												zIndex:99999, width:150, position:'absolute',
+												backgroundColor:'rgba(0,0,0, .3)', justifyContent:'center', flex:1, alignItems:'center'}}
+											>					
+												<Image source={ loadingIcon } /* Use item to set the image source */
+								                            style={{
+								                                width:150,
+								                                height:150,
+								                            }}
+								                        />  
+											</View>
+											) : ( null ) 
+										}
 										<Image source={{uri:item.uri}} /* Use item to set the image source */
 											style={{
 												width:150,
@@ -1161,72 +1226,70 @@ console.log('saveImage data', image );
 											}}
 										/>
 										{ "savingImage" == saveState && item?.id == imageState?.id ? (null) :(									
-
-										<>
+											<>
 										<Pressable 
-									style={({pressed}) => [
-													{
-											backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-											alignItems: 'center',
-											justifyContent: 'center',
-											borderRadius: 20,
-											height:40,
-											width:40,
-											position:'absolute',
-											top:-14,
-											right:-14,
-											elevation: 4,
-											marginRight:5,
-											boxShadow: '0px 2px 2px #d8d8d8'						        
-													}
-									]}
-										onPress={ () => { 
-											openSlideout(item);
-										}}
-								>
-									<Ionicons name="pencil-outline" size={25} color="" style={{
-												display:'flex-inline',
-												height:25,
-												width:25,
-												borderRadius:12,								
-									}}/>
-									</Pressable>
-									<Pressable 
-									style={({pressed}) => [
-													{
-														display:'none',
-											backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-											alignItems: 'center',
-											justifyContent: 'center',
-											borderRadius: 20,
-											height:40,
-											//borderColor:'red',
-											//borderWidth:1,
-											width:40,
-											position:'absolute',
-											top:-7,
-											left:-7,
-											elevation: 3,
-											marginRight:5,
-											boxShadow: '0px 2px 2px #d8d8d8'						        
-													}
-									]}
-										onPress={ () => { 
-											removeArtifactImage(item);
-										}}
-								>
-									<Ionicons name="close-outline" size={30} color="" style={{
-												display:'flex-inline',
-												height:30,
-												width:30,
-												borderRadius:16,								
-									}}/>
-									</Pressable>
+											style={({pressed}) => [
+															{
+													backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+													alignItems: 'center',
+													justifyContent: 'center',
+													borderRadius: 20,
+													height:40,
+													width:40,
+													position:'absolute',
+													top:-14,
+													right:-14,
+													elevation: 4,
+													marginRight:5,
+													boxShadow: '0px 2px 2px #d8d8d8'						        
+															}
+											]}
+											onPress={ () => { 
+												openSlideout(item);
+											}}
+										>
+										<Ionicons name="pencil-outline" size={25} color="" style={{
+													display:'flex-inline',
+													height:25,
+													width:25,
+													borderRadius:12,								
+										}}/>
+										</Pressable>
+										<Pressable 
+										style={({pressed}) => [
+														{
+															display:'none',
+												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+												alignItems: 'center',
+												justifyContent: 'center',
+												borderRadius: 20,
+												height:40,
+												//borderColor:'red',
+												//borderWidth:1,
+												width:40,
+												position:'absolute',
+												top:-7,
+												left:-7,
+												elevation: 3,
+												marginRight:5,
+												boxShadow: '0px 2px 2px #d8d8d8'						        
+														}
+										]}
+											onPress={ () => { 
+												removeArtifactImage(item);
+											}}
+									>
+										<Ionicons name="close-outline" size={30} color="" style={{
+													display:'flex-inline',
+													height:30,
+													width:30,
+													borderRadius:16,								
+										}}/>
+										</Pressable>
 									</>
 									) }
-										</View>
-										) : (null)
-									)}
+									</View> ) : (null)
+								)}
 								/>
 							) : (
 								<View style={[s.iconWrapper,{flex:1, flexDirection:'row',maxWidth:'1100px', alignItems: 'center'}]}>  
@@ -1246,9 +1309,50 @@ console.log('saveImage data', image );
 								/>
 							}
 						</View>
+						<View style={s.formSection}>
+							<View style={s.formSectionTitleWrapper}>
+								<Text style={s.formSectionTitle}>Description</Text>
+							</View>
 
+						</View>		
+
+						<View style={s.formSection}>
+							<View style={s.fieldWrapper}>
+								<View style={[{width:'100%', flex:1,flexDirection:'row'}]}>
+									<Text style={{color:'red', marginLeft:'auto'}}>
+										{errors.description && errors.description.message }
+									</Text>
+								</View>
+
+								<Controller
+									name="description"
+									control={control}
+									render={({field: { onChange, onBlur, value="" }}) => (
+										<TextInput 
+										    style={[s.input,{
+										        flex:1,
+										        minHeight:100,
+										        textAlignVertical:'top',
+										        justifyContent: "flex-start", 
+										        backgroundColor: 'white' 
+										    }]} 
+										placeholder="" 
+										onBlur={onBlur}
+										onChangeText={value => onChange(value)}
+										value={value}
+										multiline={true} 
+										/>								
+									)}
+								/>
+
+
+	                            						
+							</View>
+						</View>
 					</View> 				
 				</View>
+											
+
 				<StatusBar style={{display:'block'}} />			
 							
 			</ScrollView>
