@@ -2296,6 +2296,11 @@
   dependencies:
     invariant "^2.2.4"
 
+"@react-native-community/slider@^4.5.5":
+  version "4.5.5"
+  resolved "https://registry.npmjs.org/@react-native-community/slider/-/slider-4.5.5.tgz"
+  integrity sha512-x2N415pg4ZxIltArOKczPwn7JEYh+1OxQ4+hTnafomnMsqs65HZuEWcX+Ch8c5r8V83DiunuQUf5hWGWlw8hQQ==
+
 "@react-native-picker/picker@^2.9.0":
   version "2.9.0"
   resolved "https://registry.npmjs.org/@react-native-picker/picker/-/picker-2.9.0.tgz"
@@ -5283,6 +5288,11 @@ hasown@^2.0.0, hasown@^2.0.1, hasown@^2.0.2:
   integrity sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==
   dependencies:
     function-bind "^1.1.2"
+
+haversine@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.npmjs.org/haversine/-/haversine-1.1.1.tgz"
+  integrity sha512-KW4MS8+krLIeiw8bF5z532CptG0ZyGGFj0UbKMxx25lKnnJ1hMUbuzQl+PXQjNiDLnl1bOyz23U6hSK10r4guw==
 
 hermes-estree@0.19.1:
   version "0.19.1"

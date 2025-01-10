@@ -7,6 +7,7 @@ import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-
 import { useNavigation } from 'expo-router';
 const API_URL = 'https://zkd.b51.mytemp.website/api/artifacts';
 import * as Location from "expo-location";
+import MapViewDirections from 'react-native-maps-directions';
 
 const App = () => {
 
@@ -23,7 +24,8 @@ const mapRef = useRef<any>(null);
  const [currentLocation, setCurrentLocation] = useState(null);
 const [initialRegion, setInitialRegion] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
-/*
+  const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY;
+
   useEffect(() => {
     (async () => {
       // permissions check
@@ -37,7 +39,7 @@ let { status } = await Location.requestForegroundPermissionsAsync();
       setUserLocation(location);
     })()
   }, [])
-*/
+
   useEffect(() => {
     console.log('effect');
     fetchData();
@@ -225,7 +227,14 @@ const onMarkerSelected = (marker: any) => {
             </Callout>
           </Marker>)
           : null
-        ))}        
+        ))}    
+          <MapViewDirections
+            origin={userLocation ? userLocation?.coords : null}
+            destination={markers[0]}
+            apikey={API_KEY}
+            strokeColor="hotpink"
+            strokeWidth={4}
+          />                 
       </MapView>
     </View>
       <View style={styles.container}>

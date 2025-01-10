@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Platform, Pressable, View, Text,TouchableOpacity  } from 'react-native';
+import {FlatList, Image, ImageBackground, Platform, Pressable, View, Text,TouchableOpacity  } from 'react-native';
 import CustomButton from '@/components/Button';
 
 import { useSession } from '@/utilities/AuthContext';
@@ -10,14 +10,19 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import map  from '@/app/(tabs)/map';
 import camera  from '@/app/(tabs)/camera';
 import AddTab from '@/app/(tabs)/artifacts/add';
-import edit from '@/app/(tabs)/artifacts/edit';
+import EditArtifact from '@/app/(tabs)/artifacts/edit';
 import show from '@/app/(tabs)/artifacts/show';
+import Compare from '@/app/(tabs)/artifacts/compare';
+import AddCollection from '@/app/(tabs)/collections/add';
+import EditCollection from '@/app/(tabs)/collections/edit';
 import home from '@/app/(tabs)/index';
 import ProfilePage from '@/app/(tabs)/profile';
+import Home from '@/app/(tabs)/home';
 import artifacts from '@/app/(tabs)/artifacts';
 import SignIn from '@/app/sign-in';
 import Register from '@/app/register';
 import settings from '@/app/(tabs)/settings';
+import CollectionsPage from '@/app/(tabs)/collections';
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -27,6 +32,9 @@ import { Link } from 'expo-router';
 import * as Linking from 'expo-linking';
 import { useNavigationState } from '@react-navigation/native';
 import  {ArtifactsService}  from '@/utilities/ArtifactsService';
+import  {CollectionsService}  from '@/utilities/CollectionsService';
+import Constants from 'expo-constants';
+import { Asset, useAssets } from 'expo-asset';
 
 import {
 	createDrawerNavigator,
@@ -43,38 +51,6 @@ function EmptyScreen() {
 }
 
 
-function Home({ navigation }) {
-
-  const { userSession, signOut } = useSession();
-//  console.log('home userSession', userSession);
-	return (
-		<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-			<Text>Home Screens </Text>
-
-			<View style={{height:40}}></View>
-
-			<CustomButton  title="Drawer?" onPress={() => navigation.navigate('ProfileTab')} />
-	
-			<CustomButton title="Edit" onPress={() => navigation.navigate('/artifacts/edit')} />
-
-			<CustomButton title="Go to Map" onPress={() => navigation.navigate('map')} />
-			<CustomButton title="Camera" onPress={() => navigation.navigate('camera')} />
-			{ (userSession) ? (
-
-				<CustomButton title="Sign Out" 
-					style={{margin:20}}
-	            onPress={() => {
-	              // The `app/(app)/_layout.tsx` will redirect to the sign-in screen.
-	              signOut();
-	            }} />
-	           ) : <CustomButton title="Sign In" 
-					style={{margin:20}}
-	            onPress={() => navigation.navigate('SignIn')} />
-         }
-
-		</View>
-	);
-}
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
@@ -83,7 +59,12 @@ const Tab = createBottomTabNavigator();
 function MyTabs() {
   const { userSession, signOut } = useSession();	
 	const [artifacts, setArtifacts] = useState([]); 
+	const [artifactId, setArtifactId] = useState([]); 
+	const [artifactsList, setArtifactsList] = useState([]); 
+	const [artifactsCompareList, setArtifactsCompareList] = useState([]); 
+	const [collections, setCollections] = useState([]); 
 	const [ tempId, setTempId] = useState( );
+	const [ collectionId, setCollectionId] = useState( null );
 
 	const navigationState = useNavigationState((state) => state);
 	const getNestedRouteName = (state: any): string | null => {
@@ -94,7 +75,7 @@ function MyTabs() {
 			return getNestedRouteName(route.state);
 	    }
 	    return route.name;
-	};
+	};	
 	function createArtifactId(){
 		var form = new FormData();
 		form.append('idOnly', true);
@@ -112,7 +93,7 @@ function MyTabs() {
 	    })				
 	}	
 	useEffect(() => {
-    console.log('useffect in layout:::::::');
+//    console.log('useffect in layout:::::::');
         if(userSession){
         	if( !tempId){
 	        	createArtifactId();
@@ -120,15 +101,35 @@ function MyTabs() {
 					ArtifactsService({method:'getAll'})
 						.then( (results) => {
 
-							console.log('RESULTS OF getall',  results)
-							setArtifacts(results)
+							//console.log('RESULTS OF getall',  results)
+							const artifactsList = {};
+							const artifactsCompareList = {};
+							//console.log('artifactsList start', artifactsList);
+							Object.keys(results).forEach((k, i) => {
+								artifactsList[results[i].id] = results[i];
+								if( results[i].images.length > 0 ){
+									artifactsCompareList[results[i].id] = results[i];
+								}
+							});
+							setArtifacts(results);
+							setArtifactsList(results);
+							setArtifactsCompareList(artifactsCompareList);
 						})
 						.catch((error) => console.log('in profile getall .error', error))
+
+					CollectionsService({method:'getAll'})
+						.then( (results) => {
+
+//							console.log('RESULTS OF getall collections',  results)
+							setCollections(results)
+						})
+						.catch((error) => console.log('in layout collections getall .error', error))
+
         }
    }, []);
 	const currentRouteName = getNestedRouteName(navigationState);
 	const hideTabBarScreens = ['Add', 'edit'];
-console.log('tempId:::::;;', tempId);
+//console.log('tempId:::::;;', tempId);
 	return (
 		<Tab.Navigator
 			screenOptions={({ route }) => ({
@@ -148,7 +149,7 @@ console.log('tempId:::::;;', tempId);
 				}, 
 				tabBarShowLabel:false,
 				tabBarButton: (props) => {
-					if (route.name != 'show' && route.name != 'edit') {
+					if (route.name != 'show' && route.name != 'compare' && route.name != 'edit' && route.name != 'EditCollection' && route.name != 'AddCollection') {
 						return <TouchableOpacity  {...props} />
 					}
 				},
@@ -159,8 +160,15 @@ console.log('tempId:::::;;', tempId);
 			})}
 
 		>
-			<Tab.Screen name="Home" component={Home} 					
-				options={{
+			<Tab.Screen name="Home"  					
+				children={()=>{
+						return(
+							<Home  initialParams={{
+									artifacts:artifacts, collections:collections
+								}}/>
+						)
+					}}
+   				options={{
          		headerShown: false,
        		}}
 			/>
@@ -175,7 +183,29 @@ console.log('tempId:::::;;', tempId);
          		headerShown: false,
        		}}
 			/>
-			<Tab.Screen name="edit" options={{ title: 'Editing', headerShown: false }} component={edit} />
+			<Tab.Screen name="AddCollection" 
+			children={()=>{
+						return(
+							<AddCollection  tempId={tempId} artifacts={artifacts} setArtifacts={setArtifacts}/>
+						)
+					}} 
+
+				options={{
+         		headerShown: false,
+       		}}
+			/>
+
+			<Tab.Screen name="edit" options={{ title: 'Editing', headerShown: false }} 			children={()=>{
+						return(
+							<EditArtifact  artifactId={artifactId} collectionId={collectionId} setCollectionId={setCollectionId} initialParams={{ artifactsList:artifactsList}}/>
+						)}}
+ />
+			<Tab.Screen name="EditCollection" options={{ title: 'Editing', headerShown: false }} 
+			children={()=>{
+						return(
+							<EditCollection collectionId={collectionId} initialParams={{artifacts:artifacts, artifactsList:artifactsList}}/>
+						)}}
+					/>
 
 			<Tab.Screen 
 				name="show" 
@@ -185,10 +215,31 @@ console.log('tempId:::::;;', tempId);
 				component={show}
 			/>
 
+			<Tab.Screen 
+				name="compare" 
+				children={()=>{
+						return(
+							<Compare
+								artifactId={artifactId}
+								artifacts={artifacts}
+								artifactsCompareList={artifactsCompareList}
+							/>
+						)
+					}}
+   				options={{
+         		headerShown: false,
+       		}}
+			/>			
+
 			<Tab.Screen name="ProfileTab" 
 					children={()=>{
 						return(
-							<ProfilesTab  initialParams={{artifacts:artifacts, setArtifacts:setArtifacts, tempId:tempId}}/>
+							<ProfilesTab  initialParams={{
+									artifacts:artifacts, setArtifacts:setArtifacts, tempId:tempId, 
+									collections:collections, setCollections:setCollections, collectionId:collectionId, setCollectionId:setCollectionId,
+									artifactId:artifactId,
+									setArtifactId:setArtifactId
+								}}/>
 						)
 					}}
    				options={{
@@ -241,7 +292,7 @@ function CustomDrawerToggleButton({ tintColor, ...rest }: Props) {
   );
 }
 function ProfilesTab( data ) {
-	console.log('profiles data ', data.initialParams);
+//	console.log('profiles data ', data.initialParams);
 	return (
 		<Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}
 			screenOptions={{
@@ -255,9 +306,18 @@ function ProfilesTab( data ) {
 		>
 			<Drawer.Screen name="Profile" children={()=>{
 						return(
-							<ProfilePage artifacts={data.initialParams.artifacts} setArtifacts={data.initialParams.setArtifacts}/>
+							<ProfilePage artifacts={data.initialParams.artifacts} setArtifacts={data.initialParams.setArtifacts} artifactId={data.initialParams.artifactId} setArtifactId={data.initialParams.setArtifactId}/>
 						)
 					}} />
+			<Drawer.Screen name="Collections" children={()=>{
+						return(
+							<CollectionsPage artifacts={data.initialParams.artifacts} setArtifacts={data.initialParams.setArtifacts} 
+							collections={data.initialParams.collections} setCollections={data.initialParams.setCollections}
+							collectionId={data.initialParams.collectionId} setCollectionId={data.initialParams.setCollectionId}
+							/>
+						)
+					}} />
+
 			<Drawer.Screen name="Settings" component={settings} />
 			<Drawer.Screen name="Your Artifacts" component={artifacts} />
 		</Drawer.Navigator>
@@ -315,7 +375,7 @@ function App() {
 				
 				<Stack.Screen name="map" options={{ title: 'Map Title' }} component={map}/>
 				<Stack.Screen name="camera" options={{ title: 'Camera' }} component={camera}/>
-				<Stack.Screen name="add" options={{ title: 'ddd' }} component={edit} />
+				<Stack.Screen name="add" options={{ title: 'ddd' }} component={EditArtifact} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {createRoot} from 'react-dom/client';
 import * as Location from "expo-location";
+import { View, Button, Pressable, Text } from 'react-native';
 
 import {
   APIProvider,
@@ -14,6 +15,8 @@ export default function Index() {
   console.log(Location);
 
   return (
+    <>
+    <Text>test</Text>
   <APIProvider apiKey={API_KEY}>
     <Map
       defaultCenter={{lat: 43.65, lng: -79.38}}
@@ -23,7 +26,7 @@ export default function Index() {
       <Directions />
     </Map>
   </APIProvider>    
-    
+    </>
   );
 }
 

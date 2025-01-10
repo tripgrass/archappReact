@@ -11,10 +11,11 @@ type Props = {
 };
 
 export default function Button(props) {
-	const { onPress, title = 'Save', type='', styles, textStyles, webbable=false, url=null } = props;
-		var PressClass = s.pressableButton;
+	const { onPress, title = 'Save', type='', styles, textStyles, webbable=false, url=null, linkStyle=false } = props;
+		var PressClass = linkStyle ? s.linkButton : s.pressableButton;
 		var TextClass = s.pressableButtonText;
-	if(  Platform.OS == "web" && webbable ){
+
+	if(  Platform.OS == "web" && webbable  ){
 		return (
 			<Link style={[styles]} href={url}>{title}</Link>
 		);

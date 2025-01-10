@@ -34,13 +34,14 @@ const s = require('@/components/style');
 
 let camera: CameraView
 
-export default function AddEdit( { initArtifactId } ) {
-//console.log('addedit artifactId', initArtifactId);
+export default function AddEdit( { initArtifactId, collectionId, setCollectionId } ) {
+console.log('addedit artifactId', initArtifactId);
 	const isEdit = initArtifactId ? true : false;
 	const isFocused = useIsFocused()
 	const [origImageIds, setOrigImageIds] = useState([{}]);	
 	const [artifactId, setArtifactId] = useState(initArtifactId ? initArtifactId : null);	
 	const [artifact, setArtifact] = useState(null);	
+	const [collections, setCollections] = useState([]);	
 	const [galleryImages, setGalleryImages] = useState([]);
 	const [loadState, setLoadState] = useState("initial");
 	const [saveState, setSaveState] = useState(null);
@@ -142,6 +143,9 @@ console.log('setu[ artfact', artifact);
 		}	
 		console.log('after set Grade:', grade);	
 		setArtifact( artifact );
+		if( artifact.collections ){
+			setCollections( artifact.collections );
+		}
 //		setScale( (artifact.scale && "null" != artifact.scale) ? artifact.scale : 1 );
 	//	setScale( 1);
 		defaultValues = {};
@@ -1349,6 +1353,46 @@ console.log('saveImage data', image );
 	                            						
 							</View>
 						</View>
+						<View style={[s.formSection,{marginTop:5}]}>
+							<View style={s.formSectionTitleWrapper}>
+								<Text style={s.formSectionTitle}>Collections</Text>
+							</View>
+						</View>
+						<View style={s.formSection}>
+
+							<View style={s.fieldWrapper}>
+								<View style={[{width:'100%', flex:1,flexDirection:'row'}]}>
+									<Text style={{color:'red', marginLeft:'auto'}}>
+										{errors.description && errors.description.message }
+									</Text>
+								</View>
+
+								<View style={{ display:'block',flex:1,zIndex:-1, backgroundColor:'', marginTop:10}}>
+									{Object.keys(collections).map((i, item) => (
+    									<View key={i} style={{ backgroundColor:'', maxWidth:'1200px', margin:'0 auto', display:'flex', flexWrap:'wrap',flexDirection:'row',width:'100%', alignItems:'center', marginTop:8}}>
+	                                		<Text style={[ {width:'30%',flexGrow: 1}]}>{ collections[i].id} - {i}add owner</Text>
+			                                <CustomButton
+			                                    webbable={true}
+			                                    styles={{marginRight:5, paddingHorizontal: 14 }}
+			                                    title="Edit"
+			                                    onPress={ () => {
+			                                    	//alert(1);
+			//navigation.navigate('EditCollection') ;
+													setCollectionId(collections[i].id);
+													navigation.navigate('EditCollection', {
+			                                            params: { collectionId: collections[i].id }
+
+			                                        }) 
+													
+			                                    }}
+			                                />                            
+    		                        	</View>
+									))}								
+                       
+                    			</View> 	                            						
+							</View>
+						</View>						
+
 					</View> 				
 				</View>
 											

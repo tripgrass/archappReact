@@ -13,7 +13,7 @@ import { useForm, Controller } from 'react-hook-form';
 
 const s = require('@/components/style');
 export default function App({ artifactId, artifactPrimaryImageId, galleryState, galleryStateChanger, slideoutState, setslideoutState, imageState, setImageState, photographers }) {
-    let defaultValues = {};
+    const [defaultValues, setDefaultValues] = useState({});
     const { register, setError, getValues, setValue, getValue, handleSubmit, control, reset, formState: { errors } } = useForm({
         defaultValues:defaultValues
     }); 
@@ -21,13 +21,22 @@ export default function App({ artifactId, artifactPrimaryImageId, galleryState, 
     const [keyboardHeight, setKeyboardHeight] = useState(0);    
     const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);  
     const isFocused = useIsFocused()
-
+    const [isLoaded, setIsLoaded] = useState(false);
     const [loading, setLoading] = useState(false)
     const [suggestionsList, setSuggestionsList] = useState(photographers ? photographers : null)
     const notificationBarHeight = 50;
-    const [isPrimary, setIsPrimary] = useState(false);
+    const [isPrimary, setIsPrimary] = useState( (artifactPrimaryImageId == imageState?.id ) ? true : false );
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedItemTitle, setSelectedItemTitle] = useState(null);
+const formFields = {
+        year : null,
+        person_id:null,
+        person_type : null,
+        isPrimary: null,
+        title: null,
+        alttext:null
+    };    
+
   //  console.log('suggestionsList', suggestionsList);
 //console.log('in imagemeta TSXimageState.person_id', imageState.person_id);
 //console.log('imageState', imageState);
@@ -37,45 +46,50 @@ console.log('galleryState', galleryState);
         // hides development popup warning for autocompletedropdown in scrollview
         LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
 
+        console.log('defaultValues', defaultValues);
+        console.log('defaultValues.lenngth', Object.keys(defaultValues).length);
+        if( Object.keys(defaultValues).length < 1 && !isLoaded){
+            Object.keys(formFields).forEach((k, i) => {
+                if('null' !== imageState[k] && "undefined" !== typeof imageState[k]){
+                    console.log(k + "--> " + imageState[k]);
+                    // api is returing null as string  - should clean that up at the api
+                    if( Number.isInteger(imageState[k]) ){
+                        var val = JSON.stringify(imageState[k]);
+                    }
+                    else{
+                        var val = imageState[k];                        
+                    }
+                    defaultValues[k] = val;
+                }
+            });    
+            setDefaultValues(defaultValues);
+            reset({ ...defaultValues });
+            setIsLoaded(true);
+        }
+        console.log('defaultValues after', defaultValues);
+
         // setup keyboard handling
         const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
         const hideSubscription = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
 
         if( selectedItem && photographers ){
-//setSelectedItem(3);
-Object.keys(photographers).forEach((k, i) => {
-    if( selectedItem == photographers[k].id ){
-        var selectedItemTitle = photographers[k].title;
-        setSelectedItemTitle(selectedItemTitle);
-//    console.log('title: ',photographers[k].title);
-//        alert(selectedItemTitle);
-//dropdownController.current.setInputText("selectedItemTitle");
-    }
-    //console.log('i',i);
-});
-            console.log('photographers', photographers);
-//            console.log('TITLE&&&&&&&&&', title);
-//dropdownController.current.setInputText('what');
-console.log('selecteditem', selectedItem);
-console.log('selecteditemTitle', selectedItemTitle);
-
+            Object.keys(photographers).forEach((k, i) => {
+                if( selectedItem == photographers[k].id ){
+                    var selectedItemTitle = photographers[k].title;
+                    setSelectedItemTitle(selectedItemTitle);
+                }
+            });
         }
-//setSelectedItem(3);
-//console.log('selectedItem',selectedItem);
-//console.log('dropdownController.current',dropdownController.current);
-//dropdownController.current.setItem({});
-//alert(2);
-//dropdownController.current.toggle();
         // conditional seemed wrong;  was (imageState.id !== currentImageId);  
-        if( imageState?.id ){
+        if( imageState?.id  ){
             if( imageState.id == currentImageId ){
+                console.log('USE EFFECT :::>>>>>>>>>>>>>>>>>>>>> IMAGEsTATE', imageState);
                 setCurrentImageId( imageState.id );
-                console.log('USE EFFECT ::: IMAGEsTATE', imageState);
-                setValue('year', imageState?.year ? JSON.stringify(imageState?.year) : null );
-                setValue('title', imageState?.title ? imageState?.title : null );
+                //setValue('year', imageState?.year ? imageState?.year : null );
+                //setValue('title', imageState?.title ? imageState?.title : null );
             }
             if( artifactPrimaryImageId && artifactPrimaryImageId == imageState.id ){
-                setIsPrimary( true );    
+                //setIsPrimary( true );    
             }
         }
         return () => {
@@ -150,8 +164,10 @@ console.log('selecteditemTitle', selectedItemTitle);
 
         form.append('year',data.year);
         imageState.year = data.year;
-        form.append('person_id', selectedItem);
-        imageState.person_id = selectedItem;
+        if( selectedItem ){
+            form.append('person_id', selectedItem);
+            imageState.person_id = selectedItem;
+        }
         form.append('person_type', "photographer");
         imageState.person_type = "photographer";
         form.append('isPrimary', isPrimary);
@@ -169,14 +185,15 @@ console.log('selecteditemTitle', selectedItemTitle);
         else{
 
         }
-Object.keys(galleryState).forEach((k, i) => {
-    if( imageState.counter == galleryState[k].counter ){
-        if( imageState ){
-            console.log('add to galleryState 175', imageState);
-            galleryState[k] = imageState;
-        }
-    }
-});        
+        console.log( 'imageState for counter check' , imageState );
+        Object.keys(galleryState).forEach((k, i) => {
+            if( imageState.counter && imageState.counter == galleryState[k].counter ){
+                if( imageState ){
+                    console.log('add to galleryState 175', imageState);
+                    galleryState[k] = imageState;
+                }
+            }
+        });        
         /*
         if( userSession ){
             var parsedUserSession = JSON.parse(userSession);
@@ -395,13 +412,13 @@ function toggleSlideout() {
                             }}
                         />             
                         <Text style={{
-                            display:'none',
+//                            display:'none',
                             marginTop:0, 
                             fontSize: 14,
                             maxWidth:'70%',
                             color: 'black',
                             paddingLeft:20                            
-                        }}>{imageState?.fileName}</Text>
+                        }}>{imageState?.id}</Text>
                     </View>
                                        
 
@@ -413,7 +430,8 @@ function toggleSlideout() {
                             <Text style={s.label}>Year of Photograph</Text>
                             <Controller
                                 control={control}
-                                render={({field: { onChange, onBlur, value=imageState?.year }}) => (
+                                name="year"
+                                render={({field: { onChange, onBlur, value}}) => (
                                         <TextInput
                                             style={{
                                                 backgroundColor: 'white',
@@ -430,7 +448,6 @@ function toggleSlideout() {
                                             value={(value) ? value : ""}
                                         />
                                 )}
-                                name="year"
                             />
 
                         </View>

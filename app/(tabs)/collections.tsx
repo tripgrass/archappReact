@@ -8,14 +8,14 @@ import  {ArtifactsService}  from '@/utilities/ArtifactsService';
 const s = require('@/components/style');
 import { usePathname, useRouter, useSegments } from 'expo-router';
 
-export default function ProfileScreen({  artifacts, setArtifacts, artifactId, setArtifactId }) {
-    console.log('setArtifactId--------------------------------------------------------------->');
-    console.log('setArtifactId', setArtifactId);
+export default function Collections({  artifacts, setArtifacts, collections, setCollections, setCollectionId }) {
     const router = useRouter();
     const { userSession, signOut, signIn } = useSession();
     const pathname = usePathname();
     const navigation = useNavigation();
     const [ activeId, setActiveId ] = useState(null);    
+
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! collections", collections);
    useEffect(() => {
     /*
         { (userSession) ? (
@@ -47,41 +47,28 @@ export default function ProfileScreen({  artifacts, setArtifacts, artifactId, se
 
    return (
          <View style={{ alignItems: 'center', justifyContent: 'center', paddingTop:40, paddingBottom:10, backgroundColor:'' }}>
-            <Text style={{fontSize:16,fontWeight:'700'}}>Profile Screen</Text>
+            <Text style={{fontSize:16,fontWeight:'700'}}>Collections Screen</Text>
             { (userSession) ? (
                 <>
                     <FlatList
                         style={{paddingRight:20, marginBottom:0, paddinBottom:0, paddingLeft:20}}
-                        data={artifacts}
+                        data={collections}
                         keyExtractor={(item) => String(item.id)}
                         renderItem={({ item, index }) => 
                             <View key={index} style={{ backgroundColor:'', maxWidth:'1200px', margin:'0 auto', display:'flex', flexWrap:'wrap',flexDirection:'row',width:'100%', alignItems:'center', marginTop:8}}>
                                 <Text style={[ (item.id == activeId ? styles.deleting : null ), {width:'30%',flexGrow: 1}]}>{item.name}-{item.id}</Text>
-                                { (item.images.length > 0 ) ? (
-                                <CustomButton
-                                    title="Comp"
-                                    webbable={true}
-                                    url={'/compare/' + item.id }                 
-                                    styles={{marginRight:5, paddingHorizontal: 10 }}
-                                    textStyles={(item.id == activeId ? styles.deleting : null )}
-                                    onPress={() => { setArtifactId( item.id); navigation.navigate('compare', {
-                                            params: { artifactId: item.id }
-                                        }) 
-                                    }}
 
-                                />      ) : (null) }                          
                                 <CustomButton
                                     title="Edit"
                                     webbable={true}
                                     url={'/edit/' + item.id }                 
-                                    styles={{marginRight:5, paddingHorizontal: 10 }}
+                                    styles={{marginRight:5, paddingHorizontal: 14 }}
                                     textStyles={(item.id == activeId ? styles.deleting : null )}
-                                    onPress={() => { setArtifactId( item.id); navigation.navigate('edit', {
-                                            params: { artifactId: item.id }
-                                        }) 
+                                    onPress={() => { 
+                                       setCollectionId( item.id );
+                                       navigation.navigate('EditCollection') ;
                                     }}
                                 />
-
                                 <CustomButton
                                     webbable={true}
                                     url={'/show/' + item.id }                 
@@ -90,14 +77,14 @@ export default function ProfileScreen({  artifacts, setArtifacts, artifactId, se
                                     params: { artifactId: item.id }
                                         }) 
                                     }}
-                                    styles={{marginRight:5, paddingHorizontal: 10 }}                                
+                                    styles={{marginRight:5, paddingHorizontal: 14 }}                                
                                     textStyles={(item.id == activeId ? styles.deleting : null )}
                                 />
                                 <CustomButton
                                     webbable={true}
-                                    styles={{marginRight:5, paddingHorizontal: 10 }}
+                                    styles={{marginRight:5, paddingHorizontal: 14 }}
                                     textStyles={(item.id == activeId ? styles.deleting : null )}
-                                    title="X"
+                                    title="Archive"
                                     onPress={ () => { deleteArtifact( item.id ) }}
 
                                 />                            
@@ -109,8 +96,8 @@ export default function ProfileScreen({  artifacts, setArtifacts, artifactId, se
 
                                 <CustomButton
                                     webbable={true}
-                                    title="New Artifact+"
-                                    onPress={() => { navigation.navigate('Add', {
+                                    title="New Collections+"
+                                    onPress={() => { navigation.navigate('AddCollection', {
                                         }) 
                                     }}
                                 />                            

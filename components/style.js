@@ -163,6 +163,23 @@ module.exports = StyleSheet.create({
         letterSpacing: 0.25,
         color: 'black',
     },   
+    linkButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0,
+        elevation: 0,
+        display:'inline-block',
+        marginTop:10,
+        borderBottomWidth: 1,
+        borderBottomColor:'black'
+    }, 
+    linkButtonText: {
+        fontSize: 16,
+        lineHeight: 21,
+        fontWeight: 'bold',
+        letterSpacing: 0.25,
+        color: 'black',
+    },   
    
     pressableButtonAction: {
         marginTop:6,
