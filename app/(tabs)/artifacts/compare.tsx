@@ -59,10 +59,11 @@ function CompareArtifact({ route, navigation, artifacts, artifactId, artifactsCo
 		var category = null;
 //        form.append('artifact_id', artifactId);
         form.append('primary_artifact_id', artifactId);
-        form.append('secondary_artifact_one_id', comparableOne?.id );
+        form.append('secondary_artifact_one_id', comparableOne?.artifactId );
 //       form.append('rating_signatory_one', rating_signatory);
  //       form.append('rating_demos_one', rating_demos);
-        form.append('secondary_artifact_two_id', comparableTwo?.id);
+        form.append('secondary_artifact_two_id', comparableTwo?.artifactId);
+        form.append('ratingType', 'signatory');
         form.append('comparison', comparisonValue );
  //       form.append('rating_signatory_two', rating_signatory);
    //     form.append('rating_demos_two', rating_demos);

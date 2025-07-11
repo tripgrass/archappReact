@@ -11,14 +11,17 @@ import { usePathname, useRouter, useSegments } from 'expo-router';
 import { Asset, useAssets } from 'expo-asset';
 import Constants from 'expo-constants';
 
-export default function Home({ navigation, initialParams }) {
+export default function Home({ initialParams }) {
+    const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
     const [assets, error] = useAssets( [
             require('../../assets/images/icon.png'), 
             require('../../assets/images/house.jpg'), 
             require('../../assets/images/house2.png'),
     ]);
     containedWithin();
-//    console.log('arttifacts in home page', initialParams);
+    const navigation = useNavigation();
+
+    console.log('initParams!!!! in home page', initialParams);
     const loadingIcon = ( assets?.length  ? assets[0] : null );
     const houseImg = ( assets?.length  ? assets[1] : null );
     const houseImg2 = ( assets?.length  ? assets[2] : null );
@@ -27,14 +30,19 @@ const circleButtons = [
     {},{}, {}, {}, {}
 ];
 const artifactsList = initialParams.artifacts;
+const artifactId = initialParams.artifactId;
+const setArtifactId = initialParams.setArtifactId;
   const { userSession, signOut } = useSession();
-
 //  console.log('home userSession', userSession);
+  /*
+  */
+
     return (
         <View style={{ flex: 1, alignItems: '', paddingTop: Constants.statusBarHeight, justifyContent: 'flex-start' }}>
-            <View style={{ flex:1, maxHeight:220}}>
+            <View style={{ flex:1, maxHeight:200, marginBottom:30}}>
+                <CustomButton  title="" onPress={() => navigation.navigate('ProfileTab')} />
                 <ImageBackground source={artifix}> 
-                    <FlatList contentContainerStyle={{ flexGrow:1, backgroundColor:'', padding:0, marginTop:50 }}
+                    <FlatList contentContainerStyle={{ flexGrow:1, backgroundColor:'', padding:0, marginTop:20 }}
                                             horizontal={true} 
                                             showsHorizontalScrollIndicator={false} 
                                             data={circleButtons}
@@ -72,29 +80,39 @@ const artifactsList = initialParams.artifacts;
                     </FlatList>
                 </ImageBackground>
             </View> 
-            <View style={{ flex:1, maxHeight:220}}>
+            <View style={{ flex:2}}>
+                <FlatList contentContainerStyle={{  padding:0 }}
+                    horizontal={true} 
+                    showsHorizontalScrollIndicator={false} 
+                    data={artifactsList}
+                    extraData={artifactsList}
+                    keyExtractor={(item, index) => {return  index.toString();}}
+                    renderItem={ ({ item, index }) => (
+                        <Pressable 
+                            style={({pressed}) => []}
+                            onPress={ () => {
+                                setArtifactId( item.id); 
+                                navigation.navigate('show', {
+                                    params: { artifactId: item.id }
+                                }) 
+                            }}
+                        >                                               
+                            <View style={{flex:1, flexDirection:'column', margin:20}} >
+                                <View style={{padding:0}}>
+                                    <Text style={{textAlign:'center', marginBottom:20, fontSize:20, fontWeight:700}}>{item.name}+{item.id}</Text>
+                                </View>
+                                <Image source={{uri:imageBaseUrl + ( (item.images && item.images[0]) ? item.images[0].name : null)  }} /* Use item to set the image source */
+                                    style={{
+                                        width:200,
+                                        height:200,
+                                        borderRadius:100
+                                    }}
+                                />
 
-<FlatList contentContainerStyle={{ flexGrow:1, backgroundColor:'', padding:0 }}
-                                        horizontal={true} 
-                                        showsHorizontalScrollIndicator={false} 
-                                        data={artifactsList}
-                                        extraData={artifactsList}
-                                        keyExtractor={(item, index) => {return  index.toString();}}
-                                        renderItem={ ({ item, index }) => (
-                    <View style={{flex:1, flexDirection:'row', padding:20}}>
-                <Image source={ houseImg } /* Use item to set the image source */
-                  style={{
-                      width:200,
-                      height:200,
-                      borderRadius:8
-                  }}
-                    />
-                    <View style={{padding:20}}>
-                        <Text>{item.name}</Text>
-                    </View>
-            </View>
+                            </View>
+                        </Pressable> 
 
-                                        )}
+                    )}
                 >
                 </FlatList>         
             </View>

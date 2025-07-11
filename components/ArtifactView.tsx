@@ -78,7 +78,7 @@ function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryIm
 										]}
 										onPress={ () => { navigateToEdit() }}
 									>
-										<Text>Edit</Text>
+										<Text>Edit -- {artifact.id}</Text>
 									</Pressable> 
 							</View>
 						</View>	

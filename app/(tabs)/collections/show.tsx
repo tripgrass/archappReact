@@ -1,22 +1,21 @@
-import  ArtifactView  from '@/components/ArtifactView';
+import  CollectionView  from '@/components/CollectionView';
 
 import { FlatList, Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useState, useEffect } from 'react';
-import  {ArtifactsService}  from '@/utilities/ArtifactsService';
+import  {CollectionsService}  from '@/utilities/CollectionsService';
 import { useLocalSearchParams, useGlobalSearchParams, Link } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native'
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Asset, useAssets } from 'expo-asset';
 
-function ShowArtifact({ route, navigation }) {
-	const [artifact, setArtifact] = useState(null);	
+function ShowCollection({ route, navigation }) {
+	const [collection, setCollection] = useState(null);	
 	const [loadState, setLoadState] = useState('loading');	
 	const isFocused = useIsFocused()
 	const local = useLocalSearchParams();
-	const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
+	const collectionId  = ( Platform.OS == "web" ) ? ( local.collectionId ? local.collectionId : null ) : (route?.params?.params ? route?.params?.params?.collectionId : null);
 
-	const [artifacts, setArtifacts] = useState([]);
 	const [galleryImages, setGalleryImages] = useState([]);
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
 	const [assets, error] = useAssets( [require('../../../assets/images/loading.gif'), require('../../../assets/images/saving.gif')]);
@@ -24,20 +23,22 @@ function ShowArtifact({ route, navigation }) {
 
 
 	function setup(result){
-		setArtifact(result);
+		setCollection(result);
 		setGalleryImages(result.images);
 		setLoadState('loaded');
 	}
+	console.log('collectionId', collectionId);
 	useEffect(() => {
 		 if(isFocused){
 			setLoadState('loading');
-			if( artifactId ){
-		        ArtifactsService({
+			if( collectionId ){
+		        CollectionsService({
 		        	method:'getById',
-		        	id:artifactId
+		        	id:collectionId
 		        })
 		        .then( (results) => {
-		        	console.log('show get results', results);
+		        	console.log('show get results collections', results);
+		        	console.log('show get results collection artifacts[0]', results.artifacts[0].location.coordinates[0]);
 		        	if( Array.isArray( results ) ){
 		        		setup(results[0]);
 		        	}
@@ -69,7 +70,7 @@ function ShowArtifact({ route, navigation }) {
 
 			) : (
 				<View style={viewStyles.container}>
-					<ArtifactView setLoadState={setLoadState} route={route} artifact={artifact} navigation={navigation} galleryImages={galleryImages} setGalleryImages={setGalleryImages}></ArtifactView>
+					<CollectionView setLoadState={setLoadState} route={route} collection={collection} navigation={navigation} galleryImages={galleryImages} setGalleryImages={setGalleryImages}></CollectionView>
 	 			</View>
 			) }
 		</>
@@ -85,4 +86,4 @@ const viewStyles = StyleSheet.create({
 
 	}
 });
-export default ShowArtifact;
+export default ShowCollection;

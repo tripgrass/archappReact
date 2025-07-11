@@ -16,9 +16,17 @@ export default function Button(props) {
 		var TextClass = s.pressableButtonText;
 
 	if(  Platform.OS == "web" && webbable  ){
-		return (
-			<Link style={[styles]} href={url}>{title}</Link>
-		);
+		if( url ){
+			return (
+				<Link style={[styles]} href={url}>{title}</Link>
+			);
+		}
+		else{
+			return (
+				<Text>\\{title}//</Text>
+			);
+
+		}
 	}
 	else{
 		return (

@@ -71,10 +71,12 @@ export default function Collections({  artifacts, setArtifacts, collections, set
                                 />
                                 <CustomButton
                                     webbable={true}
-                                    url={'/show/' + item.id }                 
+                                    url={'/showCollection/' + item.id }                 
                                     title="View"
-                                    onPress={() => { navigation.navigate('show', {
-                                    params: { artifactId: item.id }
+                                    onPress={() => { 
+                                        setCollectionId( item.id);
+                                        navigation.navigate('showCollection', {
+                                            params: { collectionId: item.id }
                                         }) 
                                     }}
                                     styles={{marginRight:5, paddingHorizontal: 14 }}                                

@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 function EditArtifact({ route, navigation, data, artifactId, collectionId, setCollectionId, }) {
 	console.log('in edit route data:', data);
 	console.log('in edit route:', route);
+	console.log('in edit nav:', navigation);
 		const local = useLocalSearchParams();
 //		const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
 //		const [artifact, setArtifact] = useState(artifact);	

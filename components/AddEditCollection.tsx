@@ -244,7 +244,7 @@ export default function AddEditCollection( { initCollectionId, artifactsList, ro
 	const loadingIcon = ( assets?.length  ? assets[0] : null );
 	const savingIcon = ( assets?.length  ? assets[1] : null );
 	const navigateToShow = () => {
-		setLoadState("loading");
+		//setLoadState("loading");
 		navigation.navigate('show', { params: { collectionId: collectionId } })
 	}
 	const __pickImage = async () => {

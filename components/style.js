@@ -153,7 +153,7 @@ module.exports = StyleSheet.create({
         elevation:3,
         display:'inline-block',
         marginTop:10,
-        visibility:'hidden',
+        //visibility:'hidden',
         border: 'solid 1px #d8d8d8',
     }, 
     pressableButtonText: {

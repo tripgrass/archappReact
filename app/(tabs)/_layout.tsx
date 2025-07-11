@@ -12,6 +12,7 @@ import camera  from '@/app/(tabs)/camera';
 import AddTab from '@/app/(tabs)/artifacts/add';
 import EditArtifact from '@/app/(tabs)/artifacts/edit';
 import show from '@/app/(tabs)/artifacts/show';
+import showCollection from '@/app/(tabs)/collections/show';
 import Compare from '@/app/(tabs)/artifacts/compare';
 import AddCollection from '@/app/(tabs)/collections/add';
 import EditCollection from '@/app/(tabs)/collections/edit';
@@ -149,7 +150,7 @@ function MyTabs() {
 				}, 
 				tabBarShowLabel:false,
 				tabBarButton: (props) => {
-					if (route.name != 'show' && route.name != 'compare' && route.name != 'edit' && route.name != 'EditCollection' && route.name != 'AddCollection') {
+					if (route.name != 'show' && route.name != 'showCollection' && route.name != 'compare' && route.name != 'edit' && route.name != 'EditCollection' && route.name != 'AddCollection') {
 						return <TouchableOpacity  {...props} />
 					}
 				},
@@ -164,7 +165,7 @@ function MyTabs() {
 				children={()=>{
 						return(
 							<Home  initialParams={{
-									artifacts:artifacts, collections:collections
+									artifacts:artifacts, collections:collections, artifactId:artifactId, setArtifactId:setArtifactId
 								}}/>
 						)
 					}}
@@ -214,6 +215,13 @@ function MyTabs() {
 				}} 
 				component={show}
 			/>
+			<Tab.Screen 
+				name="showCollection" 
+				options={{
+	          		headerShown: false,
+				}} 
+				component={showCollection}
+			/>			
 
 			<Tab.Screen 
 				name="compare" 

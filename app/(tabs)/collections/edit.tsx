@@ -12,7 +12,7 @@ function EditCollection({ route, navigation, initialParams, params, collectionId
 	console.log('in collection edit data collectionId:', collectionId);
 	console.log('in collection edit data params:', params);
 
-	console.log('in collection edit route', route);
+	console.log('in (tabs)/collection edit route', route);
 		const local = useLocalSearchParams();
 //		const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
 //		const [artifact, setArtifact] = useState(artifact);	

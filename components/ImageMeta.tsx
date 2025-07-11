@@ -640,6 +640,7 @@ const styles = StyleSheet.create({
     borderWidth:1,  
     borderWidthTop:0,
     //height: 300,
+   /*
     shadowColor: "#000",
     shadowOffset: {
         width: 10,
@@ -647,7 +648,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 1,
     shadowRadius: 3.84,
-
+    */
     elevation: 4,    
     backgroundColor:'white',
     transition: '3s',

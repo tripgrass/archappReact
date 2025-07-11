@@ -50,15 +50,15 @@ console.log('addedit artifactId', initArtifactId);
 	    const navigation = useNavigation();
 
 	const formFields = {
-		id:null,
-		name : null,
-		initial_year : null,
-		description: null,
-		title: null,
-		address:null,
-		city:null,
-		state:null,
-		zipcode:null
+		id:"",
+		name : "",
+		initial_year : "",
+		description: "",
+		title: "",
+		address:"",
+		city:"",
+		state:"",
+		zipcode:""
 	};
 	var artifactImages = [];
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
@@ -124,6 +124,7 @@ console.log('addedit artifactId', initArtifactId);
 		artifactImages = [];
 console.log('setu[ artfact', artifact);
 		setArtifactId(artifact.id);
+		
 //				setValue('latitude', JSON.stringify(latitude) );
 		if( (artifact.scale && "null" != artifact.scale) ){
 			setScale(artifact.scale);
@@ -155,8 +156,8 @@ console.log('setu[ artfact', artifact);
 				defaultValues[k] = artifact[k];
 			}
 		});
-		defaultValues.latitude = JSON.stringify(artifact?.latitude);
-		defaultValues.longitude = JSON.stringify(artifact?.longitude);
+		defaultValues.latitude = artifact?.latitude ? JSON.stringify(artifact?.latitude) : null;
+		defaultValues.longitude = artifact?.longitude ? JSON.stringify(artifact?.longitude) : null;
 		if( defaultValues.latitude && defaultValues.longitude && defaultValues.address ){
 			setlocationLookupState('loaded')
 		}
@@ -328,7 +329,51 @@ console.log('setu[ artfact', artifact);
 		});
 		return address;
 	}
+	function coordinateLookup( street, city, state, zipcode ) {
+		const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY;
+		console.log('api key', API_KEY);
+		try {
+		let config = {
+			method: 'get',
+			maxBodyLength: Infinity,
+			url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + street + '&key=' + API_KEY,				
+			headers: { 
+				'Accept': 'application/json'
+			}
+		};
+		axios.request(config)
+			.then( (result) => {
+	console.log('geo revers result', result);
+		
+				if( 'undefined' != typeof result.data ){
 
+
+					var components = getAddressObject(result.data.results[0].address_components );
+					setValue('address', components.home + " " + components.street);
+					setValue('city', components.city);
+					setValue('state', components.region);
+					setValue('zipcode', components.postal_code);
+					var location = result.data.results[0].geometry.location;
+					setValue('latitude', location.lat);
+					setValue('longitude', location.lng);
+				}
+				else{
+//	console.log('geo revers result', result);
+					//setMachineSession("stuff");
+					//router.replace('/map');
+				}
+			})
+			.catch((error) => {
+				console.log('error', error);
+				if( '401' == error.status ){
+				setError('email', { type: 'custom', message: 'Password and Email do not match.' });
+						console.log('401');
+				}
+			})
+		} catch (error) {
+			console.error("Error:", error);
+		}       
+	}
 	function reverseCoordinateLookup(lat, lng) {
 		const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY;
 		try {
@@ -428,6 +473,7 @@ console.log('setu[ artfact', artifact);
 	}
 	const saveImage = image => {
 console.log('saveImage data', image );
+console.log('saveImage artifactId', artifactId );
 		setSaveState('savingImage');
 		var form = new FormData();
         form.append('artifact_id', artifactId);
@@ -587,21 +633,30 @@ console.log('saveImage data', image );
 
 	}
 	const __useCurrentLocation = async ( lookupState ) => {
-
+		var formData = getValues();
+//console.log('formData', formData);
 		let { status } = await Location.requestForegroundPermissionsAsync();
 		console.log('geo status', status);
 		if (status !== "granted") {
 			return;
 		}
 		try {
-			let location = await Location.getCurrentPositionAsync({});
-			var latitude = location.coords.latitude;
-			var longitude = location.coords.longitude;
-			setValue('latitude', JSON.stringify(latitude) );
-			setValue('longitude', JSON.stringify(longitude) );	
-			reverseCoordinateLookup(latitude, longitude);	
-			if(lookupState ){
-				setlocationLookupState( lookupState );
+			// check if street address is added
+			// if just street address?
+			if( formData.address ){
+				console.log('has address', encodeURIComponent( formData.address));
+				var lookupResult = coordinateLookup( encodeURIComponent( formData.address + " " + formData.city + " " + formData.state + " " + formData.zipcode) );
+			}
+			else{
+				let location = await Location.getCurrentPositionAsync({});
+				var latitude = location.coords.latitude;
+				var longitude = location.coords.longitude;
+				setValue('latitude', JSON.stringify(latitude) );
+				setValue('longitude', JSON.stringify(longitude) );	
+				reverseCoordinateLookup(latitude, longitude);	
+				if(lookupState ){
+					setlocationLookupState( lookupState );
+				}
 			}
 		} catch (exceptionVar) {
 			console.log('exceptionVar', exceptionVar);
@@ -614,15 +669,17 @@ console.log('saveImage data', image );
 		navigation.navigate('show', { params: { artifactId: artifactId } })
 	}
 	const handleFileChange = event => {
+		alert(1);
 		const fileObj = event.target.files && event.target.files[0];
 		if (!fileObj) {
 			return;
 		}
-		//console.log('fileObj is', fileObj);
+console.log('fileObj is', fileObj);
 		event.target.value = null;
 		fileObj.uri = URL.createObjectURL(fileObj);
 		const cloneDeep = _.cloneDeep(galleryImages);
 		cloneDeep.push(fileObj);
+		saveImage( fileObj );
 		console.log('setgalelryimages in handflefilechange', cloneDeep);
 		setGalleryImages( cloneDeep );
 		setPreviewVisible(true)
@@ -735,144 +792,141 @@ console.log('saveImage data', image );
 						    paddingBottom:14,				 
 					        flexDirection:'row'						
 						}}>		
-							<Pressable 
+						<Pressable 
+							style={({pressed}) => [
+											{
+									backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+									alignItems: 'center',
+									justifyContent: 'center',
+									borderRadius: 20,
+									height:40,
+									marginTop:10,
+									width:40,
+									elevation: 3,
+									marginRight:5,
+									boxShadow: '0px 2px 2px #d8d8d8'						        
+											}
+							]}
+							onPress={ () => { __onCancel() }}
+
+						>
+							<Ionicons name="arrow-back-outline" size={30} color="" style={{
+										display:'flex-inline',
+										height:30,
+										width:30,
+										borderRadius:16,								
+							}}/>
+
+						</Pressable>
+						{ ( artifact  && "out" !== slideoutState ) ? (
+						
+							<Pressable artifact={artifact}
 								style={({pressed}) => [
 												{
 										backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-										alignItems: 'center',
-										justifyContent: 'center',
-										borderRadius: 20,
-										height:40,
-										marginTop:10,
-										width:40,
-										elevation: 3,
-										marginRight:5,
-										boxShadow: '0px 2px 2px #d8d8d8'						        
+								alignItems: 'center',
+								justifyContent: 'center',
+								borderRadius: 20,
+								height:40,
+								marginTop:10,
+								width:40,
+								marginLeft:10,
+								elevation: 3,
+								marginRight:10,
+								boxShadow: '0px 2px 2px #d8d8d8'						        
 												}
 								]}
-								onPress={ () => { __onCancel() }}
-
+								onPress={ () => { navigateToShow() }}
 							>
-								<Ionicons name="arrow-back-outline" size={30} color="" style={{
-											display:'flex-inline',
-											height:30,
-											width:30,
-											borderRadius:16,								
+								<Ionicons name="eye-outline" size={30} color="" style={{
+									display:'flex-inline',
+									height:30,
+									width:30,
+									borderRadius:16,								
 								}}/>
-
-							</Pressable>
-							{ ( artifact  && "out" !== slideoutState ) ? (
-							
-									<Pressable artifact={artifact}
-										style={({pressed}) => [
-														{
-												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-										alignItems: 'center',
-										justifyContent: 'center',
-										borderRadius: 20,
-										height:40,
-										marginTop:10,
-										width:40,
-										marginLeft:10,
-										elevation: 3,
-										marginRight:10,
-										boxShadow: '0px 2px 2px #d8d8d8'						        
-														}
-										]}
-										onPress={ () => { navigateToShow() }}
-									>
-										<Ionicons name="eye-outline" size={30} color="" style={{
-											display:'flex-inline',
-											height:30,
-											width:30,
-											borderRadius:16,								
-								}}/>
-									</Pressable> 
-										
+							</Pressable> 
+									
 						) : null }										
 
-								{ artifactId ? (
-									<>
-									<CustomButton
-											styles={{
-												borderRadius: 20,
-												elevation: 3,
-												color:'black',
-												marginLeft: 'auto',
-											}}						
-											title={ "Cancel" }
-											onPress={ () => { __onCancel() }}
-										/>
-									<CustomButton
-										styles={{
-											borderRadius: 20,
-											elevation: 3,
-											marginLeft: 20,					    		
-										}}						
-										textStyles={{
-											color:( saveState == 'savingImage'  ? '#d8d8d8' : 'black' ),
-										}}
-										title={  artifact ? ( saveState == 'savingImage' ? "Saving" : "Update") : "Save" }
-										onPress={ ( saveState == 'savingImage')  ? null : handleSubmit(onSubmit, onErrors) }/>
-										</>
-									) : (null)
-								}
-
+						{ artifactId ? (
+							<>
+								<CustomButton
+									styles={{
+										borderRadius: 20,
+										elevation: 3,
+										color:'black',
+										marginLeft: 'auto',
+									}}						
+									title={ "Cancel" }
+									onPress={ () => { __onCancel() }}
+								/>
+								<CustomButton
+									styles={{
+										borderRadius: 20,
+										elevation: 3,
+										marginLeft: 20,					    		
+									}}						
+									textStyles={{
+										color:( saveState == 'savingImage'  ? '#d8d8d8' : 'black' ),
+									}}
+									title={  artifact ? ( saveState == 'savingImage' ? "Saving" : "Update") : "Save" }
+									onPress={ ( saveState == 'savingImage')  ? null : handleSubmit(onSubmit, onErrors) }
+								/>
+							</>
+						) : (null) }
 					</View>
 				</View>	
 			) : null }				
-
-						{ "loaded" != loadState ? (										
-						<View style={{
-							zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
-							backgroundColor:'white', justifyContent:'center', flex:1, alignItems:'center'}}
-						>					
-							<Image source={ loadingIcon } /* Use item to set the image source */
-			                            style={{
-			                                width:150,
-			                                height:150,
-			                            }}
-			                        />  
-						</View>
-						) : ( null ) }
-						{ ("saving" == saveState )? (										
-							<View style={{
-								zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
-								backgroundColor:'rgba(0,0,0,.7)', justifyContent:'center', flex:1, alignItems:'center'}}
-							>							
-								<Image source={ savingIcon } /* Use item to set the image source */
-				                            style={{
-				                                width:150,
-				                                height:150,
-				                            }}
-				                        />  
-				                        <Text
-				                        	style={{
-				                        		color:'white',
-				                        		marginTop:20,
-				                        		fontSize:20,
-				                        		fontWeight:'bold'
-				                        	}}
-				                        >Saving...</Text>
-							</View>
-						) : ( null ) }											
-						{ ("saved" == saveState )? (										
-							<View style={{
-								zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
-								backgroundColor:'rgba(255,255,255,.8)', justifyContent:'center', flex:1, alignItems:'center'}}
-							>							
-				                        <Text
-				                        	style={{
-				                        		marginTop:20,
-				                        		fontSize:20,
-				                        		fontWeight:'bold'
-				                        	}}
-				                        >Saved!</Text>
-							</View>
-						) : ( null ) }
-										
-{ ( "out" == slideoutState ) ? (
-			<ImageMeta photographers={photographers} galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} artifactPrimaryImageId={ artifact ? artifact.primary_image_id : null } slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
+			{ "loaded" != loadState ? (										
+				<View style={{
+					zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
+					backgroundColor:'white', justifyContent:'center', flex:1, alignItems:'center'}}
+				>					
+					<Image source={ loadingIcon } /* Use item to set the image source */
+	                            style={{
+	                                width:150,
+	                                height:150,
+	                            }}
+	                        />  
+				</View>
+			) : ( null ) }
+			{ ("saving" == saveState )? (										
+				<View style={{
+					zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
+					backgroundColor:'rgba(0,0,0,.7)', justifyContent:'center', flex:1, alignItems:'center'}}
+				>							
+					<Image source={ savingIcon } /* Use item to set the image source */
+                        style={{
+                            width:150,
+                            height:150,
+                        }}
+                    />  
+                    <Text
+                    	style={{
+                    		color:'white',
+                    		marginTop:20,
+                    		fontSize:20,
+                    		fontWeight:'bold'
+                    	}}
+                    >Saving...</Text>
+				</View>
+			) : ( null ) }											
+			{ ("saved" == saveState )? (										
+				<View style={{
+					zIndex:99999, display:'block',position:'absolute',top:0, bottom:0,paddingBottom:50,width:'100%',
+					backgroundColor:'rgba(255,255,255,.8)', justifyContent:'center', flex:1, alignItems:'center'}}
+				>							
+	                <Text
+	                	style={{
+	                		marginTop:20,
+	                		fontSize:20,
+	                		fontWeight:'bold'
+	                	}}
+	                >Saved!</Text>
+				</View>
+			) : ( null ) }							
+			{ ( "out" == slideoutState ) ? (
+				<ImageMeta photographers={photographers} galleryState={galleryImages} galleryStateChanger={setGalleryImages} artifactId={artifactId} artifactPrimaryImageId={ artifact ? artifact.primary_image_id : null } slideoutState={slideoutState} setslideoutState={setslideoutState} imageState={imageState} setImageState={setImageState}></ImageMeta>
 			) : (																	
 
 			<ScrollView 
@@ -1106,7 +1160,7 @@ console.log('saveImage data', image );
 												style={s.input}
 												onBlur={onBlur}
 												onChangeText={value => onChange(value)}
-												value={value}
+												value={(value) ? value : ""}
 											/>
 										)}
 										name="latitude"
@@ -1121,7 +1175,7 @@ console.log('saveImage data', image );
 												style={s.input}
 												onBlur={onBlur}
 												onChangeText={value => onChange(value)}
-												value={value}
+												value={(value) ? value : ""}
 											/>
 										)}
 										name="longitude"
