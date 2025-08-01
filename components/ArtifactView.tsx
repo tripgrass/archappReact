@@ -5,6 +5,7 @@ import { useLocalSearchParams, useGlobalSearchParams, Link } from 'expo-router';
 import { useIsFocused } from '@react-navigation/native'
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import PostView from '@/components/PostView';
 
 function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryImages, setLoadState }) {
 	const isFocused = useIsFocused()
@@ -13,18 +14,30 @@ function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryIm
 
 	const [artifacts, setArtifacts] = useState([]);
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
+	const [slideoutState, setslideoutState] = useState('in');
+	const [postState, setPostState] = useState(null);
 
 	const navigateToEdit = () => {
 
 		setLoadState('loading');
 		navigation.navigate('edit', { params: { artifactId: artifact.id } })
 	}
+
+	const navigateToPost = post => {
+setslideoutState( 'out' );
+		console.log('post', post);
+		setPostState( post );
+//		setLoadState('loading');
+//		navigation.navigate('edit', { params: { artifactId: artifact.id } })
+	}	
     return (
 			<>
 				<View style={viewStyles.header}>
 					<Text style={viewStyles.headerText}>{artifact?.name}</Text>
 
 				</View>
+								<PostView  artifactId={artifactId}  slideoutState={slideoutState} setslideoutState={setslideoutState} postState={postState} setPostState={setPostState}></PostView>
+
 					<View style={{display:'flex',flex:1, justifyContent:'center', alignItems:'center', marginTop:150, backgroundColor:'', width:'100%'}}>
 							<>
 								<Text>{artifact?.address}</Text>
@@ -55,6 +68,39 @@ function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryIm
 							) : (
 								<></>
 							)}
+							{artifact.posts && artifact.posts.length > 0 ? (
+								<FlatList
+									contentContainerStyle={{  justifyContent:'center', alignItems:'center'}}
+									horizontal={false} 
+									showsHorizontalScrollIndicator={true} 
+									data={artifact.posts}
+									extraData={artifact.posts}
+									keyExtractor={(item, index) => {return  index.toString();}}
+									renderItem={ ({ item, index }) => (
+										<View key={item.id} serverId={item.id} style={{width:'100%'}}>
+									<Pressable artifact={artifact}
+										style={({pressed}) => [
+														{
+												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+												alignItems: 'center',
+												justifyContent: 'center',
+												elevation: 8,
+												padding: 15,					    		
+												marginTop:20,
+												boxShadow: '0px 2px 2px #d8d8d8'						        
+														}
+										]}
+										onPress={ () => { navigateToPost( item ) }}
+									>
+										<Text style={{display:'block'}}>{item?.post_title}</Text>
+									</Pressable> 
+
+										</View>
+									)}
+								/>
+							) : (
+								<></>
+							)}							
 							<View
 								style={{
 									position:'absolute',

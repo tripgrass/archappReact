@@ -21,7 +21,7 @@ export default function Home({ initialParams }) {
     containedWithin();
     const navigation = useNavigation();
 
-    console.log('initParams!!!! in home page', initialParams);
+    console.log('initParams!!!! in home page posts:', initialParams.artifacts[0]);
     const loadingIcon = ( assets?.length  ? assets[0] : null );
     const houseImg = ( assets?.length  ? assets[1] : null );
     const houseImg2 = ( assets?.length  ? assets[2] : null );
