@@ -361,7 +361,6 @@ function App() {
 		//return <Redirect href="/sign-in" />;
 	}
 	return (
-		<NavigationContainer independent={true}>
 			<Stack.Navigator 
 
 			>
@@ -385,7 +384,6 @@ function App() {
 				<Stack.Screen name="camera" options={{ title: 'Camera' }} component={camera}/>
 				<Stack.Screen name="add" options={{ title: 'ddd' }} component={EditArtifact} />
 			</Stack.Navigator>
-		</NavigationContainer>
 	);
 }
 
