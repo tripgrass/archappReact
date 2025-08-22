@@ -7,6 +7,10 @@ import axios from 'axios';
 
 import { useSession } from '@/utilities/AuthContext';
 import { router } from 'expo-router';
+import { useNavigation, Link } from 'expo-router';
+import home from '@/app/(tabs)/index';
+import Home from '@/app/(tabs)/home';
+
 
 export default () => {
 
@@ -16,6 +20,8 @@ export default () => {
       password: ''
     }
   });
+  const navigation = useNavigation();
+
   const onSubmit = data => {
     const API_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN;
     try {
@@ -36,13 +42,20 @@ export default () => {
         .then( (result) => {
           console.log('login result', result.data);
           if( 'undefined' != typeof result.data ){
+            console.log('data!!!!! 42');
             //setMachineSession("stuff");
             signIn(result.data);
-            router.replace('/(tabs)');
+            //navigation.navigate('Home');
+            //router.replace('/(tabs)/home');
+            router.back();
+          }
+          else{
+            console.log('data!!!!! 50');
+
           }
         })
         .catch((error) => {
-          console.log('error', error);
+          console.log('error 55', error);
           if( '401' == error.status ){
             setError('email', { type: 'custom', message: 'Password and Email do not match.' });
               console.log('401');
@@ -108,6 +121,7 @@ export default () => {
           color
           title="Reset"
           onPress={() => {
+            console.log('reset loginform.tsx 124');
             reset({
               email: 'yoitsemailtime@gmail.com',
               password: '12345678'
@@ -178,6 +192,7 @@ export default () => {
           color
           title="Reset"
           onPress={() => {
+            console.log('loginform reset 195');
             reset({
               email: 'yoitsemailtime@gmail.com',
               password: '12345678'

@@ -33,7 +33,8 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
                     <View
                         style={{
                             flexDirection: 'row',
-                            justifyContent: 'space-between'
+                            justifyContent: 'space-between',
+                            paddingBottom: 100
                         }}
                     >
                         <TouchableOpacity
@@ -81,9 +82,10 @@ const CameraPreview = ({photo, retakePicture, savePhoto}: any) => {
     )
 }
 export default function App({galleryState, stateChanger, cameraState, setCameraState, artifactId, artifact}) {
+    const [startCamera, setStartCamera] = useState(false)
 
     const [facing, setFacing] = useState<CameraType>('back');
-    const [flash, setFlash] = useState<CameraType>('on');
+    const [flash, setFlash] = useState<CameraType>('o');
     const [permission, requestPermission] = useCameraPermissions();
     const [previewVisible, setPreviewVisible] = useState(false);
     const [capturedImage, setCapturedImage] = useState<any>(null);
@@ -104,6 +106,21 @@ export default function App({galleryState, stateChanger, cameraState, setCameraS
         );
     }
 */  
+    const __startCamera = async () => {
+         if (!permission) {
+                // Camera permissions are still loading.
+            alert('waiting');
+            }
+
+            setStartCamera(true)
+            if (!permission.granted) {
+                // Camera permissions are not granted yet.
+//              alert('not granted');
+            }    
+            else{
+                setStartCamera(true)
+            }
+    }    
     const __takePicture = async () => {
         const photo: any = await camera.takePictureAsync()
         setPreviewVisible(true)

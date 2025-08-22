@@ -34,9 +34,10 @@ const s = require('@/components/style');
 
 let camera: CameraView
 
-export default function AddEdit( { initArtifactId, collectionId, setCollectionId } ) {
-console.log('addedit artifactId', initArtifactId);
+export default function AddEdit( { initArtifactId, collectionId, setCollectionId, setTempId, tempId } ) {
+console.log('addedit initartifactId', initArtifactId);
 	const isEdit = initArtifactId ? true : false;
+	console.log('isedit' , isEdit);
 	const isFocused = useIsFocused()
 	const [origImageIds, setOrigImageIds] = useState([{}]);	
 	const [artifactId, setArtifactId] = useState(initArtifactId ? initArtifactId : null);	
@@ -71,7 +72,16 @@ console.log('addedit artifactId', initArtifactId);
 		defaultValues: defaultValues,
 	});
 	useEffect(() => {
+console.log('USE EFFECT ON ADDESIT:::::::');
+		if(tempId){
+			console.log('has tempud: ', tempId);
+		}
+		else{
+			console.log('NO TempID');
+
+		}
 		if( !artifactId && initArtifactId ){
+			console.log('no artifactid BUT has initartifactid (tempid)');
 			setArtifactId(initArtifactId);
 			setValue('id', initArtifactId);
 		}       
@@ -209,6 +219,7 @@ console.log('setu[ artfact', artifact);
 		reset({ ...defaultValues });
 		setArtifact(artifact);
 		setLoadState("loaded");
+		setTempId(null);		
 	}
 	useEffect(() => {
 		if( !photographers ){
@@ -427,7 +438,13 @@ console.log('setu[ artfact', artifact);
 		setGalleryImages([]);		
 		setLoadState('loading');
 		setslideoutState( 'in' );
-//		router.back();
+		console.log('BEFORE --------------------------> router back ', tempId);
+
+		router.back();
+		setTempId(null);
+		reset();
+		defaultValues = {};
+		console.log('after router back tempId', tempId);
 //					router.replace('/');		
 
 /*
@@ -478,7 +495,10 @@ console.log('saveImage artifactId', artifactId );
 		var form = new FormData();
         form.append('artifact_id', artifactId);
         if( !artifact ){
-			form.append('temp', true);
+			form.append('temp', 1);
+        }
+        else{
+			form.append('temp', 0);        	
         }
 		imageMeta = {};
 		form.append('imagesMeta[0]', JSON.stringify( image ) );
@@ -522,8 +542,9 @@ console.log('saveImage artifactId', artifactId );
 		setSaveState('saving');
 		console.log('saveState', saveState);
 		console.log('data', data);
+
 		var form = new FormData();
-		form.append('temp', false);
+		form.append('temp', 0);
 		var images = [];
 		var i = 0;
 		/*
@@ -608,7 +629,8 @@ console.log('saveImage artifactId', artifactId );
             	setSaveState('saved');
 
             	setTimeout(function(){
-	            	setSaveState(null);
+            	setSaveState(null);
+
 			}, 1000);
 		    	//navigation.navigate('ProfileTab');
 		}).catch((error) => {
@@ -756,7 +778,7 @@ console.log('fileObj is', fileObj);
 //				alert('not granted');
 			}    
 			else{
-//				setStartCamera(true)
+				setStartCamera(true)
 			}
 	}
 	const __removePhoto = () => {
@@ -1407,11 +1429,13 @@ console.log('fileObj is', fileObj);
 	                            						
 							</View>
 						</View>
+						{ ( collections && collections.length > 0 ) ? (				
 						<View style={[s.formSection,{marginTop:5}]}>
 							<View style={s.formSectionTitleWrapper}>
 								<Text style={s.formSectionTitle}>Collections</Text>
 							</View>
 						</View>
+						) : ( <View style={{marginTop:100}}></View>)  }
 						<View style={s.formSection}>
 
 							<View style={s.fieldWrapper}>

@@ -189,11 +189,15 @@ const onMarkerSelected = (marker: any) => {
             key={index}
             title={marker.name}
             coordinate={marker}
+            style={{flex:1}}
             //onPress={() => onMarkerSelected(marker)}
           >
-            <Callout onPress={() => onCalloutPressed(marker)}>
-              <View style={{ padding: 10 }}>
-                <Text style={{ fontSize: 24 }}>{marker.name}</Text>
+            <Callout onPress={() => onCalloutPressed(marker)} style={{flex:1, height:30, width:100, backgroundColor:'red'}}>
+              <View style={{ flex: 1,
+        backgroundColor: '#FAAA18',
+        borderRadius: 40,
+        flexDirection: 'row' }}>
+                <Text style={{ fontSize: 24 }}>calllout{marker.name}</Text>
                 <Text style={{ fontSize: 24 }}>View</Text>
               </View>
             </Callout>

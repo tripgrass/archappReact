@@ -21,7 +21,7 @@ export default function Home({ initialParams }) {
     containedWithin();
     const navigation = useNavigation();
 
-    console.log('initParams!!!! in home page posts:', initialParams.artifacts[0]);
+    console.log('initParams!!!! in home page posts:', initialParams);
     const loadingIcon = ( assets?.length  ? assets[0] : null );
     const houseImg = ( assets?.length  ? assets[1] : null );
     const houseImg2 = ( assets?.length  ? assets[2] : null );
@@ -39,26 +39,37 @@ const setArtifactId = initialParams.setArtifactId;
 
     return (
         <View style={{ flex: 1, alignItems: '', paddingTop: Constants.statusBarHeight, justifyContent: 'flex-start' }}>
-            <View style={{ flex:1, maxHeight:200, marginBottom:30}}>
-                <CustomButton  title="" onPress={() => navigation.navigate('ProfileTab')} />
-                <ImageBackground source={artifix}> 
-                    <FlatList contentContainerStyle={{ flexGrow:1, backgroundColor:'', padding:0, marginTop:20 }}
-                                            horizontal={true} 
-                                            showsHorizontalScrollIndicator={false} 
-                                            data={circleButtons}
-                                            extraData={circleButtons}
-                                            keyExtractor={(item, index) => {return  index.toString();}}
-                                            renderItem={ ({ item, index }) => (
+            <View style={{ flex:1, marginBottom:30}}>
+                <CustomButton  title="" onPress={() => navigation.navigate('ProfileTab')} 
+                />
+                <ImageBackground source={artifix}
+                    style={{
+                        backgroundColor:'red'
+                    }}
+                > 
+                    <FlatList 
+                            contentContainerStyle={{ 
+                                flexGrow:1, 
+                                backgroundColor:''
+                            }}
+                            horizontal={true} 
+                            showsHorizontalScrollIndicator={false} 
+                            data={circleButtons}
+                            extraData={circleButtons}
+                            keyExtractor={(item, index) => {return  index.toString();}}
+                            renderItem={ ({ item, index }) => (
                         <Pressable 
                             style={({pressed}) => [
                                             {
-                                    backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+                                    backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'blue',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     borderRadius: 60,
                                     height:120,
                                     width:120,
                                     marginLeft:20,
+                                    marginTop:20,
+                                    marginBottom:20,
                                     elevation: 3,
                                     boxShadow: '0px 2px 2px #d8d8d8'                                
                                             }
@@ -81,7 +92,7 @@ const setArtifactId = initialParams.setArtifactId;
                 </ImageBackground>
             </View> 
             <View style={{ flex:2}}>
-                <FlatList contentContainerStyle={{  padding:0 }}
+                <FlatList contentContainerStyle={{  marginTop:30, padding:0 }}
                     horizontal={true} 
                     showsHorizontalScrollIndicator={false} 
                     data={artifactsList}

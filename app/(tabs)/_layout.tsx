@@ -81,53 +81,59 @@ function MyTabs() {
 		var form = new FormData();
 		form.append('idOnly', true);
 		console.log('create from scratch:');
+		console.log('create form:' , form);
 		ArtifactsService({
-	        	method:'create',
-	        	url:'artifacts',
-	        	data:form
-	        }).then( (results) => {
-	        	console.log('ADD FILE ::::::::::::::::::after submit results', results);
-	        	var newArtifact = results;
-	        	setTempId(newArtifact.id);
+			method:'create',
+			url:'artifacts',
+			data:form
+		}).then( (results) => {
+			console.log('ADD FILE ::::::::::::::::::after submit results no web', results);
+			var newArtifact = results;
+			setTempId( newArtifact.id );
 		}).catch((error) => {
 			console.log('saving error:',error);
-	    })				
+		})				
 	}	
 	useEffect(() => {
 //    console.log('useffect in layout:::::::');
-        if(userSession){
-        	if( !tempId){
-	        	createArtifactId();
-	        }
-					ArtifactsService({method:'getAll'})
-						.then( (results) => {
-
-							//console.log('RESULTS OF getall',  results)
-							const artifactsList = {};
-							const artifactsCompareList = {};
-							//console.log('artifactsList start', artifactsList);
-							Object.keys(results).forEach((k, i) => {
-								artifactsList[results[i].id] = results[i];
-								if( results[i].images.length > 0 ){
-									artifactsCompareList[results[i].id] = results[i];
-								}
-							});
-							setArtifacts(results);
-							setArtifactsList(results);
-							setArtifactsCompareList(artifactsCompareList);
-						})
-						.catch((error) => console.log('in profile getall .error', error))
-
-					CollectionsService({method:'getAll'})
-						.then( (results) => {
-
-//							console.log('RESULTS OF getall collections',  results)
-							setCollections(results)
-						})
-						.catch((error) => console.log('in layout collections getall .error', error))
-
+//if(userSession){
+    	console.log('99 ----------------------------------');
+    	if( !tempId ){
+	    	console.log('101 ----------------------------------');
+        	createArtifactId();
         }
-   }, []);
+		ArtifactsService({
+			method:'getAll'
+		}).then( (results) => {
+
+			//console.log('RESULTS OF getall',  results)
+			const artifactsList = {};
+			const artifactsCompareList = {};
+			//console.log('artifactsList start', artifactsList);
+			Object.keys(results).forEach((k, i) => {
+				artifactsList[results[i].id] = results[i];
+				if( results[i].images.length > 0 ){
+					artifactsCompareList[results[i].id] = results[i];
+				}
+			});
+			setArtifacts(results);
+			setArtifactsList(results);
+			setArtifactsCompareList(artifactsCompareList);
+		}).catch(
+			(error) => console.log('in profile getall .error', error)
+		)
+
+		CollectionsService({
+			method:'getAll'
+		}).then( (results) => {
+//console.log('RESULTS OF getall collections',  results)
+			setCollections(results)
+		}).catch(
+			(error) => console.log('in layout collections getall .error', error)
+		)
+
+//}
+	}, []);
 	const currentRouteName = getNestedRouteName(navigationState);
 	const hideTabBarScreens = ['Add', 'edit'];
 //console.log('tempId:::::;;', tempId);
@@ -141,7 +147,7 @@ function MyTabs() {
 						size = 20;
 					} else if (route.name === 'Add') {
 						iconName = focused ? 'add-circle' : 'add-circle-outline';
-						size = 40;
+						size = 20;
 					} else if (route.name === 'ProfileTab') {
 						iconName = focused ? 'person' : 'person-outline';
 						size = 20;
@@ -173,21 +179,23 @@ function MyTabs() {
          		headerShown: false,
        		}}
 			/>
+			{ ( userSession ) ? (			
 			<Tab.Screen name="Add" 
-			children={()=>{
-						return(
-							<AddTab  tempId={tempId} artifacts={artifacts} setArtifacts={setArtifacts}/>
-						)
-					}} 
+				children={()=>{
+							return(
+								<AddTab  tempId={tempId} artifacts={artifacts} setArtifacts={setArtifacts} setTempId={setTempId}/>
+							)
+						}} 
 
-				options={{
-         		headerShown: false,
-       		}}
+					options={{
+	         		headerShown: false,
+	       		}}
 			/>
+			) : (null) }
 			<Tab.Screen name="AddCollection" 
 			children={()=>{
 						return(
-							<AddCollection  tempId={tempId} artifacts={artifacts} setArtifacts={setArtifacts}/>
+							<AddCollection  tempId={tempId} artifacts={artifacts} setArtifacts={setArtifacts} setTempId={setTempId}/>
 						)
 					}} 
 
@@ -238,22 +246,24 @@ function MyTabs() {
          		headerShown: false,
        		}}
 			/>			
+			{ ( userSession ) ? (			
 
-			<Tab.Screen name="ProfileTab" 
-					children={()=>{
-						return(
-							<ProfilesTab  initialParams={{
-									artifacts:artifacts, setArtifacts:setArtifacts, tempId:tempId, 
-									collections:collections, setCollections:setCollections, collectionId:collectionId, setCollectionId:setCollectionId,
-									artifactId:artifactId,
-									setArtifactId:setArtifactId
-								}}/>
-						)
-					}}
-   				options={{
-         		headerShown: false,
-       		}}
-			/>
+				<Tab.Screen name="ProfileTab" 
+						children={()=>{
+							return(
+								<ProfilesTab  initialParams={{
+										artifacts:artifacts, setArtifacts:setArtifacts, tempId:tempId, 
+										collections:collections, setCollections:setCollections, collectionId:collectionId, setCollectionId:setCollectionId,
+										artifactId:artifactId,
+										setArtifactId:setArtifactId
+									}}/>
+							)
+						}}
+	   				options={{
+	         		headerShown: false,
+	       		}}
+				/>
+			) : (null ) }
 		</Tab.Navigator>
 	);
 }

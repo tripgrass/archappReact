@@ -8,17 +8,21 @@ export const ArtifactsService = async function({
     }){
     switch (method) {
         case 'create':
+            console.log('ArtifactsService 11');
             var results = await axiosWrapper({
                 method:'post',
                 url:'artifacts/store',
                 data:data
             }).catch((error) => {
+            console.log('ArtifactsService 11 error' );
                 console.log(error);
             });
+            console.log('ArtifactsService 11 reuslts' , results);
             return results;
             break;
 
         case 'getAll':
+            console.log('ArtifactsService 23');
             var results = await axiosWrapper({
                 method:'get',
                 url:'artifacts'

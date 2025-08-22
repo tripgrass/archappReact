@@ -51,6 +51,7 @@ export const axiosWrapper = async function({
             
 
         case 'post':
+            console.log('axios service post' + url);
             const postConfig = {
                 method: 'post',
                 maxBodyLength: Infinity,

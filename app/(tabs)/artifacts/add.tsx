@@ -6,12 +6,13 @@ import { useState, useEffect } from 'react'
 
 
 
-function Add({ route, navigation, data, tempId }) {
+function Add({ route, navigation, data, tempId, setTempId }) {
 	console.log('add file data ', data);
 	console.log('add file tempId ', tempId);
+	
     return (
 			<>
-				<AddEdit navigation={navigation} initArtifactId={tempId} />
+				<AddEdit navigation={navigation} initArtifactId={tempId} setTempId={setTempId} tempId={tempId}/>
 			</>
     );
 }

@@ -63,7 +63,7 @@
     "react-native-autocomplete-dropdown": "^5.0.0",
     "react-native-dropdown-autocomplete": "^1.0.18",
     "react-native-gesture-handler": "~2.24.0",
-    "react-native-maps": "1.20.1",
+    "react-native-maps": "^1.20.0",
     "react-native-maps-directions": "^1.9.0",
     "react-native-radio-buttons": "^1.0.0",
     "react-native-reanimated": "~3.17.4",
@@ -81,7 +81,7 @@
     "@types/react-test-renderer": "^19.1.0",
     "jest": "~29.7.0",
     "jest-expo": "~53.0.9",
-    "react-test-renderer": "19.1.1",
+    "react-test-renderer": "^19.0.0",
     "typescript": "~5.8.3"
   },
   "private": true
