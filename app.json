@@ -20,9 +20,12 @@
       "package": "com.tripgrass.archapp",
       "config": {
         "googleMaps": {
-           "apiKey": "AIzaSyDRKJkT5Hg_QgyES9RnlDcfDh6EoODkAhk"
+          "apiKey": "AIzaSyDRKJkT5Hg_QgyES9RnlDcfDh6EoODkAhk"
         }
-      }      
+      },
+      "permissions": [
+        "INTERNET"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -39,7 +42,9 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-maps"
     ],
     "experiments": {
       "typedRoutes": true

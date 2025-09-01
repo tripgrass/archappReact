@@ -190,13 +190,13 @@ function toggleSlideout() {
                         {
                             color:'white',
                             width:'100%',
-                            marginTop:-76,
-                            flex:1,
-                        //        backgroundColor:'red'
+                            height:'1000',
+                            top:100,
+                            backgroundColor:'red'
                         }
                     ) : (
                         {
-                            display:'none'
+         //                   display:'none'
                         }
                     ),
                     ('out' == slideoutState) ? (  isKeyboardVisible  ? 
@@ -212,10 +212,10 @@ function toggleSlideout() {
                         } 
                     ) : 
                         {
-                            backgroundColor:''
+                            backgroundColor:'blue'
                         },
                         { 
-                             backgroundColor:'' 
+                             backgroundColor:'green' 
                         }
                 ]} >
                 <ScrollView
@@ -223,7 +223,7 @@ function toggleSlideout() {
                     style={[
                         {
                             width:'100%', 
-                            backgroundColor:''  
+                            backgroundColor:'yellow'  
                             //paddingBottom:60
                         },
                         (  isKeyboardVisible  ? 
@@ -250,7 +250,7 @@ function toggleSlideout() {
                             width: 10,
                             height: 20,
                         },
-                        backgroundColor:'white',
+                        backgroundColor:'blue',
                         shadowOpacity: 1,
                         shadowRadius: 3.84,
 //                        paddingBottom:100

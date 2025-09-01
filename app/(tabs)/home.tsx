@@ -44,7 +44,7 @@ const setArtifactId = initialParams.setArtifactId;
                 />
                 <ImageBackground source={artifix}
                     style={{
-                        backgroundColor:'red'
+                        backgroundColor:''
                     }}
                 > 
                     <FlatList 
@@ -61,7 +61,7 @@ const setArtifactId = initialParams.setArtifactId;
                         <Pressable 
                             style={({pressed}) => [
                                             {
-                                    backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'blue',
+                                    backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'rgb(210, 210, 210)',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     borderRadius: 60,
@@ -139,11 +139,11 @@ const setArtifactId = initialParams.setArtifactId;
                   }}
                     />
             </View>
-            <View style={{backgroundColor:'', width:'100%', flexDirection:'row', }}>
+            <View style={{backgroundColor:'', minHeight:20, width:'100%', flexDirection:'row', }}>
 
-    
+            { (1 != 1) ? (
+    <>
             <CustomButton styles={{width:'30%'}} title="Edit" onPress={() => navigation.navigate('/artifacts/edit')} />
-
             <CustomButton styles={{width:'30%'}} title="Go to Map" onPress={() => navigation.navigate('map')} />
             { (userSession) ? (
 
@@ -156,7 +156,11 @@ const setArtifactId = initialParams.setArtifactId;
                ) : <CustomButton title="Sign In" 
                     style={{margin:20}}
                 onPress={() => navigation.navigate('SignIn')} />
-         }
+            }                
+    </>
+
+            ) : (<></>) }
+
 </View>
         </View>
     );

@@ -136,21 +136,22 @@ function MyTabs() {
 	}, []);
 	const currentRouteName = getNestedRouteName(navigationState);
 	const hideTabBarScreens = ['Add', 'edit'];
-//console.log('tempId:::::;;', tempId);
 	return (
+
 		<Tab.Navigator
+
 			screenOptions={({ route }) => ({
 				tabBarIcon: ({ focused, color, size }) => {
 					let iconName;
 					if (route.name === 'Home') {
 						iconName = focused ? 'home' : 'home-outline';
-						size = 20;
+						size = 15;
 					} else if (route.name === 'Add') {
 						iconName = focused ? 'add-circle' : 'add-circle-outline';
-						size = 20;
-					} else if (route.name === 'ProfileTab') {
+						size = 35;
+					} else if (route.name === 'ProfileTab' || route.name === 'SignIn') {
 						iconName = focused ? 'person' : 'person-outline';
-						size = 20;
+						size = 15;
 					}          
 					return <Ionicons name={iconName} size={size} color={color} />;
 				}, 
@@ -160,8 +161,19 @@ function MyTabs() {
 						return <TouchableOpacity  {...props} />
 					}
 				},
-			    tabBarHideOnKeyboard: true,
+				tabBarHideOnKeyboard: true,
+				tabBarIconStyle: {
+	                flex: 1,
+	                alignItems: 'center',
+	                justifyContent: 'center',
+	                marginBottom: 0,
+	            },
+	            tabBarItemStyle:{
+					display: ( route.name === 'Home' || route.name === 'Add' || ( userSession && route.name === 'ProfileTab' ) || ( !userSession && route.name === 'SignIn') ) ? 'flex' : 'none',
+      			},
 				tabBarStyle: {
+					width:'100%',
+					textAlign:'center',
 					display: hideTabBarScreens.includes(currentRouteName) ? 'none' : 'flex',
 				},			    
 			})}
@@ -192,6 +204,26 @@ function MyTabs() {
 	       		}}
 			/>
 			) : (null) }
+				<Tab.Screen name="SignIn" options={{ title: 'SignIn' }} component={SignIn}/>
+
+			{ ( userSession ) ? (			
+
+				<Tab.Screen name="ProfileTab" 
+						children={()=>{
+							return(
+								<ProfilesTab  initialParams={{
+										artifacts:artifacts, setArtifacts:setArtifacts, tempId:tempId, 
+										collections:collections, setCollections:setCollections, collectionId:collectionId, setCollectionId:setCollectionId,
+										artifactId:artifactId,
+										setArtifactId:setArtifactId
+									}}/>
+							)
+						}}
+	   				options={{
+	         		headerShown: false,
+	       		}}
+				/>
+			) : (null ) }			
 			<Tab.Screen name="AddCollection" 
 			children={()=>{
 						return(
@@ -246,28 +278,12 @@ function MyTabs() {
          		headerShown: false,
        		}}
 			/>			
-			{ ( userSession ) ? (			
 
-				<Tab.Screen name="ProfileTab" 
-						children={()=>{
-							return(
-								<ProfilesTab  initialParams={{
-										artifacts:artifacts, setArtifacts:setArtifacts, tempId:tempId, 
-										collections:collections, setCollections:setCollections, collectionId:collectionId, setCollectionId:setCollectionId,
-										artifactId:artifactId,
-										setArtifactId:setArtifactId
-									}}/>
-							)
-						}}
-	   				options={{
-	         		headerShown: false,
-	       		}}
-				/>
-			) : (null ) }
 		</Tab.Navigator>
 	);
 }
 function CustomDrawerContent(props) {
+	const { userSession, signOut } = useSession();
 	return (
 		<DrawerContentScrollView {...props}>
 			<DrawerItemList {...props} />
@@ -279,6 +295,12 @@ function CustomDrawerContent(props) {
 				label="Toggle drawer"
 				onPress={() => props.navigation.toggleDrawer()}
 			/>
+			<DrawerItem
+				label="Sign Out"
+				onPress={() => {
+                  signOut();
+                }} 
+			/>			
 		</DrawerContentScrollView>
 	);
 }

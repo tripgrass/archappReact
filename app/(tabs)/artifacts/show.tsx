@@ -78,11 +78,7 @@ function ShowArtifact({ route, navigation }) {
 
 const viewStyles = StyleSheet.create({
 	container: {
-		flex: 1,
-		justifyContent:'center',
-		alignItems:'center',
-		padding: 16
-
+		flex: 1
 	}
 });
 export default ShowArtifact;
