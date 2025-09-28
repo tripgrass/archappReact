@@ -6,7 +6,7 @@ import { useIsFocused } from '@react-navigation/native'
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import PostView from '@/components/PostView';
-import  ImageView  from '@/components/ImageView';
+import  MetaView  from '@/components/MetaView';
 import CustomButton from '@/components/Button';
 import { vw, vh, vmin, vmax } from 'react-native-expo-viewport-units';
 
@@ -16,13 +16,19 @@ function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryIm
 	const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
 	const [imageId, setImageId] = useState(null);
 	const [image, setImage] = useState(null);
-	const [slideoutImageState, setslideoutImageState] = useState('in');
+	const [list, setList] = useState(null);
+	const [ metaObject, setMetaObject] = useState(null);
+	const [metaType, setMetaType] = useState(null);
+	const [slideoutMetaState, setSlideoutMetaState] = useState('in');
 	const [artifacts, setArtifacts] = useState([]);
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
 	const [slideoutState, setslideoutState] = useState('in');
 	const [postState, setPostState] = useState(null);
+	const [post, setPost] = useState(null);
 
-//console.log(galleryImages.length);
+
+console.log('galleryImages', galleryImages);
+//console.log('!!!!!!!!!!!!!!!!!',artifact.posts);
 	var isOdd = 0;
 	if( galleryImages.length % 2 ){
 //		console.log('is odd');
@@ -32,25 +38,138 @@ function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryIm
 //		console.log('is even');
 
 	}
+	const onMetaClose = (  ) => {
+console.log('back from image' , artifact.id);
+		setSlideoutMetaState( 'in' );
+		setImage( null );
+		setMetaType(null);
+		navigation.navigate( 'show', { params: { artifactId: artifact.id } })
+	}
+	const onBack = (  ) => {
+console.log('back to home?' , artifact.id);
+		//setSlideoutMetaState( 'in' );
+		//setImage( null );
+
+//		navigation.navigate( 'show', { params: { artifactId: artifact.id } })
+		navigation.navigate( 'Home');
+	}
 
 	const navigateToEdit = () => {
 
 		setLoadState('loading');
 		navigation.navigate('edit', { params: { artifactId: artifact.id } })
 	}
+	const isStart = (  ) => {
+		var lastListObj = list[Object.keys(list)[0]];
+		if( lastListObj ){
+			var lastListID = (lastListObj.id ? lastListObj.id : lastListObj.ID);
+			var metaObjectID = (metaObject.id ? metaObject.id : metaObject.ID);
+			if( metaObjectID == lastListID ){
+				return true;
+			}
+		}
+	}	
+	const isEnd = ( ) => {
+		var lastListObj = list[Object.keys(list)[Object.keys(list).length - 1]];
+		if( lastListObj ){
+			var lastListID = (lastListObj.id ? lastListObj.id : lastListObj.ID);
+			var metaObjectID = (metaObject.id ? metaObject.id : metaObject.ID);
+			if( metaObjectID == lastListID ){
+				return true;
+			}
+		}
+	}
+		const gotoPrev = (  ) => {
+			if( 'image' == metaType ){
+				var prevImage = navMeta( image.id, 'prev');
+				setImage( prevImage );
+				setMetaObject( prevImage );
+			}
+			if( 'post' == metaType ){
+				console.log('gotoprev post', post);
+				var prevPost = navMeta( post.id, 'prev');
+				console.log('gotoprev prevPost', prevPost);
+				//setPost( prevPost );
+				setMetaObject( prevPost );
+			}			
+		}
+		const gotoNext = (  ) => {
+			if( 'image' == metaType ){
+				var nextImage = navMeta( image.id, 'next' );
+				setImage( nextImage );
+				setMetaObject( nextImage );
+			}
+			if( 'post' == metaType ){
+				var nextPost = navMeta( post.id, 'next');
+				console.log('gotoprev nextPost', nextPost);
+				//setPost( prevPost );
+				setMetaObject( nextPost );
+			}						
+		}
+ 		const navMeta = ( obj_id, direction ) => {			
+		    let lastKey = "";
+		    let nextKey = "";
+			if( 'image' == metaType ){
+				var list = galleryImages;
+			}
+			if( 'post' == metaType ){
+				var list = artifact.posts;
+			}
 
-	const openLightbox = imageItem => {
-		setslideoutImageState( 'out' );
+	    	if( 'next' == direction ){
+	    		var isCurrent = false;
+			    for (const key in list) {
+			        if (list.hasOwnProperty(key)) {
+			            if ( !isCurrent && list[key].id == obj_id){
+			            	isCurrent = true;
+						console.log('NO SOLUTION' + obj_id + "--- ", list[key]);
+						}
+						else{
+						console.log('solved' + obj_id + "--- ", list[key]);
+				            if ( isCurrent ){
+						console.log('is current:::::: ' , key);
+				                return list[key];
+							}
+						}
+					}
+			    }
+	    	}
+	    	else{
+	    		console.log('else');
+			    for (const key in list) {
+			        if (list.hasOwnProperty(key)) {
+			            if ( list[key].id == obj_id){
+			                lastKey = lastKey || key;
+						console.log('is last! ', key);
+			                return list[lastKey];
+			            } else {
+			                lastKey = key;
+			            }
+			        }
+			    }
+		    }
+		}
+	
+
+	const openMetaImage = imageItem => {
+		setSlideoutMetaState( 'out' );
 		setImage( imageItem );
-		console.log('openLightbox !!!!!!!!!!!!!!!!!! global image', image);
+		setMetaType('image');
+		setMetaObject( imageItem );
+setList( galleryImages );
+//		console.log('openMetaImage  global image', image);
 
-		console.log('openLightbox !!!!!!!!!!!!!!!!!! imageItem', imageItem);
+//		console.log('openMetaImage imageItem', imageItem);
 	}
 
-	const navigateToPost = post => {
-setslideoutState( 'out' );
-		console.log('post', post);
-		setPostState( post );
+	const openMetaPost = post => {
+		console.log('post!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', post);
+		setSlideoutMetaState( 'out' );
+		setImage( null );
+		setMetaType('post');
+		setMetaObject( post );
+		setList( artifact.posts );
+		setPost( post );
 //		setLoadState('loading');
 //		navigation.navigate('edit', { params: { artifactId: artifact.id } })
 	}	
@@ -59,35 +178,111 @@ setslideoutState( 'out' );
 
 			<View style={{backgroundColor:'', width:'100%'}}>
 				<View style={viewStyles.header}>
+					{ (metaType && !isStart() ) && 					
+						<TouchableOpacity
+	                        style={{
+	                        	position:'absolute',
+	                        	bottom:10,
+	                            paddingTop:10,
+	                            paddingBottom:10,
+	                            paddingRight:5,
+	                            paddingLeft:20,
+	                            zIndex:9,
+	                        }}
+							onPress={ () => { gotoPrev() }}		                            
 
-                        <TouchableOpacity
+	                    >
+							<Ionicons name="chevron-back" size={30} color="black" style={{
+	                            display:'flex-inline',
+	                            height:30,
+	                            width:30,
+	                        }}/>		                            
+	                    </TouchableOpacity>  	
+	                }
+					<Text style={viewStyles.headerTitle}>{artifact?.name}</Text>
+					<Text style={viewStyles.headerText}>{artifact?.address}</Text>
+					<Text style={viewStyles.headerText}>{artifact?.city}, {artifact?.state}</Text>
+					{ (!metaType ) && 
+						<TouchableOpacity
                             style={{
-                                height: 50,
-                                left:7,
+                                height: 30,
+                                left:20,
                                 position:'absolute',
-                                width: 50,
+                                width: 30,
                                 top:7,
                                 zIndex:9,
                                 backgroundColor:'white'
                             }}
+                            onPress={ () => { onBack() }}
                         >
-                            <Ionicons name="chevron-back" size={50} color="black" style={{
+                            <Ionicons name="chevron-back" size={30} color="red" style={{
                                 display:'flex-inline',
-                                height:50,
-                                width:50,
+                                height:30,
+                                width:30,
                             }}/>
-                        </TouchableOpacity>                                                                      
-					<Text style={viewStyles.headerTitle}>{artifact?.name}</Text>
-					<Text style={viewStyles.headerText}>{artifact?.address}</Text>
-					<Text style={viewStyles.headerText}>{artifact?.city}, {artifact?.state}</Text>
+                        </TouchableOpacity>  
+                    }
+					{ (metaType  ) && 
+
+                        <TouchableOpacity
+                            style={{
+                                height: 30,
+                                right:20,
+                                position:'absolute',
+                                width: 30,
+                                top:7,
+                                zIndex:9,
+                                backgroundColor:'white'
+                            }}
+                            onPress={ () => { onMetaClose() }}
+                        >
+                            <Ionicons name="close" size={30} color="" style={{
+                                display:'flex-inline',
+                                height:30,
+                                width:30,
+                            }}/>
+                        </TouchableOpacity>   
+                    }
+					{ (metaType && !isEnd()) &&                        
+					<TouchableOpacity
+                        style={{
+
+                        	position:'absolute',
+                        	bottom:10,
+							right:0,                        	
+                            paddingTop:10,
+                            paddingBottom:10,
+                            paddingRight:20,
+                            paddingLeft:5,
+                            zIndex:9,
+                            backgroundColor:''
+                        }}
+						onPress={ () => { gotoNext() }}		                            
+
+                    >
+						<Ionicons name="chevron-forward" size={30} color="black" style={{
+                            display:'flex-inline',
+                            height:30,
+                            width:30,
+                        }}/>		                            
+                    </TouchableOpacity> 
+                    } 	
+
 				</View>				
-				{image && 
-				<ImageView
+				{ (metaType ) && 
+				<MetaView
 					artifactId={artifactId}
-					imageId={imageId}	
-					image={image}	
-					slideoutImageState={slideoutImageState} 
-					setslideoutImageState={setslideoutImageState}									
+					imageId={ image ? imageId : null}	
+					image={image ? image : null }
+					metaType={metaType}
+					setMetaType={setMetaType}
+					galleryImages={galleryImages}
+					setImage={setImage}	
+					post={post}
+					setPost={setPost}
+					metaObject={metaObject}
+					slideoutMetaState={slideoutMetaState} 
+					setSlideoutMetaState={setSlideoutMetaState}									
 					styles={{
 						display:'none',
 						borderRadius: 20,
@@ -102,9 +297,8 @@ setslideoutState( 'out' );
 				
 				<ScrollView style={{backgroundColor:'',  zIndex: -1,  elevation: -1}}>				
 				
-					<PostView  artifactId={artifactId}  slideoutState={slideoutState} setslideoutState={setslideoutState} postState={postState} setPostState={setPostState}></PostView>
 
-					<View style={{minHeight:vh(90),  paddingTop:120, backgroundColor:'', width:'100%'}}>
+					<View style={{minHeight:vh(90),  paddingTop:180, backgroundColor:'', width:'100%'}}>
 							
 							{galleryImages && galleryImages.length > 0 ? (
 								<FlatList
@@ -124,7 +318,7 @@ setslideoutState( 'out' );
 											<Pressable
 												onPress={() => {
 													console.log('click'); 
-													openLightbox(item);
+													openMetaImage(item);
 												}}
 												style={{}}												
   											>
@@ -151,7 +345,7 @@ setslideoutState( 'out' );
 							)}
 							{artifact.posts && artifact.posts.length > 0 ? (
 								<FlatList
-									style={{width:'100%'}}
+									style={{width:'100%',marginTop:10}}
 									contentContainerStyle={{  flex:1, alignItems:'stretch', marginBottom:60}}
 									horizontal={false} 
 									showsHorizontalScrollIndicator={true} 
@@ -163,14 +357,18 @@ setslideoutState( 'out' );
 										<Pressable artifact={artifact}
 											style={({pressed}) => [{
 												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-												alignItems: 'center',
+												alignItems: 'left',
 												justifyContent: 'center',
 												//elevation: 8,
 												padding:20,
+												borderBottomWidth:2,
+												borderColor:'#e3e3e3'
 											}]}
-											onPress={ () => { navigateToPost( item ) }}
+											onPress={ () => { openMetaPost( item ) }}
 										>
-											<Text style={{display:'block'}}>{item?.post_title}</Text>
+											<Text style={{display:'block', fontWeight:700, fontSize:18}}>{item?.post_title}</Text>
+											<Text style={{display:'block',fontSize:12, marginBottom:5, marginTop:-2}}>{item?.author?.first_name} {item?.author?.last_name}</Text>
+											<Text style={{display:'block',fontSize:14}}>{item?.excerpt} </Text>
 										</Pressable>
 									</View>
 									)}
@@ -224,7 +422,7 @@ const viewStyles = StyleSheet.create({
 		borderTopColor:'white',
 		left:0,
 		right:0,
-		paddingBottom:14,
+		paddingBottom:24,
 		backgroundColor:'white'
 	},
 	headerTitle:{
