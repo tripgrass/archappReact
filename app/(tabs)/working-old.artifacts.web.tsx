@@ -6,7 +6,7 @@ import { useSession } from '@/utilities/AuthContext';
 import MapView, { Callout, Marker, PROVIDER_DEFAULT, Region } from 'react-native-maps';
 import { useNavigation } from 'expo-router';
 const API_URL = 'https://zkd.b51.mytemp.website/api/artifacts';
-import { ClusterProps, MarkerClusterer } from '@teovilla/react-native-web-maps';
+//import { ClusterProps, MarkerClusterer } from '@teovilla/react-native-web-maps';
 const App = () => {
   const { machineSession, isLoading } = useSession();
 const [region, setRegion] = useState<Region | null>(null);

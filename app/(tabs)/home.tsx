@@ -110,7 +110,7 @@ const setArtifactId = initialParams.setArtifactId;
                         >                                               
                             <View style={{flex:1, flexDirection:'column', margin:20}} >
                                 <View style={{padding:0}}>
-                                    <Text style={{textAlign:'center', marginBottom:20, fontSize:20, fontWeight:700}}>{item.name}+{item.id}</Text>
+                                    <Text style={{textAlign:'center', marginBottom:7, backgroundColor:'blue',fontSize:20, fontWeight:700}}>{item.name}+{item.id}</Text>
                                 </View>
                                 <Image source={{uri:imageBaseUrl + ( (item.images && item.images[0]) ? item.images[0].name : null)  }} /* Use item to set the image source */
                                     style={{

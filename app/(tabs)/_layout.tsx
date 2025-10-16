@@ -371,9 +371,9 @@ function App() {
 
 	useEffect( () => {
 		const getData = async () => {
-	    fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
-	    setFillLocationMode(fillLocationModeVal);
-			console.log('fillLocationMode',fillLocationModeVal);
+	    //fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
+	    //setFillLocationMode(fillLocationModeVal);
+			//console.log('fillLocationMode',fillLocationModeVal);
 
 	  };
 

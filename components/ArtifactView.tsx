@@ -9,8 +9,10 @@ import PostView from '@/components/PostView';
 import  MetaView  from '@/components/MetaView';
 import CustomButton from '@/components/Button';
 import { vw, vh, vmin, vmax } from 'react-native-expo-viewport-units';
+import { useSession } from '@/utilities/AuthContext';
 
 function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryImages, setLoadState }) {
+	const { userSession, signOut } = useSession();	
 	const isFocused = useIsFocused()
 	const local = useLocalSearchParams();
 	const artifactId  = ( Platform.OS == "web" ) ? ( local.artifactId ? local.artifactId : null ) : (route?.params?.params ? route?.params?.params?.artifactId : null);
@@ -302,6 +304,7 @@ setList( galleryImages );
 							
 							{galleryImages && galleryImages.length > 0 ? (
 								<FlatList
+scrollEnabled={false}									
 									columnWrapperStyle={{ }}									
 									contentContainerStyle={{ flex:1, justifyContent:'flex-start', alignItems:'flex-start', padding:5}}
 									data={galleryImages}
@@ -343,8 +346,10 @@ setList( galleryImages );
 							) : (
 								<></>
 							)}
-							{artifact.posts && artifact.posts.length > 0 ? (
+							{ artifact.posts && artifact.posts.length > 0 ? (
 								<FlatList
+									scrollEnabled={false}									
+
 									style={{width:'100%',marginTop:10}}
 									contentContainerStyle={{  flex:1, alignItems:'stretch', marginBottom:60}}
 									horizontal={false} 
@@ -379,34 +384,36 @@ setList( galleryImages );
 							
 						</View>	
 				</ScrollView>
-				<View
-					style={{
-						position:'absolute',
-						bottom:20,
-						left:14,
-					}}
-				>
-						<Pressable artifact={artifact}
-							style={({pressed}) => [
-											{
-									backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-									alignItems: 'center',
-									justifyContent: 'center',
-									borderRadius: 40,
-									borderColor:'rgb(230,230,230)',
-									borderWidth:2,
-									height:80,
-									width:80,
-									elevation: 8,
-									marginLeft: 5,					    		
-									boxShadow: '0px 2px 2px #d8d8d8'						        
-											}
-							]}
-							onPress={ () => { navigateToEdit() }}
-						>
-							<Text>Edit</Text>
-						</Pressable> 
-				</View>				
+				{ userSession ? (
+					<View
+						style={{
+							position:'absolute',
+							bottom:20,
+							left:14,
+						}}
+					>
+							<Pressable artifact={artifact}
+								style={({pressed}) => [
+												{
+										backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'blue',
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderRadius: 40,
+										borderColor:'rgb(230,230,230)',
+										borderWidth:2,
+										height:80,
+										width:80,
+										elevation: 8,
+										marginLeft: 5,					    		
+										boxShadow: '0px 2px 2px #d8d8d8'						        
+												}
+								]}
+								onPress={ () => { navigateToEdit() }}
+							>
+								<Text>Edit</Text>
+							</Pressable> 
+					</View>				
+				) : (null)}
 			</View >
 		</>
     );
