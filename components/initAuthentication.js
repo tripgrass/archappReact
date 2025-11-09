@@ -23,7 +23,7 @@ export async function GetLaravelMachineAuthentication() {
     const response = await fetch("https://zkd.b51.mytemp.website/oauth/token", requestOptions);
 
     const data = await response.json();
-    console.log('data',data);
+    console.log('data init line 26 initauthentication',data);
       console.log('result', data);
       setMachineSession(data.access_token);
 

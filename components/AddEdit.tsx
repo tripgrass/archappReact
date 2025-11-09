@@ -106,7 +106,7 @@ console.log('USE EFFECT ON ADDESIT:::::::');
 
 	}
 	function getPhotographers(){
-		data = {
+		var data = {
 			"personas" : [
 				"Photographer"
 			]
@@ -196,7 +196,7 @@ console.log('setu[ artfact', artifact);
 			if( !origImageIds[artifact.id] ){
 				var newOrigImages = _.cloneDeep(origImageIds);
 				newOrigImages[artifact.id] = imageIds;
-				setOrigImageIds(newOrigImages);
+				(newOrigImages);
 			}
 			else{
 				setOrigImageIds([artifact.id = []]);				
@@ -264,7 +264,7 @@ console.log('setu[ artfact', artifact);
 	const { userSession } = useSession();
 
 	const getLocationData = async () => {
-		fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
+		var fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
 		setFillLocationMode(fillLocationModeVal);
 		if('Autofill Current Location' == fillLocationModeVal ){
 			__useCurrentLocation('loaded');
@@ -387,6 +387,7 @@ console.log('setu[ artfact', artifact);
 	}
 	function reverseCoordinateLookup(lat, lng) {
 		const API_KEY = process.env.EXPO_PUBLIC_GOOGLE_MAP_API_KEY;
+		console.log('api key',API_KEY);
 		try {
 		let config = {
 			method: 'post',
@@ -405,7 +406,7 @@ console.log('setu[ artfact', artifact);
 		
 				if( 'undefined' != typeof result.data ){
 
-
+console.log('google api maps', result.data);
 					var components = getAddressObject(result.data.results[0].address_components );
 					setValue('address', components.home + " " + components.street);
 					setValue('city', components.city);
@@ -619,7 +620,7 @@ console.log('saveImage artifactId', artifactId );
             }).then( (results) => {
             	console.log('after submit results', results);
             	var newArtifact = results;
-            	console.log('newartifact ',newArtifact);
+            	console.log('newartifact line 623',newArtifact);
             	if( "undefined" != typeof newArtifact.images){
 	            	setGalleryImages(newArtifact.images);
 	            }
@@ -1430,7 +1431,7 @@ console.log('fileObj is', fileObj);
 							</View>
 						</View>
 						{ ( collections && collections.length > 0 ) ? (				
-						<View style={[s.formSection,{marginTop:5}]}>
+						<View style={[s.formSection,{marginTop:40}]}>
 							<View style={s.formSectionTitleWrapper}>
 								<Text style={s.formSectionTitle}>Collections</Text>
 							</View>

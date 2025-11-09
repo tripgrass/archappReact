@@ -21,7 +21,7 @@ export default function Home({ initialParams }) {
     containedWithin();
     const navigation = useNavigation();
 
-    console.log('initParams!!!! in home page posts:', initialParams);
+//    console.log('initParams!!!! in home page posts:', initialParams);
     const loadingIcon = ( assets?.length  ? assets[0] : null );
     const houseImg = ( assets?.length  ? assets[1] : null );
     const houseImg2 = ( assets?.length  ? assets[2] : null );
@@ -110,7 +110,7 @@ const setArtifactId = initialParams.setArtifactId;
                         >                                               
                             <View style={{flex:1, flexDirection:'column', margin:20}} >
                                 <View style={{padding:0}}>
-                                    <Text style={{textAlign:'center', marginBottom:7, backgroundColor:'blue',fontSize:20, fontWeight:700}}>{item.name}+{item.id}</Text>
+                                    <Text style={{textAlign:'center', marginBottom:7,fontSize:20, fontWeight:700}}>{item.name}+{item.id}</Text>
                                 </View>
                                 <Image source={{uri:imageBaseUrl + ( (item.images && item.images[0]) ? item.images[0].name : null)  }} /* Use item to set the image source */
                                     style={{

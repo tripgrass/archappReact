@@ -4,6 +4,7 @@ import { Text, View, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import Constants from 'expo-constants';
 import axios from 'axios';
+import { Redirect } from 'expo-router';
 
 import { useSession } from '@/utilities/AuthContext';
 import { router } from 'expo-router';
@@ -12,7 +13,7 @@ import home from '@/app/(tabs)/index';
 import Home from '@/app/(tabs)/home';
 
 
-export default () => {
+export default ( { tempId} ) => {
 
   const { register, setError, setValue, handleSubmit, control, reset, formState: { errors } } = useForm({
     defaultValues: {
@@ -24,6 +25,10 @@ export default () => {
 
   const onSubmit = data => {
     const API_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN;
+    /* api token is an access_token obtained by sending a post to https://zkd.b51.mytemp.website/oauth/token with
+    * grant_type='client_credentials', client_id, client_secret, and scope=*;
+    */
+    console.log(API_TOKEN);
     try {
       let config = {
         method: 'post',
@@ -45,9 +50,9 @@ export default () => {
             console.log('data!!!!! 42');
             //setMachineSession("stuff");
             signIn(result.data);
-            //navigation.navigate('Home');
+            navigation.navigate('Home');
             //router.replace('/(tabs)/home');
-            router.back();
+           // router.back();
           }
           else{
             console.log('data!!!!! 50');
@@ -128,6 +133,7 @@ export default () => {
             })
           }}
         />
+
       </View>
 
       <View style={styles.button}>
@@ -143,7 +149,9 @@ export default () => {
 
   return (
     <View style={styles.container}>
-
+ <Link href="/register" >
+               <Text style={{color:'white'}}>Sign Up</Text>
+           </Link>
       <Text style={styles.label}>Email</Text>
       <Controller
         control={control}

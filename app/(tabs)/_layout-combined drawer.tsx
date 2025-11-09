@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import map  from '@/app/(tabs)/map';
-import add from '@/app/(tabs)/artifacts/add';
+//import add from '@/app/(tabs)/artifacts/add';
 
 function EmptyScreen() {
   return <View />;
@@ -52,7 +52,7 @@ function App() {
       <Stack.Navigator>
         <Stack.Screen name="Root" component={Root} />
         <Stack.Screen name="map" options={{ title: 'Map Title' }} component={map}/>
-        <Stack.Screen name="add" options={{ title: 'Add -' }} component={add}/>
+        
         <Stack.Screen name="dash" options={{ title: 'Dash Title' }} component={dash}/>
 
       </Stack.Navigator>

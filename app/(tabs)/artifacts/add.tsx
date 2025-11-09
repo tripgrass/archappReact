@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 
 function Add({ route, navigation, data, tempId, setTempId }) {
 	console.log('add file data ', data);
-	console.log('add file tempId ', tempId);
+	console.log('add file tempId artifacts add.tsx', tempId);
 	
     return (
 			<>

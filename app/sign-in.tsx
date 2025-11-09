@@ -4,7 +4,7 @@ import LoginForm from '@/components/LoginForm';
 
 import { useSession } from '@/utilities/AuthContext';
 
-export default function SignIn() {
+export default function SignIn( { tempId} ) {
   const { signIn } = useSession();
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

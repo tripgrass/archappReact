@@ -8,12 +8,13 @@ import  {ArtifactsService}  from '@/utilities/ArtifactsService';
 const s = require('@/components/style');
 import { usePathname, useRouter, useSegments } from 'expo-router';
 
-export default function Collections({  artifacts, setArtifacts, collections, setCollections, setCollectionId }) {
+export default function Collections({  artifacts, setArtifacts, setArtifactId, collections, setCollections, setCollectionId }) {
     const router = useRouter();
     const { userSession, signOut, signIn } = useSession();
     const pathname = usePathname();
     const navigation = useNavigation();
     const [ activeId, setActiveId ] = useState(null);    
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! setartifactid", setArtifactId);
 
     console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! collections", collections);
    useEffect(() => {
@@ -76,7 +77,7 @@ export default function Collections({  artifacts, setArtifacts, collections, set
                                     onPress={() => { 
                                         setCollectionId( item.id);
                                         navigation.navigate('showCollection', {
-                                            params: { collectionId: item.id }
+                                            params: { collectionId: item.id, setArtifactId: setArtifactId }
                                         }) 
                                     }}
                                     styles={{marginRight:5, paddingHorizontal: 14 }}                                

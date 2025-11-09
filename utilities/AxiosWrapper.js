@@ -72,6 +72,7 @@ export const axiosWrapper = async function({
                 }
             })
             .catch((error) => {
+                console.log('75 post axios error', error);
                 handleResponse(error);
             })
                 console.log('after axios wrapper get results', postResults);

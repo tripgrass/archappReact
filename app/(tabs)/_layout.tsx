@@ -102,6 +102,12 @@ function MyTabs() {
 	    	console.log('101 ----------------------------------');
         	createArtifactId();
         }
+	}, [userSession]);
+	useEffect(() => {
+    	console.log('107 ----------------------------------');
+    	console.log(' ----------------------------------');
+    	console.log(' ----------------------------------');
+
 		ArtifactsService({
 			method:'getAll'
 		}).then( (results) => {
@@ -149,7 +155,7 @@ function MyTabs() {
 					} else if (route.name === 'Add') {
 						iconName = focused ? 'add-circle' : 'add-circle-outline';
 						size = 35;
-					} else if (route.name === 'ProfileTab' || route.name === 'SignIn') {
+					} else if (route.name === 'ProfileTab' || route.name === 'SignIn' || route.name === 'Register') {
 						iconName = focused ? 'person' : 'person-outline';
 						size = 15;
 					}          
@@ -169,7 +175,7 @@ function MyTabs() {
 	                marginBottom: 0,
 	            },
 	            tabBarItemStyle:{
-					display: ( route.name === 'Home' || route.name === 'Add' || ( userSession && route.name === 'ProfileTab' ) || ( !userSession && route.name === 'SignIn') ) ? 'flex' : 'none',
+					display: ( route.name === 'Home' || route.name === 'Add' || ( userSession && route.name === 'ProfileTab' ) || ( !userSession && route.name === 'SignIn') || ( !userSession && route.name === 'Register') ) ? 'flex' : 'none',
       			},
 				tabBarStyle: {
 					width:'100%',
@@ -204,7 +210,8 @@ function MyTabs() {
 	       		}}
 			/>
 			) : (null) }
-				<Tab.Screen name="SignIn" options={{ title: 'SignIn' }} component={SignIn}/>
+				<Tab.Screen name="SignIn" tempId={tempId} options={{ title: 'signIn' }} component={SignIn}/>
+				<Tab.Screen name="Register" options={{ title: 'Register' }} component={Register}/>
 
 			{ ( userSession ) ? (			
 
@@ -212,7 +219,8 @@ function MyTabs() {
 						children={()=>{
 							return(
 								<ProfilesTab  initialParams={{
-										artifacts:artifacts, setArtifacts:setArtifacts, tempId:tempId, 
+										artifacts:artifacts, setArtifacts:setArtifacts, 
+										tempId:tempId, 
 										collections:collections, setCollections:setCollections, collectionId:collectionId, setCollectionId:setCollectionId,
 										artifactId:artifactId,
 										setArtifactId:setArtifactId
@@ -238,7 +246,7 @@ function MyTabs() {
 
 			<Tab.Screen name="edit" options={{ title: 'Editing', headerShown: false }} 			children={()=>{
 						return(
-							<EditArtifact  artifactId={artifactId} collectionId={collectionId} setCollectionId={setCollectionId} initialParams={{ artifactsList:artifactsList}}/>
+							<EditArtifact tempId={tempId} setTempId={setTempId}  artifactId={artifactId} collectionId={collectionId} setCollectionId={setCollectionId} initialParams={{ artifactsList:artifactsList}}/>
 						)}}
  />
 			<Tab.Screen name="EditCollection" options={{ title: 'Editing', headerShown: false }} 
@@ -259,6 +267,7 @@ function MyTabs() {
 				name="showCollection" 
 				options={{
 	          		headerShown: false,
+
 				}} 
 				component={showCollection}
 			/>			
@@ -332,7 +341,7 @@ function CustomDrawerToggleButton({ tintColor, ...rest }: Props) {
   );
 }
 function ProfilesTab( data ) {
-//	console.log('profiles data ', data.initialParams);
+	console.log('profiles data ', data.initialParams);
 	return (
 		<Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}
 			screenOptions={{
@@ -351,7 +360,7 @@ function ProfilesTab( data ) {
 					}} />
 			<Drawer.Screen name="Collections" children={()=>{
 						return(
-							<CollectionsPage artifacts={data.initialParams.artifacts} setArtifacts={data.initialParams.setArtifacts} 
+							<CollectionsPage artifacts={data.initialParams.artifacts} setArtifactId={data.initialParams.setArtifactId} setArtifacts={data.initialParams.setArtifacts} 
 							collections={data.initialParams.collections} setCollections={data.initialParams.setCollections}
 							collectionId={data.initialParams.collectionId} setCollectionId={data.initialParams.setCollectionId}
 							/>

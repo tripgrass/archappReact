@@ -53,8 +53,9 @@ const fetchData = async () => {
       console.error("Error:", error);
     }           
   }; 
-function CollectionView({ collection, route, navigation, galleryImages, setGalleryImages, setLoadState }) {
+function CollectionView({ collection, route, navigation, galleryImages, setGalleryImages, setLoadState, artifactId, setArtifactId }) {
 	const [currentLocation, setCurrentLocation] = useState(null);
+	const [currentMarker, setCurrentMarker] = useState(null);
 	const [initialRegion, setInitialRegion] = useState(null);
 	const [userLocation, setUserLocation] = useState(null);
 	const mapRef = useRef<any>(null);    
@@ -65,7 +66,7 @@ function CollectionView({ collection, route, navigation, galleryImages, setGalle
  useEffect(() => {
     (async () => {
       // permissions check
-let { status } = await Location.requestForegroundPermissionsAsync();
+      let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         // do something when permission is denied
         return;
@@ -116,19 +117,19 @@ let { status } = await Location.requestForegroundPermissionsAsync();
 	        longitudeDelta: 0.05,
 	      });
 	    };
-
 	    getLocation();
 	  }, []);
-	console.log('collection', collection);
-	const isFocused = useIsFocused()
-	const local = useLocalSearchParams();
-	const collectionId  = ( Platform.OS == "web" ) ? ( local.collectionId ? local.collectionId : null ) : (route?.params?.params ? route?.params?.params?.collectionId : null);
-  const onRegionChange = (region: Region) => {
+    console.log('collection', collection);
+    const isFocused = useIsFocused()
+    const local = useLocalSearchParams();
+    const collectionId  = ( Platform.OS == "web" ) ? ( local.collectionId ? local.collectionId : null ) : (route?.params?.params ? route?.params?.params?.collectionId : null);
+    const onRegionChange = (region: Region) => {
     console.log(region);
   };
-const onMarkerSelected = (marker: any) => {
+  const onMarkerSelected = (marker: any) => {
 	console.log('MARKER::::',marker.name);
 	console.log('MARKER ID::::',marker.id);
+  setCurrentMarker(marker);
 	//navigation.navigate('show', { params: { ArtifactId: marker.id } })
     //Alert.alert(marker.name);
   };
@@ -167,123 +168,130 @@ const onMarkerSelected = (marker: any) => {
 			<>
 				<View style={viewStyles.header}>
 					<Text style={viewStyles.headerText}>{collection?.name}</Text>
-
 				</View>
-					<View style={{display:'flex',flex:1, justifyContent:'center', alignItems:'center', marginTop:150, backgroundColor:'red', width:'100%', height:'100%'}}>
- 
-
-    <View style={{ flex: 1, height:screenHeight, width:'100%',}}>
-      <MapView
-        style={{  backgroundColor:'blue', width:'100%', height:(screenHeight * .75) }}
-        initialRegion={initialRegion}
-        showsUserLocation
-        showsMyLocationButton
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
-        onRegionChangeComplete={onRegionChange}
-      >
-      {userLocation && <Marker coordinate={userLocation.coords} />}
-        {markers.map( (marker, index) => (
-          marker.latitude ?
-          (<Marker
-            key={index}
-            title={marker.name}
-            coordinate={marker}
-            style={{flex:1}}
-            //onPress={() => onMarkerSelected(marker)}
-          >
-            <Callout onPress={() => onCalloutPressed(marker)} style={{flex:1, height:30, width:100, backgroundColor:'red'}}>
-              <View style={{ flex: 1,
-        backgroundColor: '#FAAA18',
-        borderRadius: 40,
-        flexDirection: 'row' }}>
-                <Text style={{ fontSize: 24 }}>calllout{marker.name}</Text>
-                <Text style={{ fontSize: 24 }}>View</Text>
-              </View>
-            </Callout>
-          </Marker>)
-          : null
-        ))}    
-          <MapViewDirections
-            origin={userLocation ? userLocation?.coords : null}
-            destination={markers[0]}
-            apikey={API_KEY}
-            strokeColor="hotpink"
-            strokeWidth={4}
-          />                 
-      </MapView>
-    </View>
-      <View style={styles.containerVoid}>
-      <FlatList
-        data={data}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text>{item.name} {item.latitude} </Text>
-          </View>
-        )}
-      />
-        
-      </View>
-
-    					
-							<>
-								<Text>tesr{screenHeight}{collection?.address}</Text>
-								<Text>{collection?.city}, {collection?.state}</Text>
-							</>
-							{galleryImages && galleryImages.length > 0 ? (
-								<FlatList
-									contentContainerStyle={{ flex:1, justifyContent:'center', alignItems:'center'}}
-									horizontal={true} 
-									showsHorizontalScrollIndicator={true} 
-									data={galleryImages}
-									extraData={galleryImages}
-									keyExtractor={(item, index) => {return  index.toString();}}
-									renderItem={ ({ item, index }) => (
-										<View key={item.id} serverId={item.id} style={{}}>
-										<Image source={{uri:imageBaseUrl + item.name}} /* Use item to set the image source */
-											style={{
-												width:150,
-												height:150,
-												backgroundColor:'#d0d0d0',
-												//resizeMode:'contain',
-												margin:6
-											}}
-										/>
-										</View>
-									)}
-								/>
-							) : (
-								<></>
-							)}
-							<View
-								style={{
-									position:'absolute',
-									bottom:10,
-									left:0,
-								}}
-							>
-									<Pressable collection={collection}
-										style={({pressed}) => [
-														{
-												backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-												alignItems: 'center',
-												justifyContent: 'center',
-												borderRadius: 40,
-												height:80,
-												width:80,
-												elevation: 8,
-												marginLeft: 5,					    		
-												boxShadow: '0px 2px 2px #d8d8d8'						        
-														}
-										]}
-										onPress={ () => { navigateToEdit() }}
-									>
-										<Text>Edit -- {collection.id}</Text>
-									</Pressable> 
-							</View>
-						</View>	
-					</>
+        <View style={{
+            display:'flex',flex:1, marginTop:150, backgroundColor:'green', width:'100%'
+          }}>
+          <View style={{ flex: 1,  width:'100%', backgroundColor:'blue'}}> 
+            <View style={{flex:1,  width:'100%', backgroundColor:'green', height:100}}></View>
+              <MapView
+                style={{  backgroundColor:'blue', width:'100%', height:(screenHeight * .45) }}
+                initialRegion={initialRegion}
+                showsUserLocation
+                showsMyLocationButton
+                ref={mapRef}
+                provider={PROVIDER_GOOGLE}
+                onRegionChangeComplete={onRegionChange}
+              >
+              {userLocation && <Marker coordinate={userLocation.coords} />}
+                {markers.map( (marker, index) => (
+                  marker.latitude ?
+                  (<Marker
+                    key={index}
+                    title={marker.name}
+                    coordinate={marker}
+                    style={{flex:1}}
+                    onPress={() => onMarkerSelected(marker)}
+                  >
+                    <Callout onPress={() => onCalloutPressed(marker)} style={{flex:1, height:30, width:100, backgroundColor:'red'}}>
+                      <View style={{ flex: 1,
+                backgroundColor: '#FAAA18',
+                borderRadius: 40,
+                flexDirection: 'row' }}>
+                        <Text style={{ fontSize: 24 }}>calllout{marker.name}</Text>
+                        <Text style={{ fontSize: 24 }}>View</Text>
+                      </View>
+                    </Callout>
+                  </Marker>)
+                  : null
+                ))}    
+                  <MapViewDirections
+                    origin={userLocation ? userLocation?.coords : null}
+                    destination={markers[0]}
+                    apikey={API_KEY}
+                    strokeColor="hotpink"
+                    strokeWidth={4}
+                  />                 
+              </MapView>
+            </View>
+            <View style={styles.containerVoid}>
+              <FlatList
+                data={data}
+                keyExtractor={(item) => String(item.id)}
+                renderItem={({ item }) => (
+                  <View style={styles.item}>
+                    <Text>{item.name} {item.latitude} </Text>
+                  </View>
+                )}
+              />  
+            </View>
+            <View style={{ flex: 1, backgroundColor:'white', padding:20 }}>
+              <Text style={{ fontSize: 24 }}>{currentMarker?.name ? currentMarker.name : null}</Text>
+              <Pressable 
+                  style={({pressed}) => []}
+                  onPress={ () => {
+                      setArtifactId( currentMarker?.id ? currentMarker?.id : null); 
+                      navigation.navigate('show', {
+                          params: { artifactId: currentMarker.id }
+                      }) 
+                  }}
+              > 
+                <Text>View </Text>
+              </Pressable>                                        
+            </View>
+            {galleryImages && galleryImages.length > 0 ? (
+              <FlatList
+                contentContainerStyle={{ flex:1, justifyContent:'center', alignItems:'center'}}
+                horizontal={true} 
+                showsHorizontalScrollIndicator={true} 
+                data={galleryImages}
+                extraData={galleryImages}
+                keyExtractor={(item, index) => {return  index.toString();}}
+                renderItem={ ({ item, index }) => (
+                  <View key={item.id} serverId={item.id} style={{}}>
+                  <Image source={{uri:imageBaseUrl + item.name}} /* Use item to set the image source */
+                    style={{
+                      width:150,
+                      height:150,
+                      backgroundColor:'#d0d0d0',
+                      //resizeMode:'contain',
+                      margin:6
+                    }}
+                  />
+                  </View>
+                )}
+              />
+            ) : (
+              <></>
+            )}
+            <View
+              style={{
+                position:'absolute',
+                bottom:10,
+                left:0,
+              }}
+            >
+              <Pressable collection={collection}
+                style={({pressed}) => [
+                        {
+                    backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 40,
+                    height:80,
+                    width:80,
+                    elevation: 8,
+                    marginLeft: 5,					    		
+                    boxShadow: '0px 2px 2px #d8d8d8'						        
+                        }
+                ]}
+                onPress={ () => { navigateToEdit() }}
+              >
+                <Text>Edit -- {collection.id}</Text>
+              </Pressable> 
+            </View>
+          </View>	
+        </>
     );
 }
 const styles = StyleSheet.create({

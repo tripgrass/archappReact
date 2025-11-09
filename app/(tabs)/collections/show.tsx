@@ -10,11 +10,15 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Asset, useAssets } from 'expo-asset';
 
 function ShowCollection({ route, navigation }) {
+	    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SHOWCOLLECTION ------------ setartifactid", setArtifactId);
+
 	const [collection, setCollection] = useState(null);	
 	const [loadState, setLoadState] = useState('loading');	
 	const isFocused = useIsFocused()
 	const local = useLocalSearchParams();
+	console.log('showtsc route', local);
 	const collectionId  = ( Platform.OS == "web" ) ? ( local.collectionId ? local.collectionId : null ) : (route?.params?.params ? route?.params?.params?.collectionId : null);
+	const setArtifactId  = ( Platform.OS == "web" ) ? ( local.setArtifactId ? local.setArtifactId : null ) : (route?.params?.params ? route?.params?.params?.setArtifactId : null);
 
 	const [galleryImages, setGalleryImages] = useState([]);
 	const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
@@ -70,7 +74,7 @@ function ShowCollection({ route, navigation }) {
 
 			) : (
 				<View style={viewStyles.container}>
-					<CollectionView setLoadState={setLoadState} route={route} collection={collection} navigation={navigation} galleryImages={galleryImages} setGalleryImages={setGalleryImages}></CollectionView>
+					<CollectionView setLoadState={setLoadState} setArtifactId={setArtifactId} route={route} collection={collection} navigation={navigation} galleryImages={galleryImages} setGalleryImages={setGalleryImages}></CollectionView>
 	 			</View>
 			) }
 		</>

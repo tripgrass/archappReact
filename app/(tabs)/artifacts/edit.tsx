@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 
 
 
-function EditArtifact({ route, navigation, data, artifactId, collectionId, setCollectionId, }) {
+function EditArtifact({ route, navigation, data, artifactId, collectionId, setCollectionId, tempId, setTempId }) {
 	console.log('in edit route data:', data);
 	console.log('in edit route:', route);
 	console.log('in edit nav:', navigation);
@@ -24,7 +24,7 @@ console.log('edit.tsx artifactID ', artifactId);
 
     return (
 			<>
-				{artifactId ? <AddEdit initArtifactId={artifactId} navigation={navigation} collectionId={collectionId} setCollectionId={setCollectionId}/> : <></> }
+				{artifactId ? <AddEdit tempId={tempId} setTempId={setTempId} initArtifactId={artifactId} navigation={navigation} collectionId={collectionId} setCollectionId={setCollectionId}/> : <></> }
  			</>
     );
 }
