@@ -15,14 +15,17 @@ type Props = {
 
 export default function MetaView({ artifactId, image, slideoutMetaState, setSlideoutMetaState, galleryImages, setImage, metaType, setMetaType, post, setPost, metaObject }) {
 		var TextClass = s.pressableButtonText;
-		var src = imageBaseUrl + image?.name;
-		var img = useImage(src, {
-			    maxWidth: 800,
-			    onError(error, retry) {
-			      console.error('Loading failed:', error.message);
-			    }
-			  }			
+		if( image){
+			var src = imageBaseUrl + image?.name;
+			console.log('META VIEW src', src);
+			var img = useImage(src, {
+					maxWidth: 800,
+					onError(error, retry) {
+					console.error('Loading failed:', error.message);
+					}
+				}			
 			);
+		}
 		const [ratio, setRatio] = useState(1);   
 		const source = {
 			html: (post?.content ? post?.content : "<p>empty</p>") 
