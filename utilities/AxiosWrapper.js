@@ -3,7 +3,6 @@ import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native'
 
-
  
 export const axiosWrapper = async function({
         method,
@@ -13,7 +12,7 @@ export const axiosWrapper = async function({
     }){
     const baseUrl = 'https://zkd.b51.mytemp.website/api/';
     const API_TOKEN = process.env.EXPO_PUBLIC_API_TOKEN; // or usesession
-    //console.log('API_TOKEN',API_TOKEN);
+    console.log('API_TOKEN',API_TOKEN);
     const userSessionStore = ( Platform.OS !== "web" ) ? await SecureStore.getItemAsync("userSession") : await AsyncStorage.getItem("userSession");
     const userSession =  userSessionStore ? JSON.parse(userSessionStore) : null;
     const token = userSession?.token ? userSession?.token : API_TOKEN;

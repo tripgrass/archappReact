@@ -28,7 +28,7 @@ export default ( { tempId} ) => {
     /* api token is an access_token obtained by sending a post to https://zkd.b51.mytemp.website/oauth/token with
     * grant_type='client_credentials', client_id, client_secret, and scope=*;
     */
-    console.log(API_TOKEN);
+    console.log('api token',API_TOKEN);
     try {
       let config = {
         method: 'post',
@@ -43,6 +43,7 @@ export default ( { tempId} ) => {
           'Authorization': `Bearer ${API_TOKEN}`         
         }
       };
+      console.log('config', config);
       axios.request(config)
         .then( (result) => {
           console.log('login result', result.data);
