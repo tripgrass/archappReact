@@ -4,7 +4,8 @@ import { useEffect, useState, useRef, useCallback} from 'react';
 import {useImage} from "expo-image";
 const s = require('@/components/style');
 const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
-import RenderHtml from 'react-native-render-html';
+import { WebView } from 'react-native-webview';
+import Constants from 'expo-constants';
 
 type Props = {
 	label: string;
@@ -27,9 +28,12 @@ export default function MetaView({ artifactId, image, slideoutMetaState, setSlid
 			);
 		}
 		const [ratio, setRatio] = useState(1);   
-		const source = {
-			html: (post?.content ? post?.content : "<p>empty</p>") 
-		};		
+		var source = post?.content ? post?.content : "<p>empty</p>";
+		var source = `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<div style='height:100vh; width:100%;'>
+		<h1 style="">` + metaObject.post_title + `</H1>
+		` + source + `</div>`;
+
 const tagsStyles = {
   body: {
   	fontSize:19,
@@ -92,15 +96,16 @@ console.log('hasssllllll IMAGE!', img);
 				{ ( 'post' == metaType ) ?
 					(
 						<View
-							style={{padding:20}}
+							style={{padding:10, height:'100%' , backgroundColor:'white'}}
 						>
-							<Text style={{fontSize:22, fontWeight:600, marginBottom:10}}>{metaObject.post_title}</Text>
-							<RenderHtml
-							baseStyle={{}}
-						      contentWidth={50}
-						      source={source}
-						      tagsStyles={tagsStyles}
-						    />
+    <WebView
+		style={{
+			flex: 1,
+		
+		}}	
+        originWhitelist={['*']}
+        source={{ html: source }}
+      />
 						</View>
 					) : 
 					(<></>)

@@ -3,7 +3,7 @@ import { Dimensions, FlatList, Image, Platform, Pressable, StyleSheet, Text, Vie
 import { useState, useEffect, useRef } from 'react';
 import  {ArtifactsService}  from '@/utilities/ArtifactsService';
 import { useLocalSearchParams, useGlobalSearchParams, Link } from 'expo-router';
-import { useIsFocused } from '@react-navigation/native'
+import { useIsFocused } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
