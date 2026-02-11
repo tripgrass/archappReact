@@ -163,7 +163,9 @@ function CollectionView({ collection, route, navigation, galleryImages, setGalle
       name: 'San Francisco City Center'
     }
   ]);
-  const webHtml = `
+
+  var webHtml = `
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
      crossorigin=""/>
@@ -171,19 +173,23 @@ function CollectionView({ collection, route, navigation, galleryImages, setGalle
  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>  
-  <h1><center>Hello test</center></h1>
-   <div id="map" style="height:100%;">ww</div>
+   <div id="map" style="height:100%;"></div>
    <script>
 
-	const map = L.map('map').setView([51.505, -0.09], 13);
+	const map = L.map('map').setView([32.25, -110.97], 13);
 
 
   L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=5db8b9d4-f0d2-4750-8c2d-ef9058433a91', {
-                maxZoom: 20,
+                maxZoom: 30,
                 attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
-            }).addTo(map);
-</script>
-  `;
+            }).addTo(map);`;
+      for (const element of collection.artifacts) {
+ console.log('element', element.location.coordinates[0]);
+webHtml += `L.marker([ ` + element.location.coordinates[1] + `, ` + element.location.coordinates[0] + `]).addTo(map).bindPopup(" ` + element.address + `");`; 
+
+}
+webHtml += `</script>`;
+
 
     return (
 			<>
@@ -191,7 +197,7 @@ function CollectionView({ collection, route, navigation, galleryImages, setGalle
 					<Text style={viewStyles.headerText}>{collection?.name}</Text>
 				</View>
         <View style={{
-            display:'flex',flex:1, marginTop:150, backgroundColor:'green', width:'100%'
+            flex:1, width:'100%'
           }}>
     <WebView
       style={{
