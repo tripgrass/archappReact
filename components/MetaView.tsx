@@ -32,7 +32,6 @@ export default function MetaView({ artifactId, image, slideoutMetaState, setSlid
 		var source = `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<div style='height:100vh; width:100%;'>
 		<h1 style="">` + metaObject.post_title + `</H1>` + source + `</div>`;
-
 const tagsStyles = {
   body: {
   	fontSize:19,
