@@ -11,7 +11,7 @@ import * as Location from "expo-location";
 import MapView, { Callout, Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import CustomButton from '@/components/Button';
-
+import { WebView } from 'react-native-webview';
 const fetchData = async () => {
     /*
     try {
@@ -163,6 +163,27 @@ function CollectionView({ collection, route, navigation, galleryImages, setGalle
       name: 'San Francisco City Center'
     }
   ]);
+  const webHtml = `
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+     <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>  
+  <h1><center>Hello test</center></h1>
+   <div id="map" style="height:100%;">ww</div>
+   <script>
+
+	const map = L.map('map').setView([51.505, -0.09], 13);
+
+
+  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=5db8b9d4-f0d2-4750-8c2d-ef9058433a91', {
+                maxZoom: 20,
+                attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+            }).addTo(map);
+</script>
+  `;
 
     return (
 			<>
@@ -172,124 +193,14 @@ function CollectionView({ collection, route, navigation, galleryImages, setGalle
         <View style={{
             display:'flex',flex:1, marginTop:150, backgroundColor:'green', width:'100%'
           }}>
-          <View style={{ flex: 1,  width:'100%', backgroundColor:'blue'}}> 
-            <View style={{flex:1,  width:'100%', backgroundColor:'green', height:100}}></View>
-              <MapView
-                style={{  backgroundColor:'blue', width:'100%', height:(screenHeight * .45) }}
-                initialRegion={initialRegion}
-                showsUserLocation
-                showsMyLocationButton
-                ref={mapRef}
-                provider={PROVIDER_GOOGLE}
-                onRegionChangeComplete={onRegionChange}
-              >
-              {userLocation && <Marker coordinate={userLocation.coords} />}
-                {markers.map( (marker, index) => (
-                  marker.latitude ?
-                  (<Marker
-                    key={index}
-                    title={marker.name}
-                    coordinate={marker}
-                    style={{flex:1}}
-                    onPress={() => onMarkerSelected(marker)}
-                  >
-                    <Callout onPress={() => onCalloutPressed(marker)} style={{flex:1, height:30, width:100, backgroundColor:'red'}}>
-                      <View style={{ flex: 1,
-                backgroundColor: '#FAAA18',
-                borderRadius: 40,
-                flexDirection: 'row' }}>
-                        <Text style={{ fontSize: 24 }}>calllout{marker.name}</Text>
-                        <Text style={{ fontSize: 24 }}>View</Text>
-                      </View>
-                    </Callout>
-                  </Marker>)
-                  : null
-                ))}    
-                  <MapViewDirections
-                    origin={userLocation ? userLocation?.coords : null}
-                    destination={markers[0]}
-                    apikey={API_KEY}
-                    strokeColor="hotpink"
-                    strokeWidth={4}
-                  />                 
-              </MapView>
-            </View>
-            <View style={styles.containerVoid}>
-              <FlatList
-                data={data}
-                keyExtractor={(item) => String(item.id)}
-                renderItem={({ item }) => (
-                  <View style={styles.item}>
-                    <Text>{item.name} {item.latitude} </Text>
-                  </View>
-                )}
-              />  
-            </View>
-            <View style={{ flex: 1, backgroundColor:'white', padding:20 }}>
-              <Text style={{ fontSize: 24 }}>{currentMarker?.name ? currentMarker.name : null}</Text>
-              <Pressable 
-                  style={({pressed}) => []}
-                  onPress={ () => {
-                      setArtifactId( currentMarker?.id ? currentMarker?.id : null); 
-                      navigation.navigate('show', {
-                          params: { artifactId: currentMarker.id }
-                      }) 
-                  }}
-              > 
-                <Text>View </Text>
-              </Pressable>                                        
-            </View>
-            {galleryImages && galleryImages.length > 0 ? (
-              <FlatList
-                contentContainerStyle={{ flex:1, justifyContent:'center', alignItems:'center'}}
-                horizontal={true} 
-                showsHorizontalScrollIndicator={true} 
-                data={galleryImages}
-                extraData={galleryImages}
-                keyExtractor={(item, index) => {return  index.toString();}}
-                renderItem={ ({ item, index }) => (
-                  <View key={item.id} serverId={item.id} style={{}}>
-                  <Image source={{uri:imageBaseUrl + item.name}} /* Use item to set the image source */
-                    style={{
-                      width:150,
-                      height:150,
-                      backgroundColor:'#d0d0d0',
-                      //resizeMode:'contain',
-                      margin:6
-                    }}
-                  />
-                  </View>
-                )}
-              />
-            ) : (
-              <></>
-            )}
-            <View
-              style={{
-                position:'absolute',
-                bottom:10,
-                left:0,
-              }}
-            >
-              <Pressable collection={collection}
-                style={({pressed}) => [
-                        {
-                    backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 40,
-                    height:80,
-                    width:80,
-                    elevation: 8,
-                    marginLeft: 5,					    		
-                    boxShadow: '0px 2px 2px #d8d8d8'						        
-                        }
-                ]}
-                onPress={ () => { navigateToEdit() }}
-              >
-                <Text>Edit -- {collection.id}</Text>
-              </Pressable> 
-            </View>
+    <WebView
+      style={{
+        flex: 1,
+        marginTop: Constants.statusBarHeight
+      }}
+      originWhitelist={['*']}
+      source={{ html: webHtml }}
+    />
           </View>	
         </>
     );
