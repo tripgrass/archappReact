@@ -175,7 +175,7 @@ function MyTabs() {
 	                marginBottom: 0,
 	            },
 	            tabBarItemStyle:{
-					display: ( route.name === 'Home' || route.name === 'Add' || ( userSession && route.name === 'ProfileTab' ) || ( !userSession && route.name === 'SignIn') || ( !userSession && route.name === 'Register') ) ? 'flex' : 'none',
+					display: ( route.name === 'Home' || route.name === 'Add' || ( userSession && route.name === 'ProfileTab' )  || ( !userSession && route.name === 'Register') ) ? 'flex' : 'none',
       			},
 				tabBarStyle: {
 					width:'100%',
@@ -211,7 +211,7 @@ function MyTabs() {
 			/>
 			) : (null) }
 				<Tab.Screen name="SignIn" tempId={tempId} options={{ title: 'signIn' }} component={SignIn}/>
-				<Tab.Screen name="Register" options={{ title: 'Register' }} component={Register}/>
+				<Tab.Screen name="Register" options={{ title: 'Artifix' }} component={Register}/>
 
 			{ ( userSession ) ? (			
 

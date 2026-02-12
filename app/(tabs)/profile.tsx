@@ -67,7 +67,7 @@ export default function ProfileScreen({  artifacts, setArtifacts, artifactId, se
 
    return (
          <View style={{   alignItems: 'center', justifyContent: 'center', paddingTop:40, paddingBottom:10, backgroundColor:'' }}>
-            <Text style={{fontSize:16,fontWeight:'700'}}>Profile Screen</Text>
+            <Text style={{fontSize:16,fontWeight:'700'}}>Artifacts</Text>
                 <View style={ ( (Platform.OS === 'web') ? (styles.webView) : (styles.mobileView) ) }>
             
             { (userSession ) ? 
@@ -177,7 +177,7 @@ export default function ProfileScreen({  artifacts, setArtifacts, artifactId, se
         //flex:1
     },
     mobileView:{
-        backgroundColor:'red'
+        //backgroundColor:'red'
     },
     deleting:{
         color: "#d8d8d8"

@@ -150,9 +150,6 @@ export default ( { tempId} ) => {
 
   return (
     <View style={styles.container}>
- <Link href="/register" >
-               <Text style={{color:'white'}}>Sign Up</Text>
-           </Link>
       <Text style={styles.label}>Email</Text>
       <Controller
         control={control}
@@ -224,7 +221,7 @@ export default ( { tempId} ) => {
 
 const styles = StyleSheet.create({
   label: {
-    color: 'white',
+//    color: 'white',
     margin: 20,
     marginLeft: 0,
   },
@@ -232,7 +229,7 @@ const styles = StyleSheet.create({
     marginTop: 40,
     color: 'white',
     height: 40,
-    backgroundColor: '#ec5990',
+  //  backgroundColor: '#ec5990',
     borderRadius: 4,
   },
   container: {
@@ -242,7 +239,6 @@ const styles = StyleSheet.create({
     width:'100%',
     justifyContent: 'center',
     paddingTop: Constants.statusBarHeight,
-    backgroundColor: '#0e101c',
   },
   input: {
     backgroundColor: 'white',
