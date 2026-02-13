@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef} from 'react';
-import { Image, ImageBackground, Pressable, View, Text, ScrollView, StyleSheet, FlatList } from 'react-native';
+import { Dimensions, Image, ImageBackground, Pressable, View, Text, ScrollView, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
 import CustomButton from '@/components/Button';
 import { useSession } from '@/utilities/AuthContext';
@@ -36,12 +36,34 @@ const setArtifactId = initialParams.setArtifactId;
 //  console.log('home userSession', userSession);
   /*
   */
-
+const LENGTH = Dimensions.get("window").height;
+const HEIGHT = 60;
+const OFFSET = ( Dimensions.get("window").width ) * -.9;
     return (
         <View style={{ flex: 1, alignItems: '', paddingTop: Constants.statusBarHeight, justifyContent: 'flex-start' }}>
             <View style={{ flex:1, marginBottom:30}}>
-                <CustomButton  title="" onPress={() => navigation.navigate('ProfileTab')} 
-                />
+                <View  
+                style={{
+                    transform: [
+                        { rotate: "270deg" }, 
+                        { translateX:  -1 * Dimensions.get("window").width }, 
+                        { translateY: OFFSET }
+                        ],
+                    width: LENGTH,
+                    height: HEIGHT,                    
+                    backgroundColor:'#A89644',
+                     borderBottomWidth: 5,
+                    borderBottomColor: "#cfb546"
+                }}
+                >
+                    <Text
+                    style={{
+                        marginTop:10,      
+                        fontSize:26,
+                        fontWeight:600
+                    }}
+                    >artifix    &#8226;  artifix   &#8226;   artifix   &#8226;      artifix   &#8226;      artifix   &#8226;    artifix   &#8226; artifix   &#8226; artifix   &#8226; </Text>
+                    </View>
                 <ImageBackground source={artifix}
                     style={{
                         backgroundColor:''
@@ -108,15 +130,23 @@ const setArtifactId = initialParams.setArtifactId;
                                 }) 
                             }}
                         >                                               
-                            <View style={{flex:1, flexDirection:'column', margin:20}} >
+                            <View style={{
+                                flex:1, 
+                                flexDirection:'column', 
+                                margin:20,
+                            }} >
                                 <View style={{padding:0}}>
-                                    <Text style={{textAlign:'center', marginBottom:7,fontSize:20, fontWeight:700}}>{item.name}+{item.id}</Text>
+                                    <Text style={{textAlign:'center', marginBottom:7,fontSize:20, fontWeight:700}}>{item.name}</Text>
                                 </View>
                                 <Image source={{uri:imageBaseUrl + ( (item.images && item.images[0]) ? item.images[0].name : null)  }} /* Use item to set the image source */
                                     style={{
                                         width:200,
                                         height:200,
-                                        borderRadius:100
+                                        borderRadius:100,
+                                borderColor:'white',
+                                borderWidth:5,
+                                borderRadius:100
+
                                     }}
                                 />
 
