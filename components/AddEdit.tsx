@@ -1433,7 +1433,7 @@ console.log('fileObj is', fileObj);
 						{ ( collections && collections.length > 0 ) ? (				
 						<View style={[s.formSection,{marginTop:40}]}>
 							<View style={s.formSectionTitleWrapper}>
-								<Text style={s.formSectionTitle}>Collections</Text>
+								<Text style={s.formSectionTitle}>Your Collections</Text>
 							</View>
 						</View>
 						) : ( <View style={{marginTop:100}}></View>)  }

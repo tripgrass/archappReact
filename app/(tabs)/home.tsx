@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef} from 'react';
-import { Dimensions, Image, ImageBackground, Pressable, View, Text, ScrollView, StyleSheet, FlatList } from 'react-native';
+import {Button, Dimensions, Image, ImageBackground, Pressable, View, Text, ScrollView, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
 import CustomButton from '@/components/Button';
 import { useSession } from '@/utilities/AuthContext';
@@ -10,6 +10,9 @@ const s = require('@/components/style');
 import { usePathname, useRouter, useSegments } from 'expo-router';
 import { Asset, useAssets } from 'expo-asset';
 import Constants from 'expo-constants';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import Dropdown from 'react-native-input-select';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function Home({ initialParams }) {
     const imageBaseUrl = "https://zkd.b51.mytemp.website/images/";
@@ -20,7 +23,7 @@ export default function Home({ initialParams }) {
     ]);
     containedWithin();
     const navigation = useNavigation();
-
+const [selectedLanguage, setSelectedLanguage] = useState();
 //    console.log('initParams!!!! in home page posts:', initialParams);
     const loadingIcon = ( assets?.length  ? assets[0] : null );
     const houseImg = ( assets?.length  ? assets[1] : null );
@@ -36,12 +39,105 @@ const setArtifactId = initialParams.setArtifactId;
 //  console.log('home userSession', userSession);
   /*
   */
+ const [country, setCountry] = React.useState(2);
 const LENGTH = Dimensions.get("window").height;
 const HEIGHT = 60;
 const OFFSET = ( Dimensions.get("window").width ) * -.9;
     return (
         <View style={{ flex: 1, alignItems: '', paddingTop: Constants.statusBarHeight, justifyContent: 'flex-start' }}>
             <View style={{ flex:1, marginBottom:30}}>
+
+ <Ionicons name="globe-outline" size={55} color="#686868" style={{
+            display:'block',
+            zIndex:9999,
+            position:'absolute',
+            left:58,
+            top:20,
+            resizeMode: 'contain'
+            }} />
+
+                <View style={{width:120, position:'absolute', top:20, right:20, zIndex:999}}>
+                <Dropdown
+                style={{color:'blue'}}
+      placeholder=""
+      options={[
+        { label: 'vol i', value: 1 },
+        { label: 'vol ii', value: 2 },
+        { label: 'vol iii', value: 3 },
+        { label: 'vol iv', value: 4 }
+      ]}
+      selectedItemStyle={{color:'black', fontSize:20}}
+      isMultiple={false}
+      selectedValue={country}
+      onValueChange={(value) => setCountry(value)}
+      primaryColor={''}
+        dropdownStyle={{
+            backgroundColor:'#f0f0f0',
+        borderWidth: 0, // To remove border, set borderWidth to 0
+      }}
+    dropdownIcon={
+        <Text style={{color:'grey'}}> &#9660;</Text>
+      }      
+      dropdownIconStyle={{ top: 20, right: 20, display:'none' }}
+      listHeaderComponent={
+        <View style={styles.customComponentContainer}>
+          <Text style={{textAlign:'center'}}>
+          </Text>
+          
+        </View>
+      }
+      modalControls={{
+        modalOptionsContainerStyle: {
+          padding: 10,
+          backgroundColor: '',
+        },
+        modalProps: {
+          supportedOrientations: [
+            'portrait',
+            'portrait-upside-down',
+            'landscape',
+            'landscape-left',
+            'landscape-right',
+          ],
+          transparent: false,
+        },
+      }}
+      listComponentStyles={{
+        listEmptyComponentStyle: {
+          color: 'red',
+        },
+        itemSeparatorStyle: {
+          opacity: 0,
+          borderColor: 'white',
+          borderWidth: 2,
+          backgroundColor: 'cyan',
+        },
+        sectionHeaderStyle: {
+          padding: 10,
+          backgroundColor: 'cyan',
+        },
+      }}
+      listControls={{
+        selectAllText: 'Choose everything',
+        unselectAllText: 'Remove everything',
+        selectAllCallback: () => Alert.alert('You selected everything'),
+        unselectAllCallback: () => Alert.alert('You removed everything'),
+        emptyListMessage: 'No record found',
+      }}
+      selectedItemsControls={{
+        removeItemIcon: (
+          <Image
+            source={{
+              uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA',
+            }}
+            style={{ tintColor: 'white', height: 12, width: 12 }}
+          />
+        ),
+        onRemoveItem: () => Alert.alert('Item was removed'),
+        showRemoveIcon: true,
+      }}      
+    /> 
+    </View>          
                 <View  
                 style={{
                     transform: [
@@ -56,14 +152,21 @@ const OFFSET = ( Dimensions.get("window").width ) * -.9;
                     borderBottomColor: "#cfb546"
                 }}
                 >
+
                     <Text
                     style={{
                         marginTop:10,      
                         fontSize:26,
                         fontWeight:600
                     }}
-                    >artifix    &#8226;  artifix   &#8226;   artifix   &#8226;      artifix   &#8226;      artifix   &#8226;    artifix   &#8226; artifix   &#8226; artifix   &#8226; </Text>
+                    >artifix1    &#8226;artifix2    &#8226;      artifix3   &#8226;      artifix   &#8226;    artifix   &#8226;  artifixlast   &#8226; 
+
+                    </Text>
+
+
                     </View>
+                  
+                                       
                 <ImageBackground source={artifix}
                     style={{
                         backgroundColor:''
@@ -113,6 +216,8 @@ const OFFSET = ( Dimensions.get("window").width ) * -.9;
                     </FlatList>
                 </ImageBackground>
             </View> 
+
+            
             <View style={{ flex:2}}>
                 <FlatList contentContainerStyle={{  marginTop:30, padding:0 }}
                     horizontal={true} 
@@ -195,3 +300,27 @@ const OFFSET = ( Dimensions.get("window").width ) * -.9;
         </View>
     );
 }
+const styles = StyleSheet.create({
+  customComponentContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  text: {
+    marginBottom: 20,
+  },
+  fixToText: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  tinyLogo: {
+    width: 20,
+    height: 20,
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 20 / 2,
+    borderWidth: 3,
+    borderColor: 'white',
+  },
+});

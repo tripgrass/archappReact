@@ -290,7 +290,7 @@ setList( galleryImages );
 						borderRadius: 20,
 						elevation: 3,
 						color:'black',
-						backgroundColor:'blue',
+						backgroundColor:'',
 						marginLeft: 'auto',
 					}}						
 					title={ "Save" }
@@ -395,7 +395,7 @@ scrollEnabled={false}
 							<Pressable artifact={artifact}
 								style={({pressed}) => [
 												{
-										backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'blue',
+										backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
 										alignItems: 'center',
 										justifyContent: 'center',
 										borderRadius: 40,
