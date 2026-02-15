@@ -47,32 +47,29 @@ const OFFSET = ( Dimensions.get("window").width ) * -.9;
         <View style={{ flex: 1, alignItems: '', paddingTop: Constants.statusBarHeight, justifyContent: 'flex-start' }}>
             <View style={{ flex:1, marginBottom:30}}>
 
- <Ionicons name="globe-outline" size={55} color="#686868" style={{
-            display:'block',
-            zIndex:9999,
-            position:'absolute',
-            left:58,
-            top:20,
-            resizeMode: 'contain'
-            }} />
-
-                <View style={{width:120, position:'absolute', top:20, right:20, zIndex:999}}>
+                <View style={{  flexDirection: 'row',
+                  justifyContent:'flex-start',
+                  flexWrap: 'wrap',
+                  backgroundColor:'transparent', width:'100%', position:'absolute', top:18, left:0, zIndex:999}}>
+              <View style={{width:120, float:'left',marginLeft:49, marginTop:-15}}>
                 <Dropdown
                 style={{color:'blue'}}
       placeholder=""
       options={[
-        { label: 'vol i', value: 1 },
-        { label: 'vol ii', value: 2 },
-        { label: 'vol iii', value: 3 },
-        { label: 'vol iv', value: 4 }
+        { label: 'vol  i', value: 1 },
+        { label: 'vol  ii', value: 2 },
+        { label: 'vol  iii', value: 3 },
+        { label: 'vol  iv', value: 4 }
       ]}
-      selectedItemStyle={{color:'black', fontSize:20}}
+      selectedItemStyle={{color:'black', fontSize:28}}
       isMultiple={false}
       selectedValue={country}
       onValueChange={(value) => setCountry(value)}
       primaryColor={''}
         dropdownStyle={{
-            backgroundColor:'#f0f0f0',
+//            backgroundColor:'#f0f0f0',
+            backgroundColor:'transparent',
+  
         borderWidth: 0, // To remove border, set borderWidth to 0
       }}
     dropdownIcon={
@@ -99,7 +96,7 @@ const OFFSET = ( Dimensions.get("window").width ) * -.9;
             'landscape-left',
             'landscape-right',
           ],
-          transparent: false,
+          transparent: true,
         },
       }}
       listComponentStyles={{
@@ -137,6 +134,20 @@ const OFFSET = ( Dimensions.get("window").width ) * -.9;
         showRemoveIcon: true,
       }}      
     /> 
+    </View>
+ <Ionicons name="globe-outline" size={35} color="#686868" style={{
+            display:'block',
+            zIndex:9999,
+            float:'right',
+            right:20,
+
+            position:'absolute',
+            //left:58,
+            //top:20,
+            resizeMode: 'contain'
+            }} />
+
+
     </View>          
                 <View  
                 style={{
