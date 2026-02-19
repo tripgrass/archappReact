@@ -1,4 +1,4 @@
-import { Image,StyleSheet, View, Platform,Pressable, Text, TouchableOpacity } from 'react-native';
+import { Dimensions,Image,StyleSheet, View, Platform,Pressable, Text, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import { useEffect, useState, useRef, useCallback} from 'react';
 import {useImage} from "expo-image";
@@ -69,6 +69,7 @@ console.log('hasssllllll IMAGE!', img);
 	                        }
 	                    ) ]
 				}>
+					
 						<View style={{flex:1, flexDirection:'column'}}>
 							<View style={{display:'block'}}>
 							
@@ -96,26 +97,6 @@ console.log('hasssllllll IMAGE!', img);
 						<View
 							style={{padding:10, height:'100%' , backgroundColor:'white'}}
 						>
-<Pressable 
-								style={({pressed}) => [
-												{
-										backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
-										alignItems: 'center',
-										justifyContent: 'center',
-										borderRadius: 40,
-										borderColor:'rgb(230,230,230)',
-										borderWidth:2,
-										height:80,
-										width:80,
-										elevation: 8,
-										marginLeft: 5,					    		
-										boxShadow: '0px 2px 2px #d8d8d8'						        
-												}
-								]}
-								onPress={() => Linking.openURL('https://zkd.b51.mytemp.website/public/observations/wp-admin/post.php?post=' + post.ID + '&action=edit')}
-							>
-								<Text>Edit</Text>
-							</Pressable> 							
     <WebView
 		style={{
 			flex: 1,

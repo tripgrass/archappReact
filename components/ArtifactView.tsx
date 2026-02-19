@@ -1,4 +1,4 @@
-import { FlatList, Image, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
+import { Dimensions, FlatList, Image, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View, ScrollView } from 'react-native';
 import { useState, useEffect } from 'react';
 import  {ArtifactsService}  from '@/utilities/ArtifactsService';
 import { useLocalSearchParams, useGlobalSearchParams, Link } from 'expo-router';
@@ -10,6 +10,7 @@ import  MetaView  from '@/components/MetaView';
 import CustomButton from '@/components/Button';
 import { vw, vh, vmin, vmax } from 'react-native-expo-viewport-units';
 import { useSession } from '@/utilities/AuthContext';
+import * as Linking from 'expo-linking';
 
 function ArtifactView({ artifact, route, navigation, galleryImages, setGalleryImages, setLoadState }) {
 	const { userSession, signOut } = useSession();	
@@ -179,6 +180,31 @@ setList( galleryImages );
     	<>
 
 			<View style={{backgroundColor:'', width:'100%'}}>
+				{ (metaType ) &&  ( 'post' == metaType ) &&
+<Pressable 
+								style={({pressed}) => [
+												{
+										backgroundColor: pressed ? 'rgb(210, 230, 255)' : 'white',
+										alignItems: 'center',
+										justifyContent: 'center',
+										borderRadius: 40,
+										borderColor:'rgb(230,230,230)',
+										borderWidth:2,
+										height:80,
+										width:80,
+										position:'absolute',
+										zIndex:9999,
+										left:10,
+										bottom: ( Dimensions.get("window").height - 70 ),
+										elevation: 8,
+										marginLeft: 5,					    		
+										boxShadow: '0px 2px 2px #d8d8d8'						        
+												}
+								]}
+								onPress={() => Linking.openURL('https://zkd.b51.mytemp.website/public/observations/wp-admin/post.php?post=' + post.ID + '&action=edit')}
+							>
+								<Text>Edit</Text>
+							</Pressable> }											
 				<View style={viewStyles.header}>
 					{ (metaType && !isStart() ) && 					
 						<TouchableOpacity

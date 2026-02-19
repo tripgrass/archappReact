@@ -35,12 +35,64 @@ export default function Home({ initialParams }) {
     const artifactId = initialParams.artifactId;
     const setArtifactId = initialParams.setArtifactId;
     const { userSession, signOut } = useSession();
-    const [country, setCountry] = React.useState(2);
+    const [volume, setVolume] = React.useState(2);
+    const [location, setLocation] = React.useState(1);
     const [anthology, setAnthology] = React.useState(1);
     console.log('anthology::::::::::', anthology);
     const LENGTH = Dimensions.get("window").height;
     const HEIGHT = 60;
     const OFFSET = ( Dimensions.get("window").width ) * -.9;
+    function updateLocation( value ){
+      //update volumes
+    }
+    function updateVolume( value ){
+      setVolume(value);      
+    }
+    const archiveLayout = {
+      locations:[
+        {
+          'name':'Tucson',
+          'value':1,
+          'volumes':[
+            { label: 'vol  i-coded', value: 1 },
+            { label: 'vol  ii', value: 2 },
+            { label: 'vol  iii', value: 3 },
+            { label: 'vol  iv', value: 4 }            
+          ]
+        },
+        {
+          'name':'Portland',
+          'value':2,
+          'volumes':[
+            { label: 'vol  ip', value: 1 },
+            { label: 'vol  ip', value: 2 }
+          ]          
+        }
+      ],
+      defaults:{
+        location:1
+      }
+    };
+    var locationOptions = [];
+      console.log('archivelayout: ', archiveLayout.locations);
+    for (let index = 0; index < archiveLayout['locations'].length; ++index) {
+      console.log('index: ', index);
+      console.log('loc: ', archiveLayout.locations[index]);
+      var loc = archiveLayout.locations[index];
+      if( archiveLayout.defaults.location == loc.value ){
+        var defaultLoc = loc;
+        var volumeOptions = loc.volumes;
+      }
+locationOptions.push( { label: loc.name, value: loc.value } );
+    };
+// need to create variable volumes based on loc:
+console.log('voptions', volumeOptions);
+useEffect(() => {
+//  setVolume();
+
+    console.log('useffect in loc select!!!!!!!!!!!!>>>>>>>:::::::');
+  }, []);
+    console.log('locationOptions' , locationOptions);
     return (
         <View style={{ 
           flex: 1,
@@ -60,16 +112,11 @@ export default function Home({ initialParams }) {
                 <Dropdown
                   style={{}}
                   placeholder=""
-                  options={[
-                    { label: 'vol  i', value: 1 },
-                    { label: 'vol  ii', value: 2 },
-                    { label: 'vol  iii', value: 3 },
-                    { label: 'vol  iv', value: 4 }
-                  ]}
+                  options={volumeOptions}
                   selectedItemStyle={{color:'black', fontSize:28}}
                   isMultiple={false}
-                  selectedValue={country}
-                  onValueChange={(value) => setCountry(value)}
+                  selectedValue={volume}
+                  onValueChange={(value) => updateVolume(value)}
                   primaryColor={''}
                   dropdownStyle={{
                     backgroundColor:'transparent',
@@ -139,7 +186,7 @@ export default function Home({ initialParams }) {
               </View>
               <Ionicons name="globe-outline" size={35} color="#686868" 
                 style={{
-                  display:'block',
+                  display:'none',
                   zIndex:9999,
                   float:'right',
                   right:20,
@@ -147,6 +194,100 @@ export default function Home({ initialParams }) {
                   resizeMode: 'contain'
                 }} 
               />
+<View 
+                style={{
+                  paddingBottom:0,
+                  marginLeft: 'auto',
+                  marginBottom:-30,
+                  backgroundColor:'transparent',
+                }}>
+                <Dropdown
+                  placeholder=""
+                  options={locationOptions}
+                  selectedItemStyle={{color:'black', fontSize:16, display:'none'}}
+                  isMultiple={false}
+                  checkboxControls={{
+                    checkboxSize: 24, 
+                    checkboxStyle: {}, 
+                   // checkboxLabelStyle: TextStyle, 
+                   // checkboxComponent?: React.ReactNode, 
+                    //checkboxDisabledStyle?: ViewStyle, 
+                    //checkboxUnselectedColor?: ColorValue
+                  }}
+                  selectedValue={location}
+                  onValueChange={(value) => setLocation(value)}
+                  primaryColor={''}
+                  dropdownStyle={{
+                    marginRight:-10,
+                    backgroundColor:'transparent',
+                    borderWidth: 0, // To remove border, set borderWidth to 0
+                  }}
+                  dropdownIcon={
+                                  <Ionicons name="globe-outline" size={35} color="#686868" 
+                style={{
+                }} 
+              />
+
+                  }      
+                  dropdownIconStyle={{ top: 20, right: 20 }}
+                  listHeaderComponent={
+                    <View style={styles.customComponentContainer}>
+                      <Text style={{textAlign:'center'}}>
+                      </Text>
+                    </View>
+                  }
+                  modalControls={{
+                    modalOptionsContainerStyle: {
+                      padding: 10,
+                      backgroundColor: '',
+                    },
+                    modalProps: {
+                      supportedOrientations: [
+                        'portrait',
+                        'portrait-upside-down',
+                        'landscape',
+                        'landscape-left',
+                        'landscape-right',
+                      ],
+                      transparent: true,
+                    },
+                  }}
+                  listComponentStyles={{
+                    listEmptyComponentStyle: {
+                      color: 'red',
+                    },
+                    itemSeparatorStyle: {
+                      opacity: 0,
+                      borderColor: 'white',
+                      borderWidth: 2,
+                      backgroundColor: 'transparent',
+                    },
+                    sectionHeaderStyle: {
+                      padding: 10,
+                      backgroundColor: 'transparent',
+                    },
+                  }}
+                  listControls={{
+                    selectAllText: 'Choose everything',
+                    unselectAllText: 'Remove everything',
+                    selectAllCallback: () => Alert.alert('You selected everything'),
+                    unselectAllCallback: () => Alert.alert('You removed everything'),
+                    emptyListMessage: 'No record found',
+                  }}
+                  selectedItemsControls={{
+                    removeItemIcon: (
+                      <Image
+                        source={{
+                          uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA',
+                        }}
+                        style={{ tintColor: 'white', height: 12, width: 12 }}
+                      />
+                    ),
+                    onRemoveItem: () => Alert.alert('Item was removed'),
+                    showRemoveIcon: true,
+                  }}      
+                /> 
+              </View>                   
             </View> 
             <View  
               style={{
