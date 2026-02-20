@@ -36,15 +36,38 @@ export default function Home({ initialParams }) {
     const setArtifactId = initialParams.setArtifactId;
     const { userSession, signOut } = useSession();
     const [volume, setVolume] = React.useState(2);
-    const [location, setLocation] = React.useState(1);
     const [anthology, setAnthology] = React.useState(1);
-    console.log('anthology::::::::::', anthology);
+//    console.log('anthology::::::::::', anthology);
+    console.log('volumeOptions::::::::::', volumeOptions);
+
+
     const LENGTH = Dimensions.get("window").height;
     const HEIGHT = 60;
     const OFFSET = ( Dimensions.get("window").width ) * -.9;
+    function getLocation( id ){
+      for (let index = 0; index < archiveLayout['locations'].length; ++index) {
+        var loc = archiveLayout.locations[index];
+        if( id == loc.value ){
+          return loc;
+        }
+      };      
+      return false;
+    }
     function updateLocation( value ){
       //update volumes
+      console.log('updatelocation:', value);
+      console.log('updatelocation:',0);
+      if( location && location.value != value ){
+        loc = getLocation( value );
+        console.log('1 loc:', loc);
+        setLocation( loc );
+        console.log(2);
+        volumeOptions = loc.volumes;
+        console.log(3);
+        console.log('000000000000000000000000volumeOptions', volumeOptions);
+      }
     }
+    
     function updateVolume( value ){
       setVolume(value);      
     }
@@ -65,7 +88,7 @@ export default function Home({ initialParams }) {
           'value':2,
           'volumes':[
             { label: 'vol  ip', value: 1 },
-            { label: 'vol  ip', value: 2 }
+            { label: 'vol  2p', value: 2 }
           ]          
         }
       ],
@@ -73,6 +96,7 @@ export default function Home({ initialParams }) {
         location:1
       }
     };
+    const defaultLocationValue = archiveLayout.defaults.location;
     var locationOptions = [];
       console.log('archivelayout: ', archiveLayout.locations);
     for (let index = 0; index < archiveLayout['locations'].length; ++index) {
@@ -81,10 +105,16 @@ export default function Home({ initialParams }) {
       var loc = archiveLayout.locations[index];
       if( archiveLayout.defaults.location == loc.value ){
         var defaultLoc = loc;
-        var volumeOptions = loc.volumes;
+        //volumeOptions = loc.volumes;
       }
-locationOptions.push( { label: loc.name, value: loc.value } );
+      locationOptions.push( { label: loc.name, value: loc.value } );
+      if( loc.value == defaultLocationValue){
+        var defaultLocation = loc;
+      }
     };
+    const [location, setLocation] = React.useState(defaultLocation ? defaultLocation : {});
+    var volumeOptions = location.volumes;
+
 // need to create variable volumes based on loc:
 console.log('voptions', volumeOptions);
 useEffect(() => {
@@ -106,7 +136,7 @@ useEffect(() => {
                   width:'100%', position:'absolute', top:18, left:0, zIndex:999}}>
               <View 
                 style={{
-                  width:120,
+                  width:220,
                   float:'left',marginLeft:49, marginTop:-15
                 }}>
                 <Dropdown
@@ -214,8 +244,8 @@ useEffect(() => {
                     //checkboxDisabledStyle?: ViewStyle, 
                     //checkboxUnselectedColor?: ColorValue
                   }}
-                  selectedValue={location}
-                  onValueChange={(value) => setLocation(value)}
+                  selectedValue={location.value}
+                  onValueChange={(value) => ( value ? updateLocation(value) : null ) }
                   primaryColor={''}
                   dropdownStyle={{
                     marginRight:-10,
@@ -308,7 +338,7 @@ useEffect(() => {
                     fontSize:26,
                     fontWeight:600
                 }}
-                >   artifix    &#8226;    artifix   &#8226;     artifix   &#8226;   artifix   &#8226;  artifix    &#8226;  artifix
+                >   artifix    &#8226;  artifix  &#8226;   {location.name}   &#8226;  artifix  &#8226;  artifix   &#8226;  artifix    &#8226;  artifix
               </Text>
             </View>
           { (1 != 1) ? (                                       
