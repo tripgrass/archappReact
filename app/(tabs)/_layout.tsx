@@ -132,7 +132,7 @@ function MyTabs() {
 		CollectionsService({
 			method:'getAll'
 		}).then( (results) => {
-//console.log('RESULTS OF getall collections',  results)
+console.log('RESULTS OF getall collections',  results)
 			setCollections(results)
 		}).catch(
 			(error) => console.log('in layout collections getall .error', error)

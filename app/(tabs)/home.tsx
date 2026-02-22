@@ -31,7 +31,13 @@ export default function Home({ initialParams }) {
     const circleButtons = [
         {},{}, {}, {}, {}
     ];
-    const artifactsList = initialParams.artifacts;
+//    console.log(initialParams.artifacts);
+//    const artifactsList = initialParams.artifacts;
+  console.log('initialParams.collections------------', initialParams.collections[1].artifacts);
+
+    var artifactsList = (initialParams.collections && initialParams.collections[1] && initialParams.collections[1].artifacts) ? initialParams.collections[1].artifacts : initialParams.artifacts;
+//  console.log('artifactsList[0]', artifactsList[0]);
+  //console.log('artifactsList[0].images',artifactsList[0].images);
     const artifactId = initialParams.artifactId;
     const setArtifactId = initialParams.setArtifactId;
     const { userSession, signOut } = useSession();
@@ -40,7 +46,7 @@ export default function Home({ initialParams }) {
 //    console.log('anthology::::::::::', anthology);
     console.log('volumeOptions::::::::::', volumeOptions);
 
-
+    const space = "   ";
     const LENGTH = Dimensions.get("window").height;
     const HEIGHT = 60;
     const OFFSET = ( Dimensions.get("window").width ) * -.9;
@@ -79,8 +85,18 @@ export default function Home({ initialParams }) {
           'volumes':[
             { label: 'vol  i-coded', value: 1 },
             { label: 'vol  ii', value: 2 },
-            { label: 'vol  iii', value: 3 },
-            { label: 'vol  iv', value: 4 }            
+            { 
+              label: 'vol  iii', 
+              value: 3,
+              anthologies:[
+                1,2
+              ]               
+             },
+            { label: 'vol  iv', value: 4,
+               anthologies:[
+                1
+              ]  
+             }            
           ]
         },
         {
@@ -119,6 +135,7 @@ export default function Home({ initialParams }) {
 console.log('voptions', volumeOptions);
 useEffect(() => {
 //  setVolume();
+  console.log('initialParams.collections', initialParams.collections);
 
     console.log('useffect in loc select!!!!!!!!!!!!>>>>>>>:::::::');
   }, []);
@@ -228,7 +245,7 @@ useEffect(() => {
                 style={{
                   paddingBottom:0,
                   marginLeft: 'auto',
-                  marginBottom:-30,
+                  marginTop:-18,
                   backgroundColor:'transparent',
                 }}>
                 <Dropdown
@@ -338,7 +355,7 @@ useEffect(() => {
                     fontSize:26,
                     fontWeight:600
                 }}
-                >   artifix    &#8226;  artifix  &#8226;   {location.name}   &#8226;  artifix  &#8226;  artifix   &#8226;  artifix    &#8226;  artifix
+                >artifix{space}&#8226;{space}artifix{space}&#8226;  {space}{location.name}  {space}&#8226;{space}artifix{space}&#8226;{space}artifix{space}&#8226;  artifix    &#8226;  artifix
               </Text>
             </View>
           { (1 != 1) ? (                                       
@@ -394,12 +411,15 @@ useEffect(() => {
             </View> 
             <View style={{ 
                 flex:1,
+                //paddingLeft:60,
                 marginTop:50,
                 flexDirection:'column', 
 //                backgroundColor:'#f8f8f8'
               }}>       
               
-              <View style={{flex:1,paddingLeft:20,backgroundColor:'transparent',marginTop:40}}>    
+              <View style={{flex:1,backgroundColor:'transparent',marginTop:55,                
+              //paddingLeft:60,
+}}>    
                 <FlatList 
                     contentContainerStyle={{   }}
                     horizontal={true} 
@@ -420,23 +440,36 @@ useEffect(() => {
                             <View style={{
                                 flex:2, 
                                 flexDirection:'column', 
-                                marginRight:30,
+                                marginRight:20,
+                                marginLeft:10,
+                                paddingLeft:30
                             }} >
                                 <View style={{padding:0}}>
                                     <Text style={{
                                       textAlign:'left', 
-                                      marginBottom:7,
-                                      marginLeft:10,
+                                      marginBottom:-67,
+                                      zIndex:999,
+                                      left:-15,
+                                      padding:12,
+                                      paddingLeft:16,
+                                      borderRadius:4,
+//                      borderColor: '#c0c0c0',
+  //                    borderWidth: 1,
+
+                                      //display:'inline-block',
+                                      backgroundColor:'rgba(255,255,255,.6)',
                                       fontSize:20, 
-                                      fontWeight:400}}>
-                                      {item.name}</Text>
+                                      fontWeight:500}}
+                                    >  
+                                      {item.name}
+                                    </Text>
                                 </View>
                                 <Image source={{uri:imageBaseUrl + ( (item.images && item.images[0]) ? item.images[0].name : null)  }} /* Use item to set the image source */
                                     style={{
                                         width:200,
                                         height:200,
                                         borderRadius:100,
-                                        borderColor:'white',
+                                        borderColor:'rgba(255,255,255,.6)',
                                         borderWidth:5,
                                         borderRadius:100
                                     }}
