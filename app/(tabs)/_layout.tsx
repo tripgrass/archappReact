@@ -80,14 +80,11 @@ function MyTabs() {
 	function createArtifactId(){
 		var form = new FormData();
 		form.append('idOnly', true);
-		console.log('create from scratch:');
-		console.log('create form:' , form);
 		ArtifactsService({
 			method:'create',
 			url:'artifacts',
 			data:form
 		}).then( (results) => {
-			console.log('ADD FILE ::::::::::::::::::after submit results no web', results);
 			var newArtifact = results;
 			setTempId( newArtifact.id );
 		}).catch((error) => {
@@ -95,18 +92,11 @@ function MyTabs() {
 		})				
 	}	
 	useEffect(() => {
-//    console.log('useffect in layout:::::::');
-//if(userSession){
-    	console.log('99 ----------------------------------');
     	if( !tempId ){
-	    	console.log('101 ----------------------------------');
         	createArtifactId();
         }
 	}, [userSession]);
 	useEffect(() => {
-    	console.log('107 ----------------------------------');
-    	console.log(' ----------------------------------');
-    	console.log(' ----------------------------------');
 
 		ArtifactsService({
 			method:'getAll'
@@ -132,7 +122,6 @@ function MyTabs() {
 		CollectionsService({
 			method:'getAll'
 		}).then( (results) => {
-console.log('RESULTS OF getall collections',  results)
 			setCollections(results)
 		}).catch(
 			(error) => console.log('in layout collections getall .error', error)
@@ -189,7 +178,10 @@ console.log('RESULTS OF getall collections',  results)
 				children={()=>{
 						return(
 							<Home  initialParams={{
-									artifacts:artifacts, collections:collections, artifactId:artifactId, setArtifactId:setArtifactId
+									artifacts:artifacts, 
+									collections:collections, 
+									artifactId:artifactId, 
+									setArtifactId:setArtifactId
 								}}/>
 						)
 					}}
@@ -341,7 +333,6 @@ function CustomDrawerToggleButton({ tintColor, ...rest }: Props) {
   );
 }
 function ProfilesTab( data ) {
-	console.log('profiles data ', data.initialParams);
 	return (
 		<Drawer.Navigator drawerContent={(props) => <CustomDrawerContent {...props} />}
 			screenOptions={{
@@ -380,11 +371,7 @@ function App() {
 
 	useEffect( () => {
 		const getData = async () => {
-	    //fillLocationModeVal = await AsyncStorage.getItem('fillLocationMode');
-	    //setFillLocationMode(fillLocationModeVal);
-			//console.log('fillLocationMode',fillLocationModeVal);
-
-	  };
+		};
 
 	  getData();  
 

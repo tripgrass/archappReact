@@ -23,7 +23,6 @@ export default function Home({ initialParams }) {
     ]);
     containedWithin();
     const navigation = useNavigation();
-//    console.log('initParams!!!! in home page posts:', initialParams);
     const loadingIcon = ( assets?.length  ? assets[0] : null );
     const houseImg = ( assets?.length  ? assets[1] : null );
     const houseImg2 = ( assets?.length  ? assets[2] : null );
@@ -31,20 +30,17 @@ export default function Home({ initialParams }) {
     const circleButtons = [
         {},{}, {}, {}, {}
     ];
-//    console.log(initialParams.artifacts);
-//    const artifactsList = initialParams.artifacts;
-  console.log('initialParams.collections------------', initialParams.collections[1].artifacts);
-
+    var initAnthologySelect = 2;
+    const [anthologySelect, setAnthologySelect] = React.useState( initAnthologySelect ); // number value of chose option
+console.log("anthologySelect", anthologySelect);
     var artifactsList = (initialParams.collections && initialParams.collections[1] && initialParams.collections[1].artifacts) ? initialParams.collections[1].artifacts : initialParams.artifacts;
-//  console.log('artifactsList[0]', artifactsList[0]);
-  //console.log('artifactsList[0].images',artifactsList[0].images);
     const artifactId = initialParams.artifactId;
     const setArtifactId = initialParams.setArtifactId;
     const { userSession, signOut } = useSession();
-    const [volume, setVolume] = React.useState(2);
-    const [anthology, setAnthology] = React.useState(1);
-//    console.log('anthology::::::::::', anthology);
-    console.log('volumeOptions::::::::::', volumeOptions);
+    const [volumeSelect, setVolumeSelect] = React.useState(1);
+    const [anthologyOptions, setAnthologyOptions] = React.useState([]);
+
+    const [volume, setVolume] = React.useState( {} );
 
     const space = "   ";
     const LENGTH = Dimensions.get("window").height;
@@ -59,43 +55,113 @@ export default function Home({ initialParams }) {
       };      
       return false;
     }
+    function getVolume( volumeObjects, id ){
+      for (let index = 0; index < volumeObjects.length; ++index) {
+        var object = volumeObjects[index];
+        if( id == object.value ){
+          return object;
+        }
+      };      
+      return false;
+    }
+    function getAnthology( anthologyObjects, id ){
+      
+      for (let index = 0; index < anthologyObjects.length; ++index) {
+        var object = anthologyObjects[index];
+        if( id == object.id ){
+          return object;
+        }
+      };      
+      return false;
+    }    
     function updateLocation( value ){
-      //update volumes
-      console.log('updatelocation:', value);
-      console.log('updatelocation:',0);
       if( location && location.value != value ){
         loc = getLocation( value );
-        console.log('1 loc:', loc);
         setLocation( loc );
-        console.log(2);
         volumeOptions = loc.volumes;
-        console.log(3);
-        console.log('000000000000000000000000volumeOptions', volumeOptions);
+        setVolumeSelect(1);
+        var volObject = getVolume( volumeOptions, 1 );
+
+        var anthologyIds = volObject.anthologies;
+        var tempAnthologyOptions = [];
+        for (let index = 0; index < anthologyIds.length; ++index) {
+          var anthology = initialParams.collections[ anthologyIds[index] ] ? initialParams.collections[ anthologyIds[index] ] : null;
+          if( anthology ){
+            tempAnthologyOptions.push({ "label": anthology.name, "value": anthology.id });
+          }
+        }
+        setAnthologySelect( tempAnthologyOptions[0].value );        
+        setAnthologyOptions( tempAnthologyOptions );
+        setLocation( loc );
+        setVolume( volObject );                  
       }
     }
-    
-    function updateVolume( value ){
-      setVolume(value);      
+    function buildAnthologySelect( anthologyIds ){
+        var tempAnthologyOptions = [];
+        for (let index = 0; index < anthologyIds.length; ++index) {
+          var anthoObject = getAnthology( initialParams.collections, anthologyIds[index] );
+          var anthology = anthoObject;
+          if( anthology ){
+            tempAnthologyOptions.push({ "label": anthology.name, "value": anthology.id });
+          }
+        }
+        return tempAnthologyOptions;
     }
+    function updateVolumeObject( value ){
+        var volObject = getVolume( volumeOptions, value );
+        var anthologyIds = volObject.anthologies;
+        
+        //var tempAnthologyOptions = buildAnthologySelect( anthologyIds );
+ var tempAnthologyOptions = [];
+ console.log("start------->");
+ console.log("initialParams.collections", initialParams);
+        for (let index = 0; index < anthologyIds.length; ++index) {
+          var anthoObject = getAnthology( initialParams.collections, anthologyIds[index] );
+          var anthology = anthoObject;
+          console.log(";init to win it", index);
+          console.log(";init to win it", anthology);
+          if( anthology ){
+            tempAnthologyOptions.push({ "label": anthology.name, "value": anthology.id });
+          }
+        }        
+         console.log("end------->");
+
+        console.log("tempAnthologyOptions",tempAnthologyOptions)
+        volObject.anthologySelect = tempAnthologyOptions; 
+        setVolume( volObject );
+        console.log('volObject', volObject);
+        setAnthologyOptions( volObject.anthologySelect );
+        console.log('setAnthologyOptions', anthologyOptions);
+        if( volObject.anthologySelect.length ){
+          setAnthologySelect( volObject.anthologySelect[0].value );
+        }
+    }
+    function updateVolume( value ){
+        setVolumeSelect(value );
+        updateVolumeObject( value );
+    }
+    function updateAnthology( value ){
+      console.log("update anthology!!!!!!!!!!!!", value);
+        setAnthologySelect(value );
+    }
+
     const archiveLayout = {
       locations:[
         {
           'name':'Tucson',
           'value':1,
           'volumes':[
-            { label: 'vol  i-coded', value: 1 },
-            { label: 'vol  ii', value: 2 },
+            { label: 'vol  i-coded', value: 1,anthologies:[2,1] },
+            { label: 'vol  ii', value: 2,
+              anthologies:[1,2] 
+             },
             { 
               label: 'vol  iii', 
               value: 3,
-              anthologies:[
-                1,2
-              ]               
+              anthologies:[2]               
              },
             { label: 'vol  iv', value: 4,
-               anthologies:[
-                1
-              ]  
+               anthologies:[1]  
              }            
           ]
         },
@@ -103,25 +169,22 @@ export default function Home({ initialParams }) {
           'name':'Portland',
           'value':2,
           'volumes':[
-            { label: 'vol  ip', value: 1 },
-            { label: 'vol  2p', value: 2 }
+            { label: 'vol  ip', value: 1,anthologies:[1,2] },
+            { label: 'vol  2p', value: 2 ,anthologies:[1]}
           ]          
         }
       ],
       defaults:{
-        location:1
+        location:1,
+        initialAnthology:1
       }
     };
     const defaultLocationValue = archiveLayout.defaults.location;
     var locationOptions = [];
-      console.log('archivelayout: ', archiveLayout.locations);
     for (let index = 0; index < archiveLayout['locations'].length; ++index) {
-      console.log('index: ', index);
-      console.log('loc: ', archiveLayout.locations[index]);
       var loc = archiveLayout.locations[index];
       if( archiveLayout.defaults.location == loc.value ){
         var defaultLoc = loc;
-        //volumeOptions = loc.volumes;
       }
       locationOptions.push( { label: loc.name, value: loc.value } );
       if( loc.value == defaultLocationValue){
@@ -130,16 +193,22 @@ export default function Home({ initialParams }) {
     };
     const [location, setLocation] = React.useState(defaultLocation ? defaultLocation : {});
     var volumeOptions = location.volumes;
-
-// need to create variable volumes based on loc:
-console.log('voptions', volumeOptions);
 useEffect(() => {
-//  setVolume();
-  console.log('initialParams.collections', initialParams.collections);
+  console.log("useeffect", initialParams);
+    updateVolumeObject( volumeSelect );
+    var volObject = getVolume( volumeOptions, volumeSelect );
+    var anthologyIds = volObject.anthologies;
+    var tempAnthologyOptions = buildAnthologySelect( anthologyIds );    
+    volObject.anthologySelect = tempAnthologyOptions; 
+    //var anthVal = (volObject.anthologySelect.length > 0 && volObject.anthologySelect[0].value) ? volObject.anthologySelect[0].value : 2;
+      console.log( "anthologyOptions volobject" , volObject.anthologySelect );
+console.log('antho:::::::::::::::::options', anthologyOptions);
 
-    console.log('useffect in loc select!!!!!!!!!!!!>>>>>>>:::::::');
+  if( anthologyOptions.length && anthologyOptions[0] && "undefined" != typeof anthologyOptions[0].value ){
+   // setAnthologySelect( anthologyOptions[0].value );
+  }
+    console.log('useffect in loc select!!!!!!!!!!!!>>>>>>>:::::::' , anthologyOptions[0]);
   }, []);
-    console.log('locationOptions' , locationOptions);
     return (
         <View style={{ 
           flex: 1,
@@ -162,7 +231,7 @@ useEffect(() => {
                   options={volumeOptions}
                   selectedItemStyle={{color:'black', fontSize:28}}
                   isMultiple={false}
-                  selectedValue={volume}
+                  selectedValue={volumeSelect}
                   onValueChange={(value) => updateVolume(value)}
                   primaryColor={''}
                   dropdownStyle={{
@@ -499,15 +568,11 @@ useEffect(() => {
                 }}>
                 <Dropdown
                   placeholder=""
-                  options={[
-                    { label: 'Anthology One', value: 1 },
-                    { label: 'Anthology Two', value: 2 },
-                    { label: 'Anthology Three', value: 3 },
-                  ]}
+                  options={anthologyOptions}
                   selectedItemStyle={{color:'black', fontSize:16}}
                   isMultiple={false}
-                  selectedValue={anthology}
-                  onValueChange={(value) => setAnthology(value)}
+                  selectedValue={anthologySelect }
+                  onValueChange={(value) => updateAnthology(value)}
                   primaryColor={''}
                   dropdownStyle={{
                     marginRight:-10,

@@ -123,7 +123,7 @@ export default function AddEditCollection( { initCollectionId, artifactsList, ro
 	function setupInitialCollection(collection){
 		console.log('setupInitialCollection', collection);
 		setLoadState("loading");
-		artifactImages = [];
+		var artifactImages = [];
 		setCollectionId(collection.id);
 		setCollection( collection );
 		if( collection.artifacts ){
