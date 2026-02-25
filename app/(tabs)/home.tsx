@@ -38,9 +38,8 @@ console.log("anthologySelect", anthologySelect);
     const setArtifactId = initialParams.setArtifactId;
     const { userSession, signOut } = useSession();
     const [volumeSelect, setVolumeSelect] = React.useState(1);
-    const [anthologyOptions, setAnthologyOptions] = React.useState([]);
-
-    const [volume, setVolume] = React.useState( {} );
+const [volume, setVolume] = React.useState( {} );
+    const [anthologyOptions, setAnthologyOptions] = React.useState( [] );
 
     const space = "   ";
     const LENGTH = Dimensions.get("window").height;
@@ -193,6 +192,12 @@ console.log("anthologySelect", anthologySelect);
     };
     const [location, setLocation] = React.useState(defaultLocation ? defaultLocation : {});
     var volumeOptions = location.volumes;
+        const initAnthoOptions = [];
+    initAnthoOptions.push( {"label": "init", "value": 2} );
+    initAnthoOptions.push( {"label": "other init TestCollect", "value": 1} );
+console.log('antho options line 198:', initAnthoOptions);
+
+
 useEffect(() => {
   console.log("useeffect", initialParams);
     updateVolumeObject( volumeSelect );
@@ -568,7 +573,7 @@ console.log('antho:::::::::::::::::options', anthologyOptions);
                 }}>
                 <Dropdown
                   placeholder=""
-                  options={anthologyOptions}
+                  options={ anthologyOptions.length ?  anthologyOptions :  initAnthoOptions }
                   selectedItemStyle={{color:'black', fontSize:16}}
                   isMultiple={false}
                   selectedValue={anthologySelect }
